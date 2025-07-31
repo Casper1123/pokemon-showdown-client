@@ -119,6 +119,12 @@
 
 		<script src="data/search-index.js" onerror="loadRemoteData(this.src)"></script>
 		<script src="data/teambuilder-tables.js" onerror="loadRemoteData(this.src)"></script>
+		<script>
+			// After teambuilder-tables.js loads
+			Dex.initializeCustomMods().then(() => {
+				console.log('Custom mods initialized');
+			}).catch(console.error);
+		</script>
 		<script src="js/battle-dex-search.js"></script>
 		<script src="js/search.js"></script>
 
