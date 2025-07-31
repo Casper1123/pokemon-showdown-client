@@ -309,7 +309,7 @@ export class MainMenuRoom extends PSRoom {
 					effectType: 'Format',
 				};
 
-				// Check if this format needs a custom mod
+				// Ensure mod is loaded for format.
 				if (window.FormatModMapping && window.FormatModMapping[id]) {
 					const modid = window.FormatModMapping[id];
 					if (!window.BattleTeambuilderTable[modid]) {

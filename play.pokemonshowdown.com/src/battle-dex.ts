@@ -254,35 +254,39 @@ export const Dex = new class implements ModdedDex {
 	/**
 	 * Load mod data recursively based on parent mod.
 	 */
-	async loadModData(modId: ID, depth = 0) {
+	loadModData(modId: ID, depth = 0) {
 		if (depth > 10) throw new Error('Max mod inheritance depth exceeded. Potential cyclicality may be in effect.'); // todo: move magic number to config.
 		if (window.BattleTeambuilderTable[modId]) return; // Already loaded
 
-		if (!(modId in window.AvailableCustomMods)) { throw new Error(`Attempt at loading mod that is not available from server: ${modId}`); }
+		if (!(modId in window.AvailableCustomMods)) {
+			throw new Error(`Attempt at loading mod that is not available from server: ${modId}`);
+		}
 
 		try {
-			const response = await fetch(`/data/moddata?mod=${modId}`);
-			if (!response.ok) {
-				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+			const xhr = new XMLHttpRequest();
+			xhr.open('GET', `/data/moddata?mod=${modId}`, false); // false = synchronous. Intentional.
+			xhr.send();
+
+			if (xhr.status !== 200) {
+				throw new Error(`HTTP ${xhr.status}: ${xhr.statusText}`);
 			}
 
 			let modData;
 			try {
-				modData = await response.json();
+				modData = JSON.parse(xhr.responseText);
 			} catch (parseError) {
 				throw new Error(`Invalid JSON for mod ${modId}: ${parseError.message}`);
 			}
 
-			// Validate mod data structure
 			if (!modData || typeof modData !== 'object') {
 				throw new Error(`Invalid mod data structure for ${modId}`);
 			}
 
-			 await this.integrateModData(modId, modData, depth);
+			this.integrateModData(modId, modData, depth);
 
 		} catch (error) {
 			console.error(`Failed to load mod data for ${modId}:`, error);
-			throw error; // Re-throw to let caller handle
+			throw error;
 		}
 	}
 
@@ -292,10 +296,10 @@ export const Dex = new class implements ModdedDex {
 	 * @param modData The data fetched from server to integrate this data into.
 	 * @param depth Current recursion depth for being able to load into parentMods.
 	 */
-	async integrateModData(modId: ID, modData, depth: number) {
+	integrateModData(modId: ID, modData: any, depth: number) {
 		// Recursively load parent if specified
 		if (modData.parentMod) {
-			await this.loadModData(modData.parentMod, depth + 1);
+			this.loadModData(modData.parentMod, depth + 1);
 			// Inherit parent data
 			const parentData = window.BattleTeambuilderTable[modData.parentMod];
 			window.BattleTeambuilderTable[modId] = JSON.parse(JSON.stringify(parentData));
@@ -357,7 +361,7 @@ export const Dex = new class implements ModdedDex {
 			if (!window.BattleTeambuilderTable[modId].overrideItemData[item]) {
 				window.BattleTeambuilderTable[modId].overrideItemData[item] = {};
 			}
-			for (const attribute in moveData) {
+			for (const attribute in itemData) {
 				if (attribute !== 'inherit') {
 					window.BattleTeambuilderTable[modId].overrideItemData[item][attribute] = itemData[attribute];
 				}
@@ -396,44 +400,59 @@ export const Dex = new class implements ModdedDex {
 	 * Assumes to be ran after BattleTeambuilderTable is loaded.
 	 * Will always fetch from server if it's an available mod from the server.
 	 */
-	async initializeCustomMods() {
+	initializeCustomMods(): void {
 		try {
 			console.log('Initializing custom-mods. Requires connection');
-			// Fetch available mods and format mappings
-			let [availableModsResult, formatModsResult] = await Promise.allSettled([
-				fetch('/data/availablemods').then(r => {
-					if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
-					return r.json();
-				}),
-				fetch('/data/formatmods').then(r => {
-					if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
-					return r.json();
-				})
-			]);
 
-			if (availableModsResult.status !== 'fulfilled' || formatModsResult.status !== 'fulfilled') {
-				throw new Error('One of availableMods or formatMods requests was not fulfilled. Aborting.');
+			// Synchronously fetch available mods
+			const availableModsXhr = new XMLHttpRequest();
+			availableModsXhr.open('GET', '/data/availablemods', false); // false = synchronous
+			availableModsXhr.send();
+
+			if (availableModsXhr.status !== 200) {
+				throw new Error(`HTTP ${availableModsXhr.status}: ${availableModsXhr.statusText}`);
 			}
 
-			// Bring results into wanted data type to allow for iteration.
+			// Synchronously fetch format mappings
+			const formatModsXhr = new XMLHttpRequest();
+			formatModsXhr.open('GET', '/data/formatmods', false); // false = synchronous
+			formatModsXhr.send();
+
+			if (formatModsXhr.status !== 200) {
+				throw new Error(`HTTP ${formatModsXhr.status}: ${formatModsXhr.statusText}`);
+			}
+
+			// Parse responses
 			let availableMods: string[] = [];
-			let formatMods: { [formatId: string ] : string } = {};
+			let formatMods: { [formatId: string]: string } = {};
 
-			if (Array.isArray(availableModsResult.value)) {
-				availableMods = availableModsResult.value.map(String);
-			} else {
-				console.warn('Unexpected availableMods structure');
+			try {
+				const availableModsData = JSON.parse(availableModsXhr.responseText);
+				if (Array.isArray(availableModsData)) {
+					availableMods = availableModsData.map(String);
+				} else {
+					console.warn('Unexpected availableMods structure');
+				}
+			} catch (parseError) {
+				throw new Error(`Invalid JSON for availableMods: ${parseError.message}`);
 			}
 
-			console.log(`Found ${formatModsResult}`);
-			console.log(`Found ${availableModsResult}`);
-			// todo: implement custom mod initialization here. I think.
-			// Store format-to-mod mapping
+			try {
+				formatMods = JSON.parse(formatModsXhr.responseText);
+			} catch (parseError) {
+				throw new Error(`Invalid JSON for formatMods: ${parseError.message}`);
+			}
+
+			console.log(`Found ${availableMods.length} available mods`);
+			console.log(`Found ${Object.keys(formatMods).length} format mappings`);
+
+			// Store globally
 			window.FormatModMapping = formatMods;
 			window.AvailableCustomMods = availableMods;
 
+			// Load all mods synchronously
 			for (const modId of availableMods) {
-				await this.loadModData(modId as ID);
+				this.loadModData(modId as ID);
 			}
 
 		} catch (error) {
@@ -449,7 +468,7 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		if (!window.BattleTeambuilderTable[modid]) {
-			this.loadModData(modid).then(); // Todo: async.run solution?
+			this.loadModData(modid); // Todo: async.run solution? I don't like this. I hate it, even. Doesn't wait here and thus means
 		}
 
 		this.moddedDexes[modid] = new ModdedDex(modid);

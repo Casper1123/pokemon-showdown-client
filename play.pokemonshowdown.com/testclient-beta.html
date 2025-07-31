@@ -114,13 +114,6 @@
 	<script src="js/panel-mainmenu.js"></script>
 	<script src="js/panel-rooms.js"></script>
 	<script src="js/panel-topbar.js"></script>
-	<script>
-		if (window.Dex && window.Dex.initializeCustomMods) {
-			Dex.initializeCustomMods().then(() => {
-				console.log('Custom mods initialized');
-			}).catch(console.error);
-		}
-	</script>
 	<!-- at this point, the main view is loaded and usable -->
 
 	<script src="js/lib/html-css-sanitizer-minified.js"></script>
@@ -155,6 +148,14 @@
 	<script src="data/abilities.js" onerror="loadRemoteData(this.src)"></script>
 	<script src="data/search-index.js" onerror="loadRemoteData(this.src)"></script>
 	<script src="data/teambuilder-tables.js" onerror="loadRemoteData(this.src)"></script>
+	<script>
+		try {
+			Dex.initializeCustomMods();
+			console.log('Custom mods initialized');
+		} catch (error) {
+			console.error(error);
+		}
+	</script>
 	<script src="js/panel-teamdropdown.js"></script>
 	<script src="js/panel-teambuilder.js?"></script>
 	<script src="js/battle-dex-search.js?"></script>
