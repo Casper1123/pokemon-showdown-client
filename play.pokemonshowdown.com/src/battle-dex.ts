@@ -18,8 +18,6 @@
  * @license MIT
  */
 
-import { merge } from 'lodash';
-
 import { Pokemon, type ServerPokemon } from "./battle";
 import {
 	BattleAvatarNumbers, BattleBaseSpeciesChart, BattlePokemonIconIndexes, BattlePokemonIconIndexesLeft,
