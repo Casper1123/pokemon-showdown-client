@@ -39,6 +39,17 @@ _this.load();return _this;
 setFormat=function setFormat(format){
 var team=this.team;
 team.format=toID(format);
+
+if(window.FormatModMapping&&window.FormatModMapping[format]){
+var modId=window.FormatModMapping[format];
+
+if(window.FormatModMapping&&window.FormatModMapping[id]){
+var modid=window.FormatModMapping[id];
+if(!window.BattleTeambuilderTable[modid]){
+Dex.loadModData(modid);
+}
+}
+}
 };_proto.
 load=function load(){var _PS$teams$loadTeam,_this2=this;
 (_PS$teams$loadTeam=PS.teams.loadTeam(this.team,true))==null||_PS$teams$loadTeam.then(function(){

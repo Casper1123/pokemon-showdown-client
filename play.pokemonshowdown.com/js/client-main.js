@@ -1881,7 +1881,7 @@ _this1=_PSModel.call(this)||this;_this1.down=false;_this1.prefs=new PSPrefs();_t
 
 _this1.mainmenu=_this1.addRoom({
 id:'',
-title:"Live. Laugh. Love."
+title:".ts title :)"
 });
 
 _this1.addRoom({

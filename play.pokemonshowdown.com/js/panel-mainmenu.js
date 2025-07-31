@@ -308,8 +308,18 @@ teambuilderFormat:teambuilderFormat,
 isTeambuilderFormat:isTeambuilderFormat,
 effectType:'Format'
 };
+
+
+if(window.FormatModMapping&&window.FormatModMapping[id]){
+var modid=window.FormatModMapping[id];
+if(!window.BattleTeambuilderTable[modid]){
+Dex.loadModData(modid);
 }
 }
+}
+}
+
+
 
 
 var multivariantFormats={};

@@ -26,12 +26,12 @@ function ThemeHeaderTemplate() {
 <?php } ?>
 
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=IE8" />
-	<link rel="stylesheet" href="//play.pokemonshowdown.com/style/font-awesome.css?0.7302433219909137" />
-	<link rel="stylesheet" href="//pokemonshowdown.com/theme/panels.css?0.8271118496777097" />
-	<link rel="stylesheet" href="//pokemonshowdown.com/theme/main.css?0.4091858871051903" />
-	<link rel="stylesheet" href="//play.pokemonshowdown.com/style/battle.css?0.5905611721439912" />
-	<link rel="stylesheet" href="//play.pokemonshowdown.com/style/replay.css?0.05941426048746057" />
-	<link rel="stylesheet" href="//play.pokemonshowdown.com/style/utilichart.css?0.19167550329286254" />
+	<link rel="stylesheet" href="//play.pokemonshowdown.com/style/font-awesome.css?0.0433316440117022" />
+	<link rel="stylesheet" href="//pokemonshowdown.com/theme/panels.css?0.01609675709559033" />
+	<link rel="stylesheet" href="//pokemonshowdown.com/theme/main.css?0.5231317928461439" />
+	<link rel="stylesheet" href="//play.pokemonshowdown.com/style/battle.css?0.5051379206813993" />
+	<link rel="stylesheet" href="//play.pokemonshowdown.com/style/replay.css?0.6132616513750289" />
+	<link rel="stylesheet" href="//play.pokemonshowdown.com/style/utilichart.css?0.09484815872924757" />
 
 	<!-- Workarounds for IE bugs to display trees correctly. -->
 	<!--[if lte IE 6]><style> li.tree { height: 1px; } </style><![endif]-->
@@ -55,7 +55,7 @@ function ThemeHeaderTemplate() {
 	<div class="pfx-topbar">
 		<div class="header">
 			<ul class="nav">
-				<li><a class="button nav-first<?php if ($panels->tab === 'home') echo ' cur'; ?>" href="//pokemonshowdown.com/"><img src="//pokemonshowdown.com/images/pokemonshowdownbeta.png?0.2500361791574144" alt="Pok&eacute;mon Showdown! (beta)" /> Home</a></li>
+				<li><a class="button nav-first<?php if ($panels->tab === 'home') echo ' cur'; ?>" href="//pokemonshowdown.com/"><img src="//pokemonshowdown.com/images/pokemonshowdownbeta.png?0.26915606873516307" alt="Pok&eacute;mon Showdown! (beta)" /> Home</a></li>
 				<li><a class="button<?php if ($panels->tab === 'pokedex') echo ' cur'; ?>" href="//dex.pokemonshowdown.com/">Pok&eacute;dex</a></li>
 				<li><a class="button<?php if ($panels->tab === 'replay') echo ' cur'; ?>" href="/">Replay</a></li>
 				<li><a class="button purplebutton" href="//smogon.com/dex/" target="_blank">Strategy</a></li>
@@ -76,10 +76,10 @@ function ThemeHeaderTemplate() {
 
 function ThemeScriptsTemplate() {
 ?>
-	<script src="//play.pokemonshowdown.com/js/lib/jquery-1.11.0.min.js?0.15780333870145213"></script>
-	<script src="//play.pokemonshowdown.com/js/lib/lodash.core.js?0.1245029530124"></script>
-	<script src="//play.pokemonshowdown.com/js/lib/backbone.js?0.322302984642713"></script>
-	<script src="//dex.pokemonshowdown.com/js/panels.js?0.13794057725529463"></script>
+	<script src="//play.pokemonshowdown.com/js/lib/jquery-1.11.0.min.js?0.9575346305505448"></script>
+	<script src="//play.pokemonshowdown.com/js/lib/lodash.core.js?0.9845804338305766"></script>
+	<script src="//play.pokemonshowdown.com/js/lib/backbone.js?0.991584891899141"></script>
+	<script src="//dex.pokemonshowdown.com/js/panels.js?0.24217954099468275"></script>
 <?php
 }
 
@@ -88,22 +88,22 @@ function ThemeFooterTemplate() {
 ?>
 <?php $panels->scripts(); ?>
 
-	<script src="//play.pokemonshowdown.com/js/lib/jquery-cookie.js?0.3227121994407063"></script>
-	<script src="//play.pokemonshowdown.com/js/lib/html-sanitizer-minified.js?0.415926588566921"></script>
-	<script src="//play.pokemonshowdown.com/js/battle-sound.js?0.9781404447278106"></script>
-	<script src="//play.pokemonshowdown.com/config/config.js?788b039c"></script>
-	<script src="//play.pokemonshowdown.com/js/battledata.js?0.8744031505372962"></script>
-	<script src="//play.pokemonshowdown.com/data/pokedex-mini.js?0.3783016024225965"></script>
-	<script src="//play.pokemonshowdown.com/data/pokedex-mini-bw.js?0.8397049205196117"></script>
-	<script src="//play.pokemonshowdown.com/data/graphics.js?0.6277896271061565"></script>
-	<script src="//play.pokemonshowdown.com/data/pokedex.js?0.474500424797639"></script>
-	<script src="//play.pokemonshowdown.com/data/items.js?0.9826951186979225"></script>
-	<script src="//play.pokemonshowdown.com/data/moves.js?0.18715794989998558"></script>
-	<script src="//play.pokemonshowdown.com/data/abilities.js?0.3695529153975643"></script>
-	<script src="//play.pokemonshowdown.com/data/teambuilder-tables.js?0.30106368492154867"></script>
-	<script src="//play.pokemonshowdown.com/js/battle-tooltips.js?0.4190793599723739"></script>
-	<script src="//play.pokemonshowdown.com/js/battle.js?0.7847254195832702"></script>
-	<script src="/js/replay.js?0.5124480875758091"></script>
+	<script src="//play.pokemonshowdown.com/js/lib/jquery-cookie.js?0.6681187651962499"></script>
+	<script src="//play.pokemonshowdown.com/js/lib/html-sanitizer-minified.js?0.566732529499006"></script>
+	<script src="//play.pokemonshowdown.com/js/battle-sound.js?0.7805893410842943"></script>
+	<script src="//play.pokemonshowdown.com/config/config.js?c7da5f7a"></script>
+	<script src="//play.pokemonshowdown.com/js/battledata.js?0.43169221531273605"></script>
+	<script src="//play.pokemonshowdown.com/data/pokedex-mini.js?0.6252481502578595"></script>
+	<script src="//play.pokemonshowdown.com/data/pokedex-mini-bw.js?0.8857423273498735"></script>
+	<script src="//play.pokemonshowdown.com/data/graphics.js?0.9162300417054687"></script>
+	<script src="//play.pokemonshowdown.com/data/pokedex.js?0.5840934057654164"></script>
+	<script src="//play.pokemonshowdown.com/data/items.js?0.033260520334502"></script>
+	<script src="//play.pokemonshowdown.com/data/moves.js?0.007907822267202436"></script>
+	<script src="//play.pokemonshowdown.com/data/abilities.js?0.480115466018336"></script>
+	<script src="//play.pokemonshowdown.com/data/teambuilder-tables.js?0.7532937192463631"></script>
+	<script src="//play.pokemonshowdown.com/js/battle-tooltips.js?0.9320513404194632"></script>
+	<script src="//play.pokemonshowdown.com/js/battle.js?0.0616530336071186"></script>
+	<script src="/js/replay.js?0.4590086437882761"></script>
 
 </body></html>
 <?php

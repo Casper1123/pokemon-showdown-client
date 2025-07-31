@@ -81,7 +81,7 @@
 			switch (room ? room.type : id) {
 			case '':
 			case 'mainmenu':
-				return buf + '><i class="fa fa-home"></i> <span>Home</span></a></li>';
+				return buf + '><i class="fa fa-home"></i> <span>Old_Client_Home</span></a></li>';
 			case 'teambuilder':
 				return buf + '><i class="fa fa-pencil-square-o"></i> <span>Teambuilder</span></a><button class="closebutton" name="closeRoom" value="' + 'teambuilder" aria-label="Close"><i class="fa fa-times-circle"></i></button></li>';
 			case 'ladder':

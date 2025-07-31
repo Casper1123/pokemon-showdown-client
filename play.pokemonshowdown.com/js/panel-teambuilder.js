@@ -61,6 +61,15 @@ key:''
 };
 }else{
 var format=this.curFolder&&!this.curFolder.endsWith('/')?this.curFolder:this.DEFAULT_FORMAT;
+
+
+if(window.FormatModMapping&&window.FormatModMapping[id]){
+var modid=window.FormatModMapping[id];
+if(!window.BattleTeambuilderTable[modid]){
+Dex.loadModData(modid);
+}
+}
+
 var folder=this.curFolder.endsWith('/')?this.curFolder.slice(0,-1):'';
 return{
 name:(isBox?"Box":"Untitled")+" "+(PS.teams.list.length+1),
