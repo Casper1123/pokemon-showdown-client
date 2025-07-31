@@ -251,6 +251,33 @@ export const Dex = new class implements ModdedDex {
 	 */
 	afdMode?: boolean | 'sprites';
 
+	/**
+	 * Function to initialise custom mods fetched from the configurated server.
+	 */
+	async initializeCustomMods() {
+		try {
+			// Fetch available mods and format mappings
+			const [availableMods, formatMods] = await Promise.all([
+				fetch('/data/availablemods').then(r => r.json()),
+				fetch('/data/formatmods').then(r => r.json())
+			]);
+
+			console.log(`Found ${formatMods}`);
+			console.log(`Found ${availableMods}`);
+			return;
+			// todo: implement custom mod initialization here. I think.
+			// Store format-to-mod mapping
+			window.FormatModMapping = formatMods;
+
+			// Load mod data with recursive parent resolution
+			for (const modid of availableMods) {
+				await this.loadModData(modid);
+			}
+		} catch (error) {
+			console.warn('Failed to load custom mods:', error);
+		}
+	}
+
 	mod(modid: ID): ModdedDex {
 		if (modid === 'gen9') return this;
 		if (!window.BattleTeambuilderTable) return this;
