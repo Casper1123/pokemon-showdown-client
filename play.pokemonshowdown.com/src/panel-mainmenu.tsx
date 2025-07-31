@@ -313,7 +313,7 @@ export class MainMenuRoom extends PSRoom {
 				if (window.FormatModMapping && window.FormatModMapping[id]) {
 					const modid = window.FormatModMapping[id];
 					if (!window.BattleTeambuilderTable[modid]) {
-						Dex.loadModData(modid).catch(console.warn);
+						Dex.loadModData(modid);
 					}
 				}
 			}

@@ -61,6 +61,15 @@ class TeambuilderRoom extends PSRoom {
 			};
 		} else {
 			const format = this.curFolder && !this.curFolder.endsWith('/') ? this.curFolder as ID : this.DEFAULT_FORMAT;
+
+			// Check if this format needs a custom mod
+			if (window.FormatModMapping && window.FormatModMapping[id]) {
+				const modid = window.FormatModMapping[id];
+				if (!window.BattleTeambuilderTable[modid]) {
+					Dex.loadModData(modid);
+				}
+			}
+
 			const folder = this.curFolder.endsWith('/') ? this.curFolder.slice(0, -1) : '';
 			return {
 				name: `${isBox ? "Box" : "Untitled"} ${PS.teams.list.length + 1}`,

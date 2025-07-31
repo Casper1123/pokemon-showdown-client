@@ -7,7 +7,7 @@
 
 import { PS, PSRoom, type RoomOptions, type Team } from "./client-main";
 import { PSPanelWrapper, PSRoomPanel } from "./panels";
-import { toID, type ID } from "./battle-dex";
+import { toID, type ID, Dex } from "./battle-dex";
 import { BattleLog } from "./battle-log";
 import { TeamEditor } from "./battle-team-editor";
 import { Net, PSLoginServer } from "./client-connection";
@@ -39,6 +39,17 @@ class TeamRoom extends PSRoom {
 	setFormat(format: string) {
 		const team = this.team;
 		team.format = toID(format);
+
+		if (window.FormatModMapping && window.FormatModMapping[format]) {
+			const modId = window.FormatModMapping[format];
+			// Ensure the proper mod is loaded.
+			if (window.FormatModMapping && window.FormatModMapping[id]) {
+				const modid = window.FormatModMapping[id];
+				if (!window.BattleTeambuilderTable[modid]) {
+					Dex.loadModData(modid);
+				}
+			}
+		}
 	}
 	load() {
 		PS.teams.loadTeam(this.team, true)?.then(() => {
