@@ -18,6 +18,8 @@
  * @license MIT
  */
 
+import { merge } from 'lodash';
+
 import { Pokemon, type ServerPokemon } from "./battle";
 import {
 	BattleAvatarNumbers, BattleBaseSpeciesChart, BattlePokemonIconIndexes, BattlePokemonIconIndexesLeft,
@@ -252,27 +254,190 @@ export const Dex = new class implements ModdedDex {
 	afdMode?: boolean | 'sprites';
 
 	/**
+	 * Load mod data recursively based on parent mod.
+	 */
+	async loadModData(modId: ID, depth = 0) {
+		if (depth > 10) throw new Error('Max mod inheritance depth exceeded. Potential cyclicality may be in effect.'); // todo: move magic number to config.
+		if (window.BattleTeambuilderTable[modId]) return; // Already loaded
+
+		if (!(modId in window.AvailableCustomMods)) { throw new Error(`Attempt at loading mod that is not available from server: ${modId}`); }
+
+		try {
+			const response = await fetch(`/data/moddata?mod=${modId}`);
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+			}
+
+			let modData;
+			try {
+				modData = await response.json();
+			} catch (parseError) {
+				throw new Error(`Invalid JSON for mod ${modId}: ${parseError.message}`);
+			}
+
+			// Validate mod data structure
+			if (!modData || typeof modData !== 'object') {
+				throw new Error(`Invalid mod data structure for ${modId}`);
+			}
+
+			 await this.integrateModData(modId, modData, depth);
+
+		} catch (error) {
+			console.error(`Failed to load mod data for ${modId}:`, error);
+			throw error; // Re-throw to let caller handle
+		}
+	}
+
+	/**
+	 * Integrates fetched mod data to be applied to modId's mod.
+	 * @param modId The ID of the mod to integrade this data into.
+	 * @param modData The data fetched from server to integrate this data into.
+	 * @param depth Current recursion depth for being able to load into parentMods.
+	 */
+	async integrateModData(modId: ID, modData, depth: number) {
+		// Recursively load parent if specified
+		if (modData.parentMod) {
+			await this.loadModData(modData.parentMod, depth + 1);
+			// Inherit parent data
+			const parentData = window.BattleTeambuilderTable[modData.parentMod];
+			window.BattleTeambuilderTable[modId] = JSON.parse(JSON.stringify(parentData));
+		} else {
+			// No parent, initialize empty structure
+			window.BattleTeambuilderTable[modId] = {
+				overrideSpeciesData: {},
+				overrideMoveData: {},
+				overrideAbilityData: {},
+				overrideItemData: {},
+				learnsets: {},
+				overrideTier: {}
+			};
+		}
+
+		// Note: This repeated code segment is here by intention as it allows us to easily modify specific behaviour for each response format output we expect.
+		// Merge pokedex entries
+		for (const mon in modData.pokedex) {
+			const monData = modData.pokedex[mon];
+			if (!monData.inherit) {
+				window.BattleTeambuilderTable[modId].overrideSpeciesData[mon] = monData;
+				continue;
+			}
+			if (!window.BattleTeambuilderTable[modId].overrideSpeciesData[mon]) {
+				window.BattleTeambuilderTable[modId].overrideSpeciesData[mon] = {};
+			}
+			for (const attribute in monData) {
+				if (attribute !== 'inherit') {
+					window.BattleTeambuilderTable[modId].overrideSpeciesData[mon][attribute] = monData[attribute];
+				}
+			}
+		}
+
+		// todo: add Abilities here. This is for Abilities functionality. I'm not sure this is even needed.
+		// Merge move entries
+		for (const move in modData.moves) {
+			const moveData = modData.moves[move];
+			if (!moveData.inherit) {
+				window.BattleTeambuilderTable[modId].overrideMoveData[move] = moveData;
+				continue;
+			}
+			if (!window.BattleTeambuilderTable[modId].overrideMoveData[move]) {
+				window.BattleTeambuilderTable[modId].overrideMoveData[move] = {};
+			}
+			for (const attribute in moveData) {
+				if (attribute !== 'inherit') {
+					window.BattleTeambuilderTable[modId].overrideMoveData[move][attribute] = moveData[attribute];
+				}
+			}
+		}
+
+		// Merge items entries
+		for (const item in modData.items) {
+			const itemData = modData.items[item];
+			if (!itemData.inherit) {
+				window.BattleTeambuilderTable[modId].overrideItemData[item] = itemData;
+				continue;
+			}
+			if (!window.BattleTeambuilderTable[modId].overrideItemData[item]) {
+				window.BattleTeambuilderTable[modId].overrideItemData[item] = {};
+			}
+			for (const attribute in moveData) {
+				if (attribute !== 'inherit') {
+					window.BattleTeambuilderTable[modId].overrideItemData[item][attribute] = itemData[attribute];
+				}
+			}
+		}
+
+		// Merge learnset entries
+		for (const mon in modData.learnsets) {
+			const monLearnsetData = modData.learnsets[mon];
+			if (!window.BattleTeambuilderTable[modId].learnsets[mon]) {
+				window.BattleTeambuilderTable[modId].learnsets[mon] = {};
+			}
+			for (const move in monLearnsetData) {
+				// Set availability of moves here. Inherit is not applied as changes to base are assumed.
+				window.BattleTeambuilderTable[modId].learnsets[mon][move] = monLearnsetData[move];
+			}
+		}
+
+		// Merge formats data
+		if (modData.formatsData) {
+			if (!window.BattleTeambuilderTable[modId].overrideTier) {
+				window.BattleTeambuilderTable[modId].overrideTier = {};
+			}
+
+			for (const speciesId in modData.formatsData) {
+				const formatData = modData.formatsData[speciesId];
+				if (formatData.tier) {
+					window.BattleTeambuilderTable[modId].overrideTier[speciesId] = formatData.tier;
+				}
+			}
+		}
+	}
+
+	/**
 	 * Function to initialise custom mods fetched from the configurated server.
+	 * Assumes to be ran after BattleTeambuilderTable is loaded.
+	 * Will always fetch from server if it's an available mod from the server.
 	 */
 	async initializeCustomMods() {
 		try {
+			console.log('Initializing custom-mods. Requires connection');
 			// Fetch available mods and format mappings
-			const [availableMods, formatMods] = await Promise.all([
-				fetch('/data/availablemods').then(r => r.json()),
-				fetch('/data/formatmods').then(r => r.json())
+			let [availableModsResult, formatModsResult] = await Promise.allSettled([
+				fetch('/data/availablemods').then(r => {
+					if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+					return r.json();
+				}),
+				fetch('/data/formatmods').then(r => {
+					if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+					return r.json();
+				})
 			]);
 
-			console.log(`Found ${formatMods}`);
-			console.log(`Found ${availableMods}`);
-			return;
+			if (availableModsResult.status !== 'fulfilled' || formatModsResult.status !== 'fulfilled') {
+				throw new Error('One of availableMods or formatMods requests was not fulfilled. Aborting.');
+			}
+
+			// Bring results into wanted data type to allow for iteration.
+			let availableMods: string[] = [];
+			let formatMods: { [formatId: string ] : string } = {};
+
+			if (Array.isArray(availableModsResult.value)) {
+				availableMods = availableModsResult.value.map(String);
+			} else {
+				console.warn('Unexpected availableMods structure');
+			}
+
+			console.log(`Found ${formatModsResult}`);
+			console.log(`Found ${availableModsResult}`);
 			// todo: implement custom mod initialization here. I think.
 			// Store format-to-mod mapping
 			window.FormatModMapping = formatMods;
+			window.AvailableCustomMods = availableMods;
 
-			// Load mod data with recursive parent resolution
-			for (const modid of availableMods) {
-				await this.loadModData(modid);
+			for (const modId of availableMods) {
+				await this.loadModData(modId as ID);
 			}
+
 		} catch (error) {
 			console.warn('Failed to load custom mods:', error);
 		}
@@ -284,6 +449,11 @@ export const Dex = new class implements ModdedDex {
 		if (modid in this.moddedDexes) {
 			return this.moddedDexes[modid];
 		}
+
+		if (!window.BattleTeambuilderTable[modid]) {
+			this.loadModData(modid).then(); // Todo: async.run solution?
+		}
+
 		this.moddedDexes[modid] = new ModdedDex(modid);
 		return this.moddedDexes[modid];
 	}

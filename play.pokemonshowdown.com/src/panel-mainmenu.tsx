@@ -308,8 +308,18 @@ export class MainMenuRoom extends PSRoom {
 					isTeambuilderFormat,
 					effectType: 'Format',
 				};
+
+				// Check if this format needs a custom mod
+				if (window.FormatModMapping && window.FormatModMapping[id]) {
+					const modid = window.FormatModMapping[id];
+					if (!window.BattleTeambuilderTable[modid]) {
+						Dex.loadModData(modid).catch(console.warn);
+					}
+				}
 			}
 		}
+
+
 
 		// Match base formats to their variants, if they are unavailable in the server.
 		let multivariantFormats: { [id: string]: 1 } = {};

@@ -1602,14 +1602,24 @@
 			this.curTeam.format = format;
 			this.curTeam.gen = this.getGen(this.curTeam.format);
 			this.curTeam.dex = Dex.forGen(this.curTeam.gen);
-			if (this.curTeam.format.includes('letsgo')) {
+
+			// Custom format mod loading
+			let custom = false;
+			if (window.FormatModMapping && window.FormatModMapping[toID(format)]) {
+				const modid = window.FormatModMapping[toID(format)];
+				this.curTeam.dex = Dex.mod(modid);
+				custom = true;
+			}
+
+			// Skipping these entries if they're not custom.
+			if (this.curTeam.format.includes('letsgo') && !custom) {
 				this.curTeam.dex = Dex.mod('gen7letsgo');
 			}
-			if (this.curTeam.format.includes('bdsp')) {
+			if (this.curTeam.format.includes('bdsp') && !custom) {
 				this.curTeam.dex = Dex.mod('gen8bdsp');
 			}
 			this.save();
-			if (this.curTeam.gen === 5 && !Dex.loadedSpriteData['bw']) Dex.loadSpriteData('bw');
+			if (this.curTeam.gen === 5 && !Dex.loadedSpriteData['bw']) Dex.loadSpriteData('bw'); // might break with custom data?
 			this.update();
 		},
 		nicknameChange: function (e) {
