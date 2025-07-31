@@ -66,11 +66,11 @@
 				},
 				defaultserver: {
 					id: 'showdown',
-					host: 'sim3.psim.us',
+					host: 'localhost',
 					port: 443,
 					httpport: 8000,
 					altport: 80,
-					registered: true
+					registered: false
 				},
 				customcolors: {}
 			};
@@ -114,6 +114,13 @@
 	<script src="js/panel-mainmenu.js"></script>
 	<script src="js/panel-rooms.js"></script>
 	<script src="js/panel-topbar.js"></script>
+	<script>
+		if (window.Dex && window.Dex.initializeCustomMods) {
+			Dex.initializeCustomMods().then(() => {
+				console.log('Custom mods initialized');
+			}).catch(console.error);
+		}
+	</script>
 	<!-- at this point, the main view is loaded and usable -->
 
 	<script src="js/lib/html-css-sanitizer-minified.js"></script>
