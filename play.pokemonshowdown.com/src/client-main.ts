@@ -1881,7 +1881,7 @@ export const PS = new class extends PSModel {
 
 		this.mainmenu = this.addRoom({
 			id: '' as RoomID,
-			title: ".ts title :)",
+			title: "Modded Home",
 		}) as MainMenuRoom;
 
 		this.addRoom({
