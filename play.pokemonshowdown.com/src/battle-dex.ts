@@ -259,11 +259,8 @@ export const Dex = new class implements ModdedDex {
 		if (depth > 10) throw new Error('Max mod inheritance depth exceeded. Potential cyclicality may be in effect.'); // todo: move magic number to config.
 		if (window.BattleTeambuilderTable[modId]) return; // Already loaded
 
-		console.log('window.AvailableCustomMods:', window.AvailableCustomMods);
-		console.log('modId being checked:', modId);
-
-		if (!(modId in window.AvailableCustomMods)) {
-			throw new Error(`Attempt at loading mod that is not available from server: ${modId}`);
+		if (!window.AvailableCustomMods.includes(modId)) {
+			throw new Error(`Attempt at loading mod that is not available from server: (${modId} not in [${window.AvailableCustomMods}])`);
 		}
 
 		try {
@@ -289,6 +286,7 @@ export const Dex = new class implements ModdedDex {
 				throw new Error(`Invalid mod data structure for ${modId}`);
 			}
 
+			console.log(`Integrating data for mod ${modId}`);
 			this.integrateModData(modId, modData, depth);
 
 		} catch (error) {
@@ -304,11 +302,29 @@ export const Dex = new class implements ModdedDex {
 	 * @param depth Current recursion depth for being able to load into parentMods.
 	 */
 	integrateModData(modId: ID, modData: any, depth: number) {
-		// Recursively load parent if specified
-		if (modData.parentMod) {
+		// Recursively load parent if specified. Skips if it's the base gen; this is handled below.
+		if (modData.parentMod && modData.parentMod !== `gen${Dex.gen}`) {
+			console.debug(`Preparing parent data of mod ${modData.parentMod} for ${modId}`);
 			this.loadModData(modData.parentMod, depth + 1);
 			// Inherit parent data
 			const parentData = window.BattleTeambuilderTable[modData.parentMod];
+			window.BattleTeambuilderTable[modId] = JSON.parse(JSON.stringify(parentData));
+		// Create a copy of the base gen.
+		} else if (modData.parentMod !== `gen${Dex.gen}`) {
+			console.debug(`Loading base gen (gen${Dex.gen}) into ${modId} as it's parent.`)
+			// Todo: create a copy of the base gen.
+			const baseProps = [
+				'tiers', 'items', 'overrideTier', 'ubersUUBans', 'monotypeBans',
+				'formatSlices', 'learnsets', 'overrideSpeciesData', 'overrideMoveData',
+				'overrideAbilityData', 'overrideItemData', 'overrideTypeChart', 'removeType'
+			];
+
+			const parentData: { [prop: string] : any} = {};
+			for (const prop of baseProps) {
+				if (window.BattleTeambuilderTable[prop] !== undefined) {
+					parentData[prop] = window.BattleTeambuilderTable[prop];
+				}
+			}
 			window.BattleTeambuilderTable[modId] = JSON.parse(JSON.stringify(parentData));
 		} else {
 			// No parent, initialize empty structure
@@ -321,21 +337,26 @@ export const Dex = new class implements ModdedDex {
 				overrideTier: {}
 			};
 		}
+		console.debug("table is defined", window.BattleTeambuilderTable !== undefined)
+		console.debug("mod is defined", window.BattleTeambuilderTable[modId] !== undefined);
 
 		// Note: This repeated code segment is here by intention as it allows us to easily modify specific behaviour for each response format output we expect.
 		// Merge pokedex entries
 		for (const mon in modData.pokedex) {
 			const monData = modData.pokedex[mon];
+			console.debug(`Applying modification for mon ${mon}. inherit = ${monData.inherit}`);
 			if (!monData.inherit) {
 				window.BattleTeambuilderTable[modId].overrideSpeciesData[mon] = monData;
 				continue;
 			}
 			if (!window.BattleTeambuilderTable[modId].overrideSpeciesData[mon]) {
 				window.BattleTeambuilderTable[modId].overrideSpeciesData[mon] = {};
+				console.debug(`Created new table entry for mon ${mon}`);
 			}
 			for (const attribute in monData) {
 				if (attribute !== 'inherit') {
 					window.BattleTeambuilderTable[modId].overrideSpeciesData[mon][attribute] = monData[attribute];
+					console.debug(`Attaching attribute ${attribute} to table. Resulting mon-attribute table:`, JSON.stringify(window.BattleTeambuilderTable[modId].overrideSpeciesData[mon]));
 				}
 			}
 		}
@@ -400,6 +421,7 @@ export const Dex = new class implements ModdedDex {
 				}
 			}
 		}
+		console.debug(`Implemented overrides from server on mod ${modId} with ${Object.keys(window.BattleTeambuilderTable[modId].overrideSpeciesData).length} species.`);
 	}
 
 	/**
@@ -409,9 +431,8 @@ export const Dex = new class implements ModdedDex {
 	 */
 	initializeCustomMods(): void {
 		try {
-			console.log('Initializing custom-mods. Requires connection');
+			console.log('Initializing custom-mods. Requires connection to server with the right endpoint infrastructure.');
 
-			// Synchronously fetch available mods
 			// const serverUrl = `http://${PS.server.host}:${PS.server.port}`;
 			const serverUrl = "http://localhost:8000";  // For figuring out why it's not working during testing.
 			const availableModsXhr = new XMLHttpRequest();
@@ -423,20 +444,7 @@ export const Dex = new class implements ModdedDex {
 				throw new Error(`HTTP ${availableModsXhr.status}: ${availableModsXhr.statusText}`);
 			}
 
-			// Synchronously fetch format mappings
-			const formatModsXhr = new XMLHttpRequest();
-			console.log(`Attempting to fetch formatmods from ${serverUrl}`)
-			formatModsXhr.open('GET', `${serverUrl}/data/formatmods`, false); // false = synchronous
-			formatModsXhr.send();
-
-			if (formatModsXhr.status !== 200) {
-				throw new Error(`HTTP ${formatModsXhr.status}: ${formatModsXhr.statusText}`);
-			}
-
-			// Parse responses
 			let availableMods: string[] = [];
-			let formatMods: { [formatId: string]: string } = {};
-
 			try {
 				const availableModsData = JSON.parse(availableModsXhr.responseText);
 				if (Array.isArray(availableModsData)) {
@@ -447,28 +455,30 @@ export const Dex = new class implements ModdedDex {
 			} catch (e) {
 				throw new Error(`Invalid JSON for availableMods: ${e}`);
 			}
+			console.log(`Found ${availableMods.length} available mods`);
+
+
+
+			const formatModsXhr = new XMLHttpRequest();
+			console.log(`Attempting to fetch formatmods from ${serverUrl}`)
+			formatModsXhr.open('GET', `${serverUrl}/data/formatmods`, false); // false = synchronous
+			formatModsXhr.send();
+
+			if (formatModsXhr.status !== 200) {
+				throw new Error(`HTTP ${formatModsXhr.status}: ${formatModsXhr.statusText}`);
+			}
+
+			let formatMods: { [formatId: string]: string } = {};
 
 			try {
 				formatMods = JSON.parse(formatModsXhr.responseText);
 			} catch (e) {
 				throw new Error(`Invalid JSON for formatMods: ${e}`);
 			}
-
-			console.log(`Found ${availableMods.length} available mods`);
 			console.log(`Found ${Object.keys(formatMods).length} format mappings`);
 
-			// Store globally
-			try{
-				window.FormatModMapping = formatMods;
-				window.AvailableCustomMods = availableMods;
-
-				console.log("Loaded the following data into window");
-				console.log(window.FormatModMapping);
-				console.log(window.AvailableCustomMods);
-			} catch (e) {
-				console.log("Failed to load data into window!")
-			}
-
+			window.FormatModMapping = formatMods;
+			window.AvailableCustomMods = availableMods;
 
 			// Load all mods synchronously
 			for (const modId of availableMods) {
