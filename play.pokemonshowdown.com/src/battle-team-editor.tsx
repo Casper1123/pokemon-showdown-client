@@ -66,7 +66,21 @@ class TeamEditorState extends PSModel {
 		const formatid = toID(format);
 		this.format = formatid;
 		team.format = formatid;
-		this.dex = Dex.forFormat(formatid);
+
+		// Injecting custom mods
+		if (window.FormatModMapping && window.FormatModMapping[formatid]) {
+			const modId = window.FormatModMapping[formatid];
+			console.debug(`Set team editor to custom mod ${modId} for format ${formatid}`);
+			this.dex = Dex.mod(modId);
+		} else {
+			console.debug(`Set team editor to default mod for format ${formatid}`);
+			this.dex = Dex.forFormat(formatid);
+		}
+		this.search.dex = this.dex;  // Reset search dex to ensure override is loaded into the search options too.
+		if (this.search.typedSearch) {
+			this.search.typedSearch.dex = this.dex;
+		} // Force changes into typed search. Beta client moment.
+
 		this.gen = this.dex.gen;
 
 		format = toID(format).slice(4);
@@ -102,6 +116,17 @@ class TeamEditorState extends PSModel {
 	setSearchType(type: SearchType, i: number, value?: string) {
 		const set = this.sets[i];
 		this.search.setType(type, this.format, set);
+
+		// Basically begging to inject our custom mod into here.
+		// Please just work this search bar is so bloody annoying I swear dude.
+		if (window.FormatModMapping && window.FormatModMapping[this.format]) {
+			const modId = window.FormatModMapping[this.format];
+			this.search.dex = Dex.mod(modId);
+			if (this.search.typedSearch) {
+				this.search.typedSearch.dex = Dex.mod(modId);
+			}
+		}
+
 		this.originalSpecies = null;
 		this.search.prependResults = null;
 		if (type === 'move') {

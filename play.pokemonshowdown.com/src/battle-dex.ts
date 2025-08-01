@@ -18,14 +18,23 @@
  * @license MIT
  */
 
-import { Pokemon, type ServerPokemon } from "./battle";
-import {
-	BattleAvatarNumbers, BattleBaseSpeciesChart, BattlePokemonIconIndexes, BattlePokemonIconIndexesLeft,
-	Ability, Item, Move, Species, PureEffect, type ID, type Type,
-} from "./battle-dex-data";
+import {Pokemon, type ServerPokemon} from "./battle";
 import type * as DexData from "./battle-dex-data";
-import type { Teams } from "./battle-teams";
-import { Config } from "./client-main";
+import {
+	Ability,
+	BattleAvatarNumbers,
+	BattleBaseSpeciesChart,
+	BattlePokemonIconIndexes,
+	BattlePokemonIconIndexesLeft,
+	type ID,
+	Item,
+	Move,
+	PureEffect,
+	Species,
+	type Type,
+} from "./battle-dex-data";
+import type {Teams} from "./battle-teams";
+import {Config} from "./client-main";
 
 export declare namespace Dex {
 	/* eslint-disable @typescript-eslint/no-shadow */
@@ -251,6 +260,39 @@ export const Dex = new class implements ModdedDex {
 	 */
 	afdMode?: boolean | 'sprites';
 
+	/**
+	 * Takes in an input array for a moveset change and converts it to a string used internally.
+	 */
+	convertLearnsetArrayToString(learnsetArray: string[] | any): string | any {
+		if (!Array.isArray(learnsetArray)) {
+			return learnsetArray;
+		}
+
+		const generations = new Set();
+		const versionChars = new Set();
+
+		for (const moveSource of learnsetArray) {
+			// Extract generation number (first character)
+			const gen = parseInt(moveSource.charAt(0));
+			if (gen >= 1 && gen <= 9) {  // todo: test and maintain properly. I hate this piece of code.
+				generations.add(gen);
+
+				if (gen === 6) versionChars.add('p');
+				else if (gen === 7 && !moveSource.includes('V')) versionChars.add('q');
+				else if (gen === 8 && !moveSource.includes('V')) versionChars.add('g');
+				else if (gen === 9 && !moveSource.includes('V')) versionChars.add('a');
+
+				// Handle egg moves for Gen 9 (following build-tools logic)
+				if (gen === 9 && moveSource.includes('E')) versionChars.add('e');
+			}
+		}
+
+		// Convert to sorted string format
+		const genString = Array.from(generations).sort().join('');
+		const versionString = Array.from(versionChars).join('');
+
+		return genString + versionString;
+	}
 
 	/**
 	 * Load mod data recursively based on parent mod.
@@ -303,6 +345,8 @@ export const Dex = new class implements ModdedDex {
 	 */
 	integrateModData(modId: ID, modData: any, depth: number) {
 		// Recursively load parent if specified. Skips if it's the base gen; this is handled below.
+		console.debug(`Mod: ${modId} has parent ${modData.parentMod}. Dex gen is '${Dex.gen}'`);
+
 		if (modData.parentMod && modData.parentMod !== `gen${Dex.gen}`) {
 			console.debug(`Preparing parent data of mod ${modData.parentMod} for ${modId}`);
 			this.loadModData(modData.parentMod, depth + 1);
@@ -310,13 +354,13 @@ export const Dex = new class implements ModdedDex {
 			const parentData = window.BattleTeambuilderTable[modData.parentMod];
 			window.BattleTeambuilderTable[modId] = JSON.parse(JSON.stringify(parentData));
 		// Create a copy of the base gen.
-		} else if (modData.parentMod !== `gen${Dex.gen}`) {
+		} else if (modData.parentMod === `gen${Dex.gen}`) {
 			console.debug(`Loading base gen (gen${Dex.gen}) into ${modId} as it's parent.`)
 			// Todo: create a copy of the base gen.
 			const baseProps = [
 				'tiers', 'items', 'overrideTier', 'ubersUUBans', 'monotypeBans',
 				'formatSlices', 'learnsets', 'overrideSpeciesData', 'overrideMoveData',
-				'overrideAbilityData', 'overrideItemData', 'overrideTypeChart', 'removeType'
+				'overrideAbilityData', 'overrideItemData', 'overrideTypeChart', 'removeType',
 			];
 
 			const parentData: { [prop: string] : any} = {};
@@ -324,10 +368,21 @@ export const Dex = new class implements ModdedDex {
 				if (window.BattleTeambuilderTable[prop] !== undefined) {
 					parentData[prop] = window.BattleTeambuilderTable[prop];
 				}
+				else {
+					// Horrible, brute-ish solution.
+					if (prop === 'learnsets') {
+						parentData[prop] = window.BattleTeambuilderTable.learnsets || {};
+					} else if (['tiers', 'items'].includes(prop)) {
+						parentData[prop] = [];
+					} else {
+						parentData[prop] = {};
+					}
+				}
 			}
 			window.BattleTeambuilderTable[modId] = JSON.parse(JSON.stringify(parentData));
 		} else {
 			// No parent, initialize empty structure
+			console.debug(`Mod ${modId} has no parent, initializing empty table.`)
 			window.BattleTeambuilderTable[modId] = {
 				overrideSpeciesData: {},
 				overrideMoveData: {},
@@ -337,16 +392,16 @@ export const Dex = new class implements ModdedDex {
 				overrideTier: {}
 			};
 		}
-		console.debug("table is defined", window.BattleTeambuilderTable !== undefined)
-		console.debug("mod is defined", window.BattleTeambuilderTable[modId] !== undefined);
 
 		// Note: This repeated code segment is here by intention as it allows us to easily modify specific behaviour for each response format output we expect.
 		// Merge pokedex entries
+		console.debug(`Merging pokedex entries.`);
 		for (const mon in modData.pokedex) {
 			const monData = modData.pokedex[mon];
 			console.debug(`Applying modification for mon ${mon}. inherit = ${monData.inherit}`);
 			if (!monData.inherit) {
 				window.BattleTeambuilderTable[modId].overrideSpeciesData[mon] = monData;
+				console.debug(`Replaced mon data for ${mon} due to inherit = ${monData.inherit}`);
 				continue;
 			}
 			if (!window.BattleTeambuilderTable[modId].overrideSpeciesData[mon]) {
@@ -356,59 +411,75 @@ export const Dex = new class implements ModdedDex {
 			for (const attribute in monData) {
 				if (attribute !== 'inherit') {
 					window.BattleTeambuilderTable[modId].overrideSpeciesData[mon][attribute] = monData[attribute];
-					console.debug(`Attaching attribute ${attribute} to table. Resulting mon-attribute table:`, JSON.stringify(window.BattleTeambuilderTable[modId].overrideSpeciesData[mon]));
+					console.debug(`Attaching attribute ${attribute} to table.`);
 				}
 			}
 		}
 
 		// todo: add Abilities here. This is for Abilities functionality. I'm not sure this is even needed.
 		// Merge move entries
+		console.debug(`Merging move entries.`);
 		for (const move in modData.moves) {
 			const moveData = modData.moves[move];
+			console.debug(`Applying modification for move ${move}. inherit = ${moveData.inherit}`);
 			if (!moveData.inherit) {
 				window.BattleTeambuilderTable[modId].overrideMoveData[move] = moveData;
+				console.debug(`Replaced move data for ${move} due to inherit = ${moveData.inherit}`);
 				continue;
 			}
 			if (!window.BattleTeambuilderTable[modId].overrideMoveData[move]) {
 				window.BattleTeambuilderTable[modId].overrideMoveData[move] = {};
+				console.debug(`Created new table entry for move ${move}`);
 			}
 			for (const attribute in moveData) {
 				if (attribute !== 'inherit') {
 					window.BattleTeambuilderTable[modId].overrideMoveData[move][attribute] = moveData[attribute];
+					console.debug(`Attaching attribute ${attribute} to table.`);
 				}
 			}
 		}
 
 		// Merge items entries
+		console.debug(`Merging item entries.`);
 		for (const item in modData.items) {
 			const itemData = modData.items[item];
+			console.debug(`Applying modification for item ${item}. inherit = ${itemData.inherit}`);
 			if (!itemData.inherit) {
 				window.BattleTeambuilderTable[modId].overrideItemData[item] = itemData;
+				console.debug(`Replaced item data for ${item} due to inherit = ${itemData.inherit}`);
 				continue;
 			}
 			if (!window.BattleTeambuilderTable[modId].overrideItemData[item]) {
 				window.BattleTeambuilderTable[modId].overrideItemData[item] = {};
+				console.debug(`Created new table entry for item ${item}`);
 			}
 			for (const attribute in itemData) {
 				if (attribute !== 'inherit') {
 					window.BattleTeambuilderTable[modId].overrideItemData[item][attribute] = itemData[attribute];
+					console.debug(`Attaching attribute ${attribute} to table.`);
 				}
 			}
 		}
 
 		// Merge learnset entries
+		console.debug(`Merging learnset entries.`);
 		for (const mon in modData.learnsets) {
 			const monLearnsetData = modData.learnsets[mon];
+			console.debug(`Applying modification for learnset of  ${mon}.`);
 			if (!window.BattleTeambuilderTable[modId].learnsets[mon]) {
 				window.BattleTeambuilderTable[modId].learnsets[mon] = {};
+				console.debug(`Created new table entry for mon ${mon}`);
 			}
 			for (const move in monLearnsetData) {
 				// Set availability of moves here. Inherit is not applied as changes to base are assumed.
-				window.BattleTeambuilderTable[modId].learnsets[mon][move] = monLearnsetData[move];
+				// Have to have their type converted first.
+				window.BattleTeambuilderTable[modId].learnsets[mon][move] = this.convertLearnsetArrayToString(monLearnsetData[move]);
+				console.debug(`Set data for move ${move} to `, JSON.stringify(monLearnsetData[move]));
 			}
 		}
 
 		// Merge formats data
+		console.debug(`Merging formatdata entries.`);
 		if (modData.formatsData) {
 			if (!window.BattleTeambuilderTable[modId].overrideTier) {
 				window.BattleTeambuilderTable[modId].overrideTier = {};
@@ -418,10 +489,12 @@ export const Dex = new class implements ModdedDex {
 				const formatData = modData.formatsData[speciesId];
 				if (formatData.tier) {
 					window.BattleTeambuilderTable[modId].overrideTier[speciesId] = formatData.tier;
+					console.debug(`Modifying formatdata for ${speciesId} to ${formatData.tier}`);
+					// todo: implement other overrides too.. this just does default tier not ND Ubers or something. In case that might be relevant.
 				}
 			}
 		}
-		console.debug(`Implemented overrides from server on mod ${modId} with ${Object.keys(window.BattleTeambuilderTable[modId].overrideSpeciesData).length} species.`);
+		console.debug(`Implemented overrides from server on mod ${modId} with ${Object.keys(window.BattleTeambuilderTable[modId].overrideSpeciesData).length} species & ${Object.keys(window.BattleTeambuilderTable[modId].learnsets).length} learnsets.`);
 	}
 
 	/**
