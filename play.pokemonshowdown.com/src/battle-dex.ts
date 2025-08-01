@@ -27,9 +27,6 @@ import type * as DexData from "./battle-dex-data";
 import type { Teams } from "./battle-teams";
 import { Config } from "./client-main";
 
-export declare let AvailableCustomMods: string[];
-export declare let FormatModMapping: { [ formatId: string ] : string };
-
 export declare namespace Dex {
 	/* eslint-disable @typescript-eslint/no-shadow */
 	export type Ability = DexData.Ability;

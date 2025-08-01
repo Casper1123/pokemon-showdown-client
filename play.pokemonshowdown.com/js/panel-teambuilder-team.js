@@ -43,8 +43,8 @@ team.format=toID(format);
 if(window.FormatModMapping&&window.FormatModMapping[format]){
 var modId=window.FormatModMapping[format];
 
-if(window.FormatModMapping&&window.FormatModMapping[id]){
-var modid=window.FormatModMapping[id];
+if(window.FormatModMapping&&window.FormatModMapping[modId]){
+var modid=window.FormatModMapping[modId];
 if(!window.BattleTeambuilderTable[modid]){
 Dex.loadModData(modid);
 }

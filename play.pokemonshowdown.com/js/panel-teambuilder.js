@@ -63,8 +63,8 @@ key:''
 var format=this.curFolder&&!this.curFolder.endsWith('/')?this.curFolder:this.DEFAULT_FORMAT;
 
 
-if(window.FormatModMapping&&window.FormatModMapping[id]){
-var modid=window.FormatModMapping[id];
+if(window.FormatModMapping&&window.FormatModMapping[format]){
+var modid=window.FormatModMapping[format];
 if(!window.BattleTeambuilderTable[modid]){
 Dex.loadModData(modid);
 }

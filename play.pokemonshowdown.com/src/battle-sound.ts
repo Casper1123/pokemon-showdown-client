@@ -82,6 +82,7 @@ export class BattleBGM {
 			this.sound.currentTime -= (this.loopend - this.loopstart) / 1000;
 		}
 
+		// @ts-ignore
 		this.timer = setTimeout(() => {
 			this.updateTime();
 		}, Math.max(this.loopend - progress, 1));

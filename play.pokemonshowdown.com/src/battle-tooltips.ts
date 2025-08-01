@@ -248,6 +248,7 @@ export class BattleTooltips {
 		this.showTooltip(target);
 		const isClick = (e.type === 'mousedown' && target.tagName === 'BUTTON');
 
+		// @ts-ignore
 		BattleTooltips.longTapTimeout = setTimeout(() => {
 			BattleTooltips.longTapTimeout = 0;
 			this.lockTooltip();
