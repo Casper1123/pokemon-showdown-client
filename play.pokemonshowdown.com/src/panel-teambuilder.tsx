@@ -63,8 +63,8 @@ class TeambuilderRoom extends PSRoom {
 			const format = this.curFolder && !this.curFolder.endsWith('/') ? this.curFolder as ID : this.DEFAULT_FORMAT;
 
 			// Check if this format needs a custom mod
-			if (window.FormatModMapping && window.FormatModMapping[id]) {
-				const modid = window.FormatModMapping[id];
+			if (window.FormatModMapping && window.FormatModMapping[format]) {
+				const modid = window.FormatModMapping[format];
 				if (!window.BattleTeambuilderTable[modid]) {
 					Dex.loadModData(modid);
 				}

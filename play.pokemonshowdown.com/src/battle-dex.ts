@@ -27,6 +27,9 @@ import type * as DexData from "./battle-dex-data";
 import type { Teams } from "./battle-teams";
 import { Config } from "./client-main";
 
+export declare let AvailableCustomMods: string[];
+export declare let FormatModMapping: { [ formatId: string ] : string };
+
 export declare namespace Dex {
 	/* eslint-disable @typescript-eslint/no-shadow */
 	export type Ability = DexData.Ability;
@@ -251,6 +254,7 @@ export const Dex = new class implements ModdedDex {
 	 */
 	afdMode?: boolean | 'sprites';
 
+
 	/**
 	 * Load mod data recursively based on parent mod.
 	 */
@@ -258,13 +262,19 @@ export const Dex = new class implements ModdedDex {
 		if (depth > 10) throw new Error('Max mod inheritance depth exceeded. Potential cyclicality may be in effect.'); // todo: move magic number to config.
 		if (window.BattleTeambuilderTable[modId]) return; // Already loaded
 
+		console.log('window.AvailableCustomMods:', window.AvailableCustomMods);
+		console.log('modId being checked:', modId);
+
 		if (!(modId in window.AvailableCustomMods)) {
 			throw new Error(`Attempt at loading mod that is not available from server: ${modId}`);
 		}
 
 		try {
 			const xhr = new XMLHttpRequest();
-			xhr.open('GET', `/data/moddata?mod=${modId}`, false); // false = synchronous. Intentional.
+			// const serverUrl = `http://${PS.server.host}:${PS.server.port}`;
+			const serverUrl = "http://localhost:8000";  // For figuring out why it's not working during testing.
+			console.log(`Attempting to fetch moddata for ${modId} from ${serverUrl}`)
+			xhr.open('GET', `${serverUrl}/data/moddata?mod=${modId}`, false); // false = synchronous. Intentional.
 			xhr.send();
 
 			if (xhr.status !== 200) {
@@ -274,8 +284,8 @@ export const Dex = new class implements ModdedDex {
 			let modData;
 			try {
 				modData = JSON.parse(xhr.responseText);
-			} catch (parseError) {
-				throw new Error(`Invalid JSON for mod ${modId}: ${parseError.message}`);
+			} catch (e) {
+				throw new Error(`Invalid JSON for mod ${modId}: ${e}`);
 			}
 
 			if (!modData || typeof modData !== 'object') {
@@ -405,8 +415,11 @@ export const Dex = new class implements ModdedDex {
 			console.log('Initializing custom-mods. Requires connection');
 
 			// Synchronously fetch available mods
+			// const serverUrl = `http://${PS.server.host}:${PS.server.port}`;
+			const serverUrl = "http://localhost:8000";  // For figuring out why it's not working during testing.
 			const availableModsXhr = new XMLHttpRequest();
-			availableModsXhr.open('GET', '/data/availablemods', false); // false = synchronous
+			console.log(`Attempting to fetch availablemods from ${serverUrl}`)
+			availableModsXhr.open('GET', `${serverUrl}/data/availablemods`, false); // false = synchronous
 			availableModsXhr.send();
 
 			if (availableModsXhr.status !== 200) {
@@ -415,7 +428,8 @@ export const Dex = new class implements ModdedDex {
 
 			// Synchronously fetch format mappings
 			const formatModsXhr = new XMLHttpRequest();
-			formatModsXhr.open('GET', '/data/formatmods', false); // false = synchronous
+			console.log(`Attempting to fetch formatmods from ${serverUrl}`)
+			formatModsXhr.open('GET', `${serverUrl}/data/formatmods`, false); // false = synchronous
 			formatModsXhr.send();
 
 			if (formatModsXhr.status !== 200) {
@@ -433,22 +447,31 @@ export const Dex = new class implements ModdedDex {
 				} else {
 					console.warn('Unexpected availableMods structure');
 				}
-			} catch (parseError) {
-				throw new Error(`Invalid JSON for availableMods: ${parseError.message}`);
+			} catch (e) {
+				throw new Error(`Invalid JSON for availableMods: ${e}`);
 			}
 
 			try {
 				formatMods = JSON.parse(formatModsXhr.responseText);
-			} catch (parseError) {
-				throw new Error(`Invalid JSON for formatMods: ${parseError.message}`);
+			} catch (e) {
+				throw new Error(`Invalid JSON for formatMods: ${e}`);
 			}
 
 			console.log(`Found ${availableMods.length} available mods`);
 			console.log(`Found ${Object.keys(formatMods).length} format mappings`);
 
 			// Store globally
-			window.FormatModMapping = formatMods;
-			window.AvailableCustomMods = availableMods;
+			try{
+				window.FormatModMapping = formatMods;
+				window.AvailableCustomMods = availableMods;
+
+				console.log("Loaded the following data into window");
+				console.log(window.FormatModMapping);
+				console.log(window.AvailableCustomMods);
+			} catch (e) {
+				console.log("Failed to load data into window!")
+			}
+
 
 			// Load all mods synchronously
 			for (const modId of availableMods) {

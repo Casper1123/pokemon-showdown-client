@@ -43,8 +43,8 @@ class TeamRoom extends PSRoom {
 		if (window.FormatModMapping && window.FormatModMapping[format]) {
 			const modId = window.FormatModMapping[format];
 			// Ensure the proper mod is loaded.
-			if (window.FormatModMapping && window.FormatModMapping[id]) {
-				const modid = window.FormatModMapping[id];
+			if (window.FormatModMapping && window.FormatModMapping[modId]) {
+				const modid = window.FormatModMapping[modId];
 				if (!window.BattleTeambuilderTable[modid]) {
 					Dex.loadModData(modid);
 				}

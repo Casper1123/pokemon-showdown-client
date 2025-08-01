@@ -1,12 +1,29 @@
 {
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
+    "lib": ["dom", "dom.iterable", "es6", "es2016.array.include", "es2017.object"],
+    "noEmit": true,
+    "target": "esnext",
+    "module": "None",
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
+    "jsx": "preserve",
     "strict": true,
-    "skipLibCheck": true,
-    "outDir": "dist"
+    "noImplicitOverride": true,
+    "paths": {
+      // This is solely to stop a bug with @types/node as of 12/15/2023
+      // Source: https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/67406#discussioncomment-7866621
+      "undici-types": [
+        "./node_modules/undici-types/index.d.ts"
+      ],
+    }
   },
-  "include": ["src"]
+  "types": [],
+  "include": [
+    "./play.pokemonshowdown.com/js/lib/preact.d.ts",
+    "./play.pokemonshowdown.com/src/*",
+    "./replay.pokemonshowdown.com/src/*",
+    "./teams.pokemonshowdown.com/src/*"
+  ]
 }

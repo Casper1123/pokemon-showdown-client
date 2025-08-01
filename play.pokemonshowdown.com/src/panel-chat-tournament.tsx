@@ -7,7 +7,8 @@ import { TeamForm } from "./panel-mainmenu";
 import type { Args } from "./battle-text-parser";
 import type { ChatRoom } from "./panel-chat";
 // we check window.d3 before using it, so d3 doesn't need to be loaded before this file
-import * as d3 from 'd3';
+// @ts-ignore
+import * as d3 from 'd3';  // todo: if this breaks, replace with 'declare const d3: any;' as it's already loaded in the testclient.
 import { PSPanelWrapper, PSRoomPanel } from "./panels";
 
 interface TreeNode {

@@ -1,7 +1,7 @@
 {
-  "name": "${PROJECT_NAME}",
+  "name": "Custom Showdown Client",
   "version": "1.0.0",
-  "description": "",
+  "description": "A customized pokémon showdown client for our server to automatically hook in and load custom mods for formats on the server.",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc"
@@ -12,6 +12,7 @@
     "@babel/plugin-transform-typescript": "^7.28.0",
     "@babel/preset-env": "^7.28.0",
     "@babel/preset-typescript": "^7.27.1",
+    "@types/jquery": "^3.5.3",
     "clean-css": "^5.3.3",
     "esbuild": "^0.25.8",
     "fs-extra": "^11.3.0",
@@ -28,6 +29,7 @@
     "@babel/plugin-transform-strict-mode": "^7.27.1",
     "babel-plugin-remove-import-export": "^1.1.1",
     "image-size": "^2.0.2",
-    "package-lock.json": "^1.0.0"
+    "package-lock.json": "^1.0.0",
+    "undici-types": "^7.13.0"
   }
 }
