@@ -468,13 +468,11 @@ export const Dex = new class implements ModdedDex {
 			console.debug(`Applying modification for learnset of  ${mon}.`);
 			if (!window.BattleTeambuilderTable[modId].learnsets[mon]) {
 				window.BattleTeambuilderTable[modId].learnsets[mon] = {};
-				console.debug(`Created new table entry for mon ${mon}`);
 			}
 			for (const move in monLearnsetData) {
 				// Set availability of moves here. Inherit is not applied as changes to base are assumed.
 				// Have to have their type converted first.
 				window.BattleTeambuilderTable[modId].learnsets[mon][move] = this.convertLearnsetArrayToString(monLearnsetData[move]);
-				console.debug(`Set data for move ${move} to `, JSON.stringify(monLearnsetData[move]));
 			}
 		}
 

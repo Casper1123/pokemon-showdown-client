@@ -891,8 +891,15 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			return pokemon.num >= 0 ? String(pokemon.num) : pokemon.tier;
 		}
 		let table = window.BattleTeambuilderTable;
-		const gen = this.dex.gen;
-		const tableKey = this.formatType === 'doubles' ? `gen${gen}doubles` :
+		// Add custom mod support
+		if (window.AvailableCustomMods?.includes(this.dex.modid)) {
+			if (!window.BattleTeambuilderTable[this.dex.modid]) {
+				Dex.loadModData(this.dex.modid);
+			}
+			table = window.BattleTeambuilderTable[this.dex.modid];
+		} else {
+			const gen = this.dex.gen;
+			const tableKey = this.formatType === 'doubles' ? `gen${gen}doubles` :
 			this.formatType === 'letsgo' ? 'gen7letsgo' :
 			this.formatType === 'bdsp' ? 'gen8bdsp' :
 			this.formatType === 'bdspdoubles' ? 'gen8bdspdoubles' :
@@ -909,12 +916,12 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.formatType === 'svdlc1doubles' ? 'gen9dlc1doubles' :
 			this.formatType === 'svdlc1natdex' ? 'gen9dlc1natdex' :
 			this.formatType === 'natdex' ? `gen${gen}natdex` :
-			this.formatType === 'stadium' ? `gen${gen}stadium${gen > 1 ? gen : ''}` :
-			`gen${gen}`;
-		if (table?.[tableKey]) {
-			table = table[tableKey];
+			this.formatType === 'stadium' ? `gen${gen}stadium${gen > 1 ? gen : ''}` : `gen${gen}`;
+			if (table?.[tableKey]) {
+				table = table[tableKey];
+			}
+			if (!table) return pokemon.tier;
 		}
-		if (!table) return pokemon.tier;
 
 		let id = pokemon.id;
 		if (id in table.overrideTier) {
@@ -1731,14 +1738,27 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		let sketchMoves: string[] = [];
 		let sketch = false;
 		let gen = `${dex.gen}`;
+
 		let lsetTable = BattleTeambuilderTable;
-		if (this.formatType?.startsWith('bdsp')) lsetTable = lsetTable['gen8bdsp'];
-		if (this.formatType === 'letsgo') lsetTable = lsetTable['gen7letsgo'];
-		if (this.formatType === 'bw1') lsetTable = lsetTable['gen5bw1'];
-		if (this.formatType === 'rs') lsetTable = lsetTable['gen3rs'];
-		if (this.formatType?.startsWith('ssdlc1')) lsetTable = lsetTable['gen8dlc1'];
-		if (this.formatType?.startsWith('predlc')) lsetTable = lsetTable['gen9predlc'];
-		if (this.formatType?.startsWith('svdlc1')) lsetTable = lsetTable['gen9dlc1'];
+
+		// injecting custom mods we know don't pair with default implementation :)
+		if (this.dex.modid !== `gen${Dex.gen}` && window.AvailableCustomMods?.includes(this.dex.modid)) {
+			if (!window.BattleTeambuilderTable[this.dex.modid]) {
+				Dex.loadModData(this.dex.modid); // Ensure that it is loaded. Yeah I do this a lot I'm not about to have
+				// Missing mod data in memory.
+			}
+			lsetTable = window.BattleTeambuilderTable[this.dex.modid];
+		}
+		else {
+			if (this.formatType?.startsWith('bdsp')) lsetTable = lsetTable['gen8bdsp'];
+			if (this.formatType === 'letsgo') lsetTable = lsetTable['gen7letsgo'];
+			if (this.formatType === 'bw1') lsetTable = lsetTable['gen5bw1'];
+			if (this.formatType === 'rs') lsetTable = lsetTable['gen3rs'];
+			if (this.formatType?.startsWith('ssdlc1')) lsetTable = lsetTable['gen8dlc1'];
+			if (this.formatType?.startsWith('predlc')) lsetTable = lsetTable['gen9predlc'];
+			if (this.formatType?.startsWith('svdlc1')) lsetTable = lsetTable['gen9dlc1'];
+		}
+
 		while (learnsetid) {
 			let learnset = lsetTable.learnsets[learnsetid];
 			if (learnset) {
