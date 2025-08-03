@@ -64,6 +64,7 @@
 
 
 
+
 var PSPrefsDefaults={};var
 
 
@@ -1881,7 +1882,7 @@ _this1=_PSModel.call(this)||this;_this1.down=false;_this1.prefs=new PSPrefs();_t
 
 _this1.mainmenu=_this1.addRoom({
 id:'',
-title:".ts title :)"
+title:"Modded Home"
 });
 
 _this1.addRoom({
@@ -2037,7 +2038,71 @@ update=function update(){
 this.updateLayout();
 _PSModel.prototype.update.call(this);
 };_proto7.
+
+handleCustomGroupsMessage=function handleCustomGroupsMessage(data){
+if(!data.startsWith('|customgroups|'))return false;
+console.debug("pre parsing:",data);
+try{
+var nlIndex=data.indexOf('\n');
+if(nlIndex>0){
+
+this.receive(data.substr(nlIndex+1));
+}
+
+var groupsData=data.slice(14,nlIndex>0?nlIndex:undefined);
+this.parseGroups(groupsData);
+return true;
+}catch(e){return false;}
+
+};_proto7.
+
+parseGroups=function parseGroups(groupsList){
+var data=null;
+try{
+data=JSON.parse(groupsList);
+}catch(e){
+return;
+}
+if(!data)return;
+console.debug("post-parsing:",data);
+console.debug(this.server.groups);
+
+var groups={};
+
+for(var i=0;i<data.length;i++){
+var entry=data[i];
+console.debug("entry: ",entry);
+if(!entry)continue;
+
+var symbol=entry.symbol||' ';
+var groupName=entry.name;
+var groupType=entry.type||'normal';
+
+
+if(groupType==='normal'&&!this.server.defaultGroup.order){
+this.server.defaultGroup.order=i+0.5;
+}
+if(!groupName){
+this.server.defaultGroup={order:i+1};
+}
+
+groups[symbol]={
+name:groupName?BattleLog.escapeHTML(groupName+' ('+symbol+')'):undefined,
+type:groupType,
+order:i+1
+};
+}
+
+this.server.groups=groups;
+console.debug("Done!",this.server.groups);
+};_proto7.
+
 receive=function receive(msg){var _room2;
+
+if(this.handleCustomGroupsMessage(msg)){
+return;
+}
+
 msg=msg.endsWith('\n')?msg.slice(0,-1):msg;
 var roomid='';
 if(msg.startsWith('>')){

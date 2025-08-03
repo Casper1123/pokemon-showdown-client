@@ -636,8 +636,8 @@ TeamGenerator=require(Dex.forFormat(format).dataDir+'/cg-teams')["default"];
 TeamGenerator=require("../data/mods/gen9ssb/random-teams")["default"];
 }else if(mod==='ccapm2024'){
 TeamGenerator=require("../data/mods/ccapm2024/random-teams")["default"];
-}else if(mod==='vaporemons'){
-TeamGenerator=require("../data/mods/vaporemons/random-teams")["default"];
+}else if(mod==='balls'){
+TeamGenerator=require("../data/mods/balls/random-teams")["default"];
 }else if(formatID.includes('gen9babyrandombattle')){
 TeamGenerator=require("../data/random-battles/gen9baby/teams")["default"];
 }else if(formatID.includes('gen9randombattle')&&(_format$ruleTable=format.ruleTable)!=null&&_format$ruleTable.has('+pokemontag:cap')){

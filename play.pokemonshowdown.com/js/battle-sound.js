@@ -82,6 +82,7 @@ if(progress>this.loopend-1000){
 this.sound.currentTime-=(this.loopend-this.loopstart)/1000;
 }
 
+
 this.timer=setTimeout(function(){
 _this.updateTime();
 },Math.max(this.loopend-progress,1));

@@ -886,11 +886,18 @@ learnsetid=this.nextLearnsetid(learnsetid,speciesid,true);
 }
 return false;
 };_proto2.
-getTier=function getTier(pokemon){var _table;
+getTier=function getTier(pokemon){var _window$AvailableCust;
 if(this.formatType==='metronome'){
 return pokemon.num>=0?String(pokemon.num):pokemon.tier;
 }
 var table=window.BattleTeambuilderTable;
+
+if((_window$AvailableCust=window.AvailableCustomMods)!=null&&_window$AvailableCust.includes(this.dex.modid)){
+if(!window.BattleTeambuilderTable[this.dex.modid]){
+Dex.loadModData(this.dex.modid);
+}
+table=window.BattleTeambuilderTable[this.dex.modid];
+}else{var _table;
 var gen=this.dex.gen;
 var tableKey=this.formatType==='doubles'?"gen"+gen+"doubles":
 this.formatType==='letsgo'?'gen7letsgo':
@@ -909,12 +916,12 @@ this.formatType==='svdlc1'?'gen9dlc1':
 this.formatType==='svdlc1doubles'?'gen9dlc1doubles':
 this.formatType==='svdlc1natdex'?'gen9dlc1natdex':
 this.formatType==='natdex'?"gen"+gen+"natdex":
-this.formatType==='stadium'?"gen"+gen+"stadium"+(gen>1?gen:''):"gen"+
-gen;
+this.formatType==='stadium'?"gen"+gen+"stadium"+(gen>1?gen:''):"gen"+gen;
 if((_table=table)!=null&&_table[tableKey]){
 table=table[tableKey];
 }
 if(!table)return pokemon.tier;
+}
 
 var id=pokemon.id;
 if(id in table.overrideTier){
@@ -1714,7 +1721,7 @@ return!BattleMoveSearch.BAD_STRONG_MOVES.includes(id);
 
 
 
-getBaseResults=function getBaseResults(){var _this$formatType11,_this$formatType12,_this$formatType13,_this$formatType14;
+getBaseResults=function getBaseResults(){var _window$AvailableCust2;
 if(!this.species)return this.getDefaultResults();
 var dex=this.dex;
 var species=dex.species.get(this.species);
@@ -1731,7 +1738,18 @@ var moves=[];
 var sketchMoves=[];
 var sketch=false;
 var gen=""+dex.gen;
+
 var lsetTable=BattleTeambuilderTable;
+
+
+if(this.dex.modid!=="gen"+Dex.gen&&(_window$AvailableCust2=window.AvailableCustomMods)!=null&&_window$AvailableCust2.includes(this.dex.modid)){
+if(!window.BattleTeambuilderTable[this.dex.modid]){
+Dex.loadModData(this.dex.modid);
+
+}
+lsetTable=window.BattleTeambuilderTable[this.dex.modid];
+}else
+{var _this$formatType11,_this$formatType12,_this$formatType13,_this$formatType14;
 if((_this$formatType11=this.formatType)!=null&&_this$formatType11.startsWith('bdsp'))lsetTable=lsetTable['gen8bdsp'];
 if(this.formatType==='letsgo')lsetTable=lsetTable['gen7letsgo'];
 if(this.formatType==='bw1')lsetTable=lsetTable['gen5bw1'];
@@ -1739,6 +1757,8 @@ if(this.formatType==='rs')lsetTable=lsetTable['gen3rs'];
 if((_this$formatType12=this.formatType)!=null&&_this$formatType12.startsWith('ssdlc1'))lsetTable=lsetTable['gen8dlc1'];
 if((_this$formatType13=this.formatType)!=null&&_this$formatType13.startsWith('predlc'))lsetTable=lsetTable['gen9predlc'];
 if((_this$formatType14=this.formatType)!=null&&_this$formatType14.startsWith('svdlc1'))lsetTable=lsetTable['gen9dlc1'];
+}
+
 while(learnsetid){
 var learnset=lsetTable.learnsets[learnsetid];
 if(learnset){

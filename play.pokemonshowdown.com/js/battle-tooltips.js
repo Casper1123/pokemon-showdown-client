@@ -248,6 +248,7 @@ var target=e.currentTarget;
 _this.showTooltip(target);
 var isClick=e.type==='mousedown'&&target.tagName==='BUTTON';
 
+
 BattleTooltips.longTapTimeout=setTimeout(function(){
 BattleTooltips.longTapTimeout=0;
 _this.lockTooltip();
