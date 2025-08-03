@@ -1122,6 +1122,7 @@ export class Battle {
 	id = '';
 	/** used to forward some information to the room in the old client */
 	roomid = '';
+	formatId: string = '';  // Used to maintain information about modded rooms.
 	hardcoreMode = false;
 	ignoreNicks = !!Dex.prefs('ignorenicks');
 	ignoreOpponent = !!Dex.prefs('ignoreopp');
@@ -1141,6 +1142,7 @@ export class Battle {
 		$logFrame?: JQuery,
 		id?: ID,
 		log?: string[] | string | null,
+		formatId?: string | null,
 		paused?: boolean,
 		isReplay?: boolean,
 		debug?: boolean,
@@ -1149,6 +1151,7 @@ export class Battle {
 		autoresize?: boolean,
 	} = {}) {
 		this.id = options.id || '';
+		this.formatId = options.formatId || '';
 
 		if (options.$frame && options.$logFrame) {
 			this.scene = new BattleScene(this, options.$frame, options.$logFrame);
@@ -3726,8 +3729,16 @@ export class Battle {
 			break;
 		}
 		case 'gen': {
+			// This stupid case keeps overwriting the client-side mod. Thanks.
+			// Setting the dex to the one we need instead of running forGen to avoid getting a non-modded mod.
 			this.gen = parseInt(args[1], 10);
-			this.dex = Dex.forGen(this.gen);
+			if (window.FormatModMapping && window.FormatModMapping[this.formatId] && this.formatId) {
+				const modId = window.FormatModMapping[this.formatId];
+				this.dex =  Dex.mod(modId);
+			} else {
+				this.dex = Dex.forGen(this.gen);
+			}
+
 			this.scene.updateGen();
 			this.log(args);
 			break;

@@ -347,12 +347,21 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 	override componentDidMount() {
 		const room = this.props.room;
 		const $elem = $(this.base!);
+
+		let formatId = room.id as string;
+		if (room.id.startsWith('battle-')) {
+			const idChunks = room.id.slice(7).split('-');
+			formatId = idChunks[0];
+		}
+
 		const battle = (room.battle ||= new Battle({
 			id: room.id as any,
 			$frame: $elem.find('.battle'),
 			$logFrame: $elem.find('.battle-log'),
 			log: room.backlog?.map(args => '|' + args.join('|')),
+			formatId: formatId
 		}));
+
 		const scene = battle.scene as BattleScene;
 		room.backlog = null;
 		room.log ||= scene.log;
@@ -361,7 +370,17 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		scene.tooltips.listen(scene.log.elem);
 		super.componentDidMount();
 		battle.seekTurn(Infinity);
+
+		if (window.FormatModMapping && window.FormatModMapping[formatId]) {
+			const modId = window.FormatModMapping[formatId];
+			battle.dex = Dex.mod(modId);
+			console.debug('Battle dex set to custom mod:', battle.dex.modid, 'for format:', formatId);
+		} else {
+			battle.dex = Dex.forFormat(formatId);
+			console.debug('Using default dex for format:', formatId);
+		}
 		battle.subscribe(() => this.forceUpdate());
+
 	}
 	battleHeight = 360;
 	updateLayout() {
