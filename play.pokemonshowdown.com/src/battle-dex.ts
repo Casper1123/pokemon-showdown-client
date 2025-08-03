@@ -34,7 +34,7 @@ import {
 	type Type,
 } from "./battle-dex-data";
 import type {Teams} from "./battle-teams";
-import {Config} from "./client-main";
+import {Config, PS} from "./client-main";
 
 export declare namespace Dex {
 	/* eslint-disable @typescript-eslint/no-shadow */
@@ -307,8 +307,8 @@ export const Dex = new class implements ModdedDex {
 
 		try {
 			const xhr = new XMLHttpRequest();
-			// const serverUrl = `http://${PS.server.host}:${PS.server.port}`;
-			const serverUrl = "http://localhost:8000";  // For figuring out why it's not working during testing.
+			const serverUrl = `http://${PS.server.host}:${PS.server.port}`;
+			// const serverUrl = "http://localhost:8000";  // For figuring out why it's not working during testing.
 			console.log(`Attempting to fetch moddata for ${modId} from ${serverUrl}`)
 			xhr.open('GET', `${serverUrl}/data/moddata?mod=${modId}`, false); // false = synchronous. Intentional.
 			xhr.send();
@@ -503,8 +503,8 @@ export const Dex = new class implements ModdedDex {
 		try {
 			console.log('Initializing custom-mods. Requires connection to server with the right endpoint infrastructure.');
 
-			// const serverUrl = `http://${PS.server.host}:${PS.server.port}`;
-			const serverUrl = "http://localhost:8000";  // For figuring out why it's not working during testing.
+			const serverUrl = `http://${PS.server.host}:${PS.server.port}`;
+			// const serverUrl = "http://localhost:8000";  // For figuring out why it's not working during testing.
 			const availableModsXhr = new XMLHttpRequest();
 			console.log(`Attempting to fetch availablemods from ${serverUrl}`)
 			availableModsXhr.open('GET', `${serverUrl}/data/availablemods`, false); // false = synchronous
