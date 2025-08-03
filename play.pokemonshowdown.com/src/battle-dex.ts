@@ -345,7 +345,7 @@ export const Dex = new class implements ModdedDex {
 	 */
 	integrateModData(modId: ID, modData: any, depth: number) {
 		// Recursively load parent if specified. Skips if it's the base gen; this is handled below.
-		console.debug(`Mod: ${modId} has parent ${modData.parentMod}. Dex gen is '${Dex.gen}'`);
+		console.debug(`Mod: ${modId} has parent ${modData.parentMod}.`);
 
 		if (modData.parentMod && modData.parentMod !== `gen${Dex.gen}`) {
 			console.debug(`Preparing parent data of mod ${modData.parentMod} for ${modId}`);
@@ -465,7 +465,6 @@ export const Dex = new class implements ModdedDex {
 		console.debug(`Merging learnset entries.`);
 		for (const mon in modData.learnsets) {
 			const monLearnsetData = modData.learnsets[mon];
-			console.debug(`Applying modification for learnset of  ${mon}.`);
 			if (!window.BattleTeambuilderTable[modId].learnsets[mon]) {
 				window.BattleTeambuilderTable[modId].learnsets[mon] = {};
 			}
@@ -586,6 +585,14 @@ export const Dex = new class implements ModdedDex {
 		return parseInt(formatid.charAt(3)) || Dex.gen;
 	}
 	forFormat(format: string) {
+
+		// Inject custom format. I really hope this works ;-;
+		const formatId = toID(format).slice(4);
+		if (window.FormatModMapping && window.FormatModMapping[formatId]) {
+			const modId = window.FormatModMapping[formatId];
+			return Dex.mod(modId);
+		}
+
 		let dex = Dex.forGen(Dex.formatGen(format));
 
 		const formatid = toID(format).slice(4);
