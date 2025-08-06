@@ -389,7 +389,8 @@ export const Dex = new class implements ModdedDex {
 				overrideAbilityData: {},
 				overrideItemData: {},
 				learnsets: {},
-				overrideTier: {}
+				overrideTier: {},
+				overrideTypeChart: {},
 			};
 		}
 
@@ -491,6 +492,20 @@ export const Dex = new class implements ModdedDex {
 				}
 			}
 		}
+
+		// Merge type chart changes.
+		console.debug("Merging typechart entries.");
+		if (!window.BattleTeambuilderTable[modId].overrideTypeChart) {
+			window.BattleTeambuilderTable[modId].overrideTypeChart = {};
+		}
+		// if (!window.BattleTeambuilderTable[modId].removeType) {window.BattleTeambuilderTable[modId].removeType = {};} // Not currently supported, but might be in the future.
+
+		for (const typeId in modData.typechart) {
+			const typeData = modData.typechart[typeId];
+			// Inherit is currently discarded, but might be supported in the future.
+			window.BattleTeambuilderTable[modId].overrideTypeChart[typeId] = typeData;
+		}
+
 		console.debug(`Implemented overrides from server on mod ${modId} with ${Object.keys(window.BattleTeambuilderTable[modId].overrideSpeciesData).length} species & ${Object.keys(window.BattleTeambuilderTable[modId].learnsets).length} learnsets.`);
 	}
 
