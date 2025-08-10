@@ -47,6 +47,7 @@ export class MainMenuRoom extends PSRoom {
 	searchSent = false;
 	search: { searching: string[], games: Record<RoomID, string> | null } = { searching: [], games: null };
 	disallowSpectators: boolean | null = PS.prefs.disallowspectators;
+	lastChallenged: number | null = null;
 	constructor(options: RoomOptions) {
 		super(options);
 		if (this.backlog) {
@@ -350,7 +351,8 @@ export class MainMenuRoom extends PSRoom {
 			PS.addRoom({
 				id: roomid,
 				args: { pmTarget },
-			}, true);
+				autofocus: false,
+			});
 			room = PS.rooms[roomid] as ChatRoom;
 		} else {
 			room.updateTarget(pmTarget);
@@ -447,7 +449,7 @@ class NewsPanel extends PSRoomPanel {
 	change = (ev: Event) => {
 		const target = ev.currentTarget as HTMLInputElement;
 		if (target.value === '1') {
-			document.cookie = "preactalpha=1; expires=Thu, 1 Aug 2025 12:00:00 UTC; path=/";
+			document.cookie = "preactalpha=1; expires=Thu, 1 Sep 2025 12:00:00 UTC; path=/";
 		} else {
 			document.cookie = "preactalpha=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 		}
@@ -791,8 +793,15 @@ export class TeamForm extends preact.Component<{
 	submit = (ev: Event, validate?: 'validate') => {
 		ev.preventDefault();
 		const format = this.format;
-		const teamKey = this.base!.querySelector<HTMLButtonElement>('button[name=team]')!.value;
+		const teamElement = this.base!.querySelector<HTMLButtonElement>('button[name=team]');
+		const teamKey = teamElement!.value;
 		const team = teamKey ? PS.teams.byKey[teamKey] : undefined;
+		if (!window.BattleFormats[toID(format)]?.team && !team) {
+			PS.alert('You need to go into the Teambuilder and build a team for this format.', {
+				parentElem: teamElement!,
+			});
+			return;
+		}
 		PS.teams.loadTeam(team).then(() => {
 			(validate === 'validate' ? this.props.onValidate : this.props.onSubmit)?.(ev, format, team);
 		});

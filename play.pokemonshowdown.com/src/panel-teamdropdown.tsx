@@ -289,7 +289,12 @@ export class PSTeambuilder {
 	}
 }
 
-export function TeamBox(props: { team: Team | null, noLink?: boolean, button?: boolean }) {
+export function TeamBox(props: {
+	team: Team | null,
+	noLink?: boolean,
+	button?: boolean,
+	onClick?: () => void,
+}) {
 	const team = props.team;
 	let contents;
 	if (team) {
@@ -303,7 +308,7 @@ export function TeamBox(props: { team: Team | null, noLink?: boolean, button?: b
 			<em>(empty {team.isBox ? 'box' : 'team'})</em>
 		);
 		let format = team.format as string;
-		if (format.startsWith(`gen${Dex.gen}`)) format = format.slice(4);
+		if (format.startsWith(Dex.modid)) format = format.slice(4);
 		format = (format ? `[${format}] ` : ``) + (team.folder ? `${team.folder}/` : ``);
 		contents = [
 			<strong>{team.isBox && <i class="fa fa-archive"></i>} {format && <span>{format}</span>}{team.name}</strong>,
@@ -325,7 +330,10 @@ export function TeamBox(props: { team: Team | null, noLink?: boolean, button?: b
 			{contents}
 		</div>;
 	}
-	return <a href={`team-${team ? team.key : ''}`} class={className} draggable onDragStart={PSTeambuilder.dragStart}>
+	return <a
+		href={`team-${team ? team.key : ''}`} class={className} draggable
+		onDragStart={PSTeambuilder.dragStart} onClick={props.onClick}
+	>
 		{contents}
 	</a>;
 }

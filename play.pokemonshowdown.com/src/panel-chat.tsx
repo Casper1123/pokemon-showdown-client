@@ -314,6 +314,7 @@ export class ChatRoom extends PSRoom {
 		'reject'(target) {
 			this.challenged = null;
 			this.update(null);
+			this.sendDirect(`/reject ${target}`);
 		},
 		'clear'() {
 			this.log?.reset();
@@ -438,6 +439,7 @@ export class ChatRoom extends PSRoom {
 		'play'() {
 			if (!this.battle) return this.add('|error|You are not in a battle');
 			if (this.battle.atQueueEnd) {
+				if (this.battle.ended) this.battle.isReplay = true;
 				this.battle.reset();
 			}
 			this.battle.play();
@@ -1137,6 +1139,16 @@ class ChatPanel extends PSRoomPanel<ChatRoom> {
 		return false;
 	};
 	makeChallenge = (e: Event, format: string, team?: Team) => {
+		const elem = e.target as HTMLElement;
+		const now = Date.now();
+		const lastChallenged = PS.mainmenu.lastChallenged || 0;
+		if (now - lastChallenged < 5_000) {
+			PS.alert(`Please wait 5 seconds before challenging again.`, {
+				parentElem: elem,
+			});
+			return;
+		}
+
 		PS.requestNotifications();
 		const room = this.props.room;
 		const packedTeam = team ? team.packedTeam : '';
@@ -1149,6 +1161,7 @@ class ChatPanel extends PSRoomPanel<ChatRoom> {
 			formatName: format,
 			teamFormat: format,
 		};
+		PS.mainmenu.lastChallenged = now;
 		room.update(null);
 	};
 	acceptChallenge = (e: Event, format: string, team?: Team) => {
