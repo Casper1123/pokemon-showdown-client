@@ -149,6 +149,11 @@ process.stdout.write("Updating cachebuster and URLs... ");
 const URL_REGEX = /(src=|href=|linkStyle\()"(.*?)(\?[a-z0-9]*?)?"/g;
 
 function addCachebuster(_, attr, url, urlQuery) {
+	// Modded injection into build process; Any url containing these contents should be relayed to official sites;
+	if (url.includes('pokedex-mini.js') || url.includes('pokedex-mini-bw.js')) {
+		return attr + '"' + url + (urlQuery || '') + '"';
+	}
+	// End of injection.
 	url = url.replace('/replay.pokemonshowdown.com/', '/' + routes.replays + '/');
 	url = url.replace('/dex.pokemonshowdown.com/', '/' + routes.dex + '/');
 	url = url.replace('/play.pokemonshowdown.com/', '/' + routes.client + '/');
