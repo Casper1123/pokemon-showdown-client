@@ -9,7 +9,7 @@ if (preg_match('/^([a-z0-9-_\.]*?)\.psim\.us$/', $host, $m)) {
 	if ($config['host'] === 'logs') die; // not authorised
 	if ($config['host'] === 'sim') die; // not authorised
 } else if ($host === $psconfig['routes']['client']) {
-	$config['host'] = 'showdown';
+	// This is an unofficial client. Things down below need to be handled.
 } else {
 	die; // not authorised
 }
