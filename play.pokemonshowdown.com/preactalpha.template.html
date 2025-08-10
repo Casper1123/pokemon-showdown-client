@@ -97,7 +97,6 @@ https://psim.us/dev
 	<script defer src="/src/battle-log-misc.js?"></script>
 	<script defer src="/js/server/chat-formatter.js?"></script>
 	<script defer src="/js/battle-log.js?"></script>
-
 	<script defer src="/js/miniedit.js?"></script>
 	<script defer src="/js/panel-chat-tournament.js?"></script>
 	<script defer src="/js/panel-chat.js?"></script>
@@ -131,8 +130,15 @@ https://psim.us/dev
 	<script defer src="/js/battle-team-editor.js?"></script>
 	<script defer src="/js/panel-teambuilder-team.js?"></script>
 
-	<script defer src="/data/pokedex-mini.js?"></script>
-	<script defer src="/data/pokedex-mini-bw.js?"></script>
+	<script>
+		function loadRemoteData(src) {
+			var scriptEl = document.createElement('script');
+			scriptEl.src = src.replace(/.*\/(data|js)\//g, 'https://play.pokemonshowdown.com/$1/');
+			document.head.appendChild(scriptEl);
+		}
+	</script>
+	<script defer src="/data/pokedex-mini.js?" onerror="loadRemoteData(this.src)"></script>
+	<script defer src="/data/pokedex-mini-bw.js?" onerror="loadRemoteData(this.src)"></script>
 	<script defer src="/data/typechart.js?"></script>
 	<script defer src="/data/aliases.js?"></script>
 	<script defer src="/js/lib/d3.v3.min.js"></script>
