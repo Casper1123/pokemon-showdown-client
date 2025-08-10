@@ -19,7 +19,7 @@ Config.whitelist = [
 // `defaultserver` specifies the server to use when the domain name in the
 // address bar is `Config.routes.client`.
 Config.defaultserver = {
-	id: 'showdownserver.casper1123',
+	id: 'showdown',
 	host: 'showdownserver.casper1123.nl',
 	port: 443,
 	httpport: 443,
