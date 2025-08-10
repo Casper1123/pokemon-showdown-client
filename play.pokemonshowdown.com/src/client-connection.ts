@@ -225,6 +225,7 @@ export class PSStorage {
 	static loader?: () => void;
 	static loaded: Promise<void> | boolean = false;
 	static init(): void | Promise<void> {
+		// Todo: find potential issues going on over here! This is supposed to be called, but nothing is really happening.
 		if (this.loaded) {
 			if (this.loaded === true) return;
 			return this.loaded;
@@ -247,6 +248,8 @@ export class PSStorage {
 		window.addEventListener('message', this.onMessage);
 
 		if (document.location.hostname !== Config.routes.client) {
+			// Todo: this is supposedly called, but something goes wrong here.
+			console.log("Called for crossdomain. document location hostname:", document.location.hostname, "Config routes client:", Config.routes.client);
 			const iframe = document.createElement('iframe');
 			iframe.src = 'https://' + Config.routes.client + '/crossdomain.php?host=' +
 				encodeURIComponent(document.location.hostname) +
@@ -254,6 +257,7 @@ export class PSStorage {
 				'&protocol=' + encodeURIComponent(document.location.protocol);
 			iframe.style.display = 'none';
 			document.body.appendChild(iframe);
+			console.log("Appended iframe. Source:", iframe.src)
 		} else {
 			Config.server ||= Config.defaultserver;
 			$(
