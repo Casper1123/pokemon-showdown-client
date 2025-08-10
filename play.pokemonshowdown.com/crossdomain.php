@@ -10,6 +10,7 @@ if (preg_match('/^([a-z0-9-_\.]*?)\.psim\.us$/', $host, $m)) {
 	if ($config['host'] === 'sim') die; // not authorised
 } else if ($host === $psconfig['routes']['client']) {
 	// This is an unofficial client. Things down below need to be handled.
+	$config['host'] = $host.replace(".", "-")
 } else {
 	die; // not authorised
 }
