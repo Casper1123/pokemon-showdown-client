@@ -380,8 +380,19 @@ export class PSStorage {
 	}
 	static postCrossOriginMessage = function (data: string) {
 		try {
+			let targetOrigin = PSStorage.origin;
+
+			// If it's a POST or GET request. See crossprotocol file for information regarding starting characters.
+			if (data.startsWith('S') || data.startsWith('R')) {
+				const requestData = JSON.parse(data.substr(1));
+				const url = requestData[0];
+				if (url && url.includes('/action.php')) {
+					targetOrigin = 'https://play.pokemon' + 'showdown.com'; // Splitting string to avoid build process replacing it.
+				}
+			}
+
 			// I really hope this is a Chrome bug that this can fail
-			return PSStorage.frame!.postMessage(data, PSStorage.origin);
+			return PSStorage.frame!.postMessage(data, targetOrigin);
 		} catch {
 		}
 		return false;
