@@ -461,22 +461,10 @@ class NewsPanel extends PSRoomPanel {
 		const cookieSet = document.cookie.includes('preactalpha=1');
 		return <PSPanelWrapper room={this.props.room} fullSize scrollable>
 			<div class="construction">
-				This is the client rewrite beta test.
-				<form>
-					<label class="checkbox">
-						<input type="radio" name="preactalpha" value="1" onChange={this.change} checked={cookieSet} /> {}
-						Use Rewrite always
-					</label>
-					<label class="checkbox">
-						<input type="radio" name="preactalpha" value="0" onChange={this.change} checked={!cookieSet} /> {}
-						Use Rewrite with URL
-					</label>
-					<label class="checkbox">
-						<input type="radio" name="preactalpha" value="leave" onChange={this.change} /> {}
-						Back to the old client
-					</label>
-				</form>
-				Provide feedback in <a href="development" style="color:black">the Dev chatroom</a>.
+				This is a custom modification of the Pokémon Showdown! beta test client.
+				Source code can be found <a href="https://github.com/Casper1123/pokemon-showdown-client">for this client</a> and <a href="https://github.com/smogon/pokemon-showdown-client">the vanilla one</a>.
+				If you are using this through my website, then we have a <a href="https://discord.gg/NC2pwmVRQ7">discord server</a> related to the mods we host.
+				If you are from the Showdown team and want to tell me I did things incorrectly and I should stop it, please contact me through either Discord or Github.
 			</div>
 			<div class="readable-bg" dangerouslySetInnerHTML={{ __html: PS.newsHTML }}></div>
 		</PSPanelWrapper>;
