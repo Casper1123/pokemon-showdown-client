@@ -77,3 +77,6 @@ if (full) {
 		console.error(e);
 	}
 }
+
+// Also move copy of config file for clients to load.
+fs.copyFileSync("config/config.js", "play.pokemonshowdown.com/config/config.js")
