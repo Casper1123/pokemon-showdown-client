@@ -294,7 +294,7 @@ class PSPrefs extends PSStreamModel<string | null> {
 			}
 			let rooms = autojoin[PS.server.id] || '';
 			for (let title of rooms.split(",")) {
-				PS.addRoom({ id: toID(title) as string as RoomID, title, connected: true }, true);
+				PS.addRoom({ id: toID(title) as string as RoomID, title, connected: true, autofocus: false });
 			};
 			const cmd = `/autojoin ${rooms}`;
 			if (PS.connection?.queue.includes(cmd)) {
@@ -323,16 +323,21 @@ export interface Team {
 	name: string;
 	format: ID;
 	folder: string;
-	/** note that this can be wrong if .uploaded?.loaded === false */
+	/** Note that this can be wrong if `.uploaded?.notLoaded` */
 	packedTeam: string;
 	/** The icon cache must be cleared (to `null`) whenever `packedTeam` is modified */
 	iconCache: preact.ComponentChildren;
+	/** Used in roomids (`team-[key]`) to refer to the team. Always persists within
+	  * a single session, but not always between refreshes. As long as a team still
+		* exists, pointers to a Team are equivalent to a key. */
 	key: string;
-	/** `uploaded` will only exist if you're logged into the correct account. otherwise teamid is still tracked */
 	isBox: boolean;
+	/** uploaded team ID. will not exist for teams that are not uploaded. tracked locally */
 	teamid?: number;
+	/** `uploaded` will only exist if you're logged into the correct account. otherwise teamid is still tracked */
 	uploaded?: {
 		teamid: number,
+		/** Promise = loading. */
 		notLoaded: boolean | Promise<void>,
 		/** password, if private. null = public, undefined = unknown, not loaded yet */
 		private?: string | null,
@@ -1047,6 +1052,10 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 	}
 	subtleNotify() {
 		if (PS.isVisible(this)) return;
+		const room = PS.rooms[this.id] as ChatRoom;
+		const lastSeenTimestamp = PS.prefs.logtimes?.[PS.server.id]?.[this.id] || 0;
+		const lastMessageTime = +(room.lastMessage?.[1] || 0);
+		if ((lastMessageTime - room.timeOffset) <= lastSeenTimestamp) return;
 		this.isSubtleNotifying = true;
 		PS.update();
 	}
@@ -1095,8 +1104,14 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 			this.title = args[1];
 			PS.update();
 			break;
+		} case 'notify': {
+			const [, title, body, toHighlight] = args;
+			if (toHighlight && !ChatRoom.getHighlight(toHighlight, this.id)) break;
+			this.notify({ title, body });
+			break;
 		} case 'tempnotify': {
 			const [, id, title, body, toHighlight] = args;
+			if (toHighlight && !ChatRoom.getHighlight(toHighlight, this.id)) break;
 			this.notify({ title, body, id });
 			break;
 		} case 'tempnotifyoff': {
@@ -1156,7 +1171,7 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 			const room = PS.rooms[roomid];
 			const battle = (room as BattleRoom)?.battle;
 
-			if (room?.type === "battle" && !battle.ended && battle.mySide.id === PS.user.userid) {
+			if (room?.type === "battle" && !battle.ended && battle.mySide.id === PS.user.userid && !battle.isReplay) {
 				PS.join("forfeitbattle" as RoomID, { parentElem: elem });
 				return;
 			}
@@ -1888,14 +1903,16 @@ export const PS = new class extends PSModel {
 		this.addRoom({
 			id: 'rooms' as RoomID,
 			title: "Rooms",
-		}, true);
+			autofocus: false,
+		});
 		this.rightPanel = this.rooms['rooms']!;
 
 		if (this.newsHTML) {
 			this.addRoom({
 				id: 'news' as RoomID,
 				title: "News",
-			}, true);
+				autofocus: false,
+			});
 		}
 
 		// Create rooms before /autojoin is sent to the server
@@ -1906,7 +1923,7 @@ export const PS = new class extends PSModel {
 			}
 			let rooms = autojoin[this.server.id] || '';
 			for (let title of rooms.split(",")) {
-				this.addRoom({ id: toID(title) as unknown as RoomID, title, connected: true }, true);
+				this.addRoom({ id: toID(title) as unknown as RoomID, title, connected: true, autofocus: false });
 			}
 		}
 
@@ -2126,7 +2143,11 @@ export const PS = new class extends PSModel {
 						id: roomid2,
 						type,
 						connected: true,
-					}, roomid === 'staff' || roomid === 'upperstaff');
+						autofocus: roomid !== 'staff' && roomid !== 'upperstaff',
+						// probably the only use for `autoclosePopups: false`.
+						// (the server sometimes sends a popup error message and a new room at the same time)
+						autoclosePopups: false,
+					});
 				} else {
 					room.type = type;
 					this.updateRoomTypes();
@@ -2440,8 +2461,15 @@ export const PS = new class extends PSModel {
 	}
 	/**
 	 * Low-level add room. You usually want `join`.
+	 *
+	 * By default, focuses the room after adding it. (`options.autofocus = false` to suppress)
+	 *
+	 * By default, when autofocusing, closes popups that aren't the parent of the added room.
+	 * (`options.autoclosePopups = false` to suppress)
 	 */
-	addRoom(options: RoomOptions, noFocus = false) {
+	addRoom(options: RoomOptions & { autoclosePopups?: boolean, autofocus?: boolean }) {
+		options.autofocus ??= true;
+		options.autoclosePopups ??= options.autofocus;
 		// support hardcoded PM room-IDs
 		if (options.id.startsWith('challenge-')) {
 			this.requestNotifications();
@@ -2466,7 +2494,7 @@ export const PS = new class extends PSModel {
 			preexistingRoom = this.rooms[options.id];
 		}
 		if (preexistingRoom) {
-			if (!noFocus) {
+			if (options.autofocus) {
 				if (options.args?.challengeMenuOpen) {
 					(preexistingRoom as ChatRoom).openChallenge();
 				}
@@ -2474,7 +2502,7 @@ export const PS = new class extends PSModel {
 			}
 			return preexistingRoom;
 		}
-		if (!noFocus) {
+		if (options.autoclosePopups) {
 			let parentPopup = parentRoom;
 			if ((options.parentElem as HTMLButtonElement)?.name === 'closeRoom') {
 				// We want to close all popups above the parent element.
@@ -2490,13 +2518,13 @@ export const PS = new class extends PSModel {
 		this.rooms[room.id] = room;
 		const location = room.location;
 		room.location = null!;
-		this.moveRoom(room, location, noFocus);
+		this.moveRoom(room, location, !options.autofocus);
 		if (options.backlog) {
 			for (const args of options.backlog) {
 				room.receiveLine(args);
 			}
 		}
-		if (!noFocus) room.focusNextUpdate = true;
+		if (options.autofocus) room.focusNextUpdate = true;
 		return room;
 	}
 	hideRightRoom() {
@@ -2690,6 +2718,7 @@ export const PS = new class extends PSModel {
 		this.closePopupsAbove(null, skipUpdate);
 	}
 	closePopupsAbove(room: PSRoom | null | undefined, skipUpdate?: boolean) {
+		if (!this.popups.length) return;
 		// a while-loop may be simpler, but the loop invariant is very hard to prove
 		// and any bugs (opening a popup while leaving a room) could lead to an infinite loop
 		// a for-loop doesn't have that problem
