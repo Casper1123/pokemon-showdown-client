@@ -19,12 +19,12 @@ Config.whitelist = [
 // `defaultserver` specifies the server to use when the domain name in the
 // address bar is `Config.routes.client`.
 Config.defaultserver = {
-	id: 'showdown',
-	host: 'sim3.psim.us',
+	id: 'showdownserver.casper1123',
+	host: 'showdownserver.casper1123.nl',
 	port: 443,
-	httpport: 8000,
+	httpport: 443,
 	altport: 80,
-	registered: true
+	registered: false
 };
 
 Config.roomsFirstOpenScript = function () {
