@@ -248,7 +248,7 @@ export class PSStorage {
 		window.addEventListener('message', this.onMessage);
 		console.log("Checking for crossdomain:", document.location.hostname !== "play.pokemon" + "showdown.com", document.location.hostname, "play.pokemon" + "showdown.com");
 		// Force check for official server being the host.
-		if (document.location.hostname !== "play.pokemon" + "showdown.com") {
+		if (document.location.hostname !== Config.routes.client) {
 			// Todo: this is supposedly called, but something goes wrong here.
 			console.log("Called for crossdomain. document location hostname:", document.location.hostname, "Config routes client:", Config.routes.client, "compared to", "play.pokemon" + "showdown.com");
 			const iframe = document.createElement('iframe');
@@ -260,10 +260,10 @@ export class PSStorage {
 			document.body.appendChild(iframe);
 			console.log("Appended iframe. Source:", iframe.src)
 		} else {
-			console.log("Failed crossdomain check.");
+			console.log("Failed crossdomain check. Preparing crossprotocol.");
 			Config.server ||= Config.defaultserver;
 			$(
-				`<iframe src="https://${Config.routes.client}/crossprotocol.html?v1.2" style="display: none;"></iframe>`
+				`<iframe src="https://${Config.routes.client}/crossprotocol.html" style="display: none;"></iframe>`
 			).appendTo('body');
 			setTimeout(() => {
 				// HTTPS may be blocked
