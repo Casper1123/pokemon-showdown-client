@@ -410,11 +410,11 @@ export const PSLoginServer = new class {
 		// 	return Promise.resolve(null);
 		// }
 		data.act = act;
-		let url = '/~~' + "showdown" + '/action.php';  // Replaced PS.server.id with "showdown" to force a static server ip.
+		// Fragmented the url here to make sure the build processes don't overwrite it.
+		// I am not going to support unofficial login server.
+		let url = 'https://' + "play.pokemon" + "showdown.com" + '/~~' + "showdown" + '/action.php';  // Replaced PS.server.id with "showdown" to force a static server id.
 		if (location.pathname.endsWith('.html')) {
-			// Fragmented the url here to make sure the build processes don't overwrite it.
-			// I am not going to support unofficial login server.
-			url = 'https://' + "play.pokemon" + "showdown.com" + url;
+
 			if (typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY === 'string') {
 				data.sid = POKEMON_SHOWDOWN_TESTCLIENT_KEY.replace(/%2C/g, ',');
 			}
