@@ -458,7 +458,6 @@ document.location.href="/";
 }
 };return _this2;}_inheritsLoose(NewsPanel,_PSRoomPanel);var _proto2=NewsPanel.prototype;_proto2.
 render=function render(){
-var cookieSet=document.cookie.includes('preactalpha=1');
 return preact.h(PSPanelWrapper,{room:this.props.room,fullSize:true,scrollable:true},
 preact.h("div",{"class":"construction"},"This is a custom modification of the Pok\xE9mon Showdown! beta test client. Source code can be found ",
 

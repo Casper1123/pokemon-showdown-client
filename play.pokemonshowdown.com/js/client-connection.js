@@ -246,12 +246,13 @@ return;
 }
 
 window.addEventListener('message',this.onMessage);
+console.log("Checking for crossdomain:",document.location.hostname!=="play.pokemon"+"showdown.com",document.location.hostname,"play.pokemon"+"showdown.com");
 
-if(document.location.hostname!==Config.routes.client){
+if(document.location.hostname!=="play.pokemon"+"showdown.com"){
 
-console.log("Called for crossdomain. document location hostname:",document.location.hostname,"Config routes client:",Config.routes.client);
+console.log("Called for crossdomain. document location hostname:",document.location.hostname,"Config routes client:",Config.routes.client,"compared to","play.pokemon"+"showdown.com");
 var iframe=document.createElement('iframe');
-iframe.src='https://'+Config.routes.client+'/crossdomain.php?host='+
+iframe.src='https://'+"play.pokemon"+"showdown.com"+'/crossdomain.php?host='+
 encodeURIComponent(document.location.hostname)+
 '&path='+encodeURIComponent(document.location.pathname.substr(1))+
 '&protocol='+encodeURIComponent(document.location.protocol);
@@ -259,6 +260,7 @@ iframe.style.display='none';
 document.body.appendChild(iframe);
 console.log("Appended iframe. Source:",iframe.src);
 }else{var _Config2;
+console.log("Failed crossdomain check.");
 (_Config2=Config).server||(_Config2.server=Config.defaultserver);
 $("<iframe src=\"https://"+
 Config.routes.client+"/crossprotocol.html?v1.2\" style=\"display: none;\"></iframe>"
@@ -400,7 +402,9 @@ rawQuery=function rawQuery(act,data){
 data.act=act;
 var url='/~~'+PS.server.id+'/action.php';
 if(location.pathname.endsWith('.html')){
-url='https://'+Config.routes.client+url;
+
+
+url='https://'+"play.pokemon"+"showdown.com"+url;
 if(typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY==='string'){
 data.sid=POKEMON_SHOWDOWN_TESTCLIENT_KEY.replace(/%2C/g,',');
 }

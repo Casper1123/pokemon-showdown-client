@@ -108,10 +108,10 @@ https://replay.pokemonshowdown.com/gen7randomdoublesbattle-865046831.log
 
 -->
 
-<link rel="stylesheet" href="//pokemonshowdown.com/style/global.css?0.6818465023962621" />
-<link rel="stylesheet" href="//play.pokemonshowdown.com/style/font-awesome.css?0.010388030979736396" />
-<link rel="stylesheet" href="//play.pokemonshowdown.com/style/battle.css?0.3466538137794244" />
-<link rel="stylesheet" href="//play.pokemonshowdown.com/style/utilichart.css?0.6219603741453827" />
+<link rel="stylesheet" href="//pokemonshowdown.com/style/global.css?0.6281946782594381" />
+<link rel="stylesheet" href="//showdown.casper1123.nl/style/font-awesome.css?0.1907486208074607" />
+<link rel="stylesheet" href="//showdown.casper1123.nl/style/battle.css?0.340199444011408" />
+<link rel="stylesheet" href="//showdown.casper1123.nl/style/utilichart.css?0.709165671040829" />
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26211653-1"></script>
@@ -234,7 +234,7 @@ https://replay.pokemonshowdown.com/gen7randomdoublesbattle-865046831.log
 			<li><a class="button cur" href="/">Replay</a></li>
 			<li><a class="button purplebutton" href="//smogon.com/dex/" target="_blank">Strategy</a></li>
 			<li><a class="button nav-last purplebutton" href="//smogon.com/forums/" target="_blank">Forum</a></li>
-			<li><a class="button greenbutton nav-first nav-last" href="//play.pokemonshowdown.com/">Play</a></li>
+			<li><a class="button greenbutton nav-first nav-last" href="//showdown.casper1123.nl/">Play</a></li>
 		</ul></div>
 	</header>
 
@@ -246,28 +246,28 @@ https://replay.pokemonshowdown.com/gen7randomdoublesbattle-865046831.log
 
 </div>
 
-<script defer nomodule src="//play.pokemonshowdown.com/js/lib/ps-polyfill.js"></script>
-<script defer src="//play.pokemonshowdown.com/js/lib/preact.min.js"></script>
+<script defer nomodule src="//showdown.casper1123.nl/js/lib/ps-polyfill.js"></script>
+<script defer src="//showdown.casper1123.nl/js/lib/preact.min.js"></script>
 
-<script defer src="//play.pokemonshowdown.com/config/config.js?4c7efa29"></script>
-<script defer src="//play.pokemonshowdown.com/js/lib/jquery-1.11.0.min.js"></script>
-<script defer src="//play.pokemonshowdown.com/js/lib/html-sanitizer-minified.js"></script>
-<script defer src="//play.pokemonshowdown.com/js/battle-sound.js"></script>
-<script defer src="//play.pokemonshowdown.com/js/battledata.js?0.22436125790986017"></script>
-<script defer src="//play.pokemonshowdown.com/data/pokedex-mini.js?0.22744166925654308"></script>
-<script defer src="//play.pokemonshowdown.com/data/pokedex-mini-bw.js?0.1914241548348523"></script>
-<script defer src="//play.pokemonshowdown.com/data/graphics.js?0.049301866281410645"></script>
-<script defer src="//play.pokemonshowdown.com/data/pokedex.js?0.922966220346531"></script>
-<script defer src="//play.pokemonshowdown.com/data/moves.js?0.1688685174486324"></script>
-<script defer src="//play.pokemonshowdown.com/data/abilities.js?0.7979257159055035"></script>
-<script defer src="//play.pokemonshowdown.com/data/items.js?0.42384356818976054"></script>
-<script defer src="//play.pokemonshowdown.com/data/teambuilder-tables.js?0.40158662481541496"></script>
-<script defer src="//play.pokemonshowdown.com/js/battle-tooltips.js?0.5404390693098593"></script>
-<script defer src="//play.pokemonshowdown.com/js/battle.js?0.31793793939915527"></script>
+<script defer src="//showdown.casper1123.nl/config/config.js?0bc9b843"></script>
+<script defer src="//showdown.casper1123.nl/js/lib/jquery-1.11.0.min.js"></script>
+<script defer src="//showdown.casper1123.nl/js/lib/html-sanitizer-minified.js"></script>
+<script defer src="//showdown.casper1123.nl/js/battle-sound.js"></script>
+<script defer src="//showdown.casper1123.nl/js/battledata.js?0.8521151304101684"></script>
+<script defer src="//play.pokemonshowdown.com/data/pokedex-mini.js?a7"></script>
+<script defer src="//play.pokemonshowdown.com/data/pokedex-mini-bw.js?a7"></script>
+<script defer src="//showdown.casper1123.nl/data/graphics.js?0.7396905143166776"></script>
+<script defer src="//showdown.casper1123.nl/data/pokedex.js?0.7144008658845431"></script>
+<script defer src="//showdown.casper1123.nl/data/moves.js?0.3249673063686018"></script>
+<script defer src="//showdown.casper1123.nl/data/abilities.js?0.7237520649002058"></script>
+<script defer src="//showdown.casper1123.nl/data/items.js?0.8377749007463633"></script>
+<script defer src="//showdown.casper1123.nl/data/teambuilder-tables.js?0.03578655705271405"></script>
+<script defer src="//showdown.casper1123.nl/js/battle-tooltips.js?0.02417610277402571"></script>
+<script defer src="//showdown.casper1123.nl/js/battle.js?0.9646979542146639"></script>
 
-<script defer src="/js/utils.js?0.7200218902096451"></script>
-<script defer src="/js/replays-battle.js?0.5184864315902602"></script>
-<script defer src="/js/replays-index.js?0.08764316631830193"></script>
+<script defer src="/js/utils.js?0.7691319231593812"></script>
+<script defer src="/js/replays-battle.js?0.9415404513046548"></script>
+<script defer src="/js/replays-index.js?0.12788535156889957"></script>
 
 <?php
 
@@ -294,4 +294,4 @@ if ($replay) {
 
 ?>
 
-<script defer src="/js/replays.js?0.19425232868254216"></script>
+<script defer src="/js/replays.js?0.2071026436480472"></script>
