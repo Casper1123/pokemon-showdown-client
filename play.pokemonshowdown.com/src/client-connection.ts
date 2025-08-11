@@ -230,11 +230,13 @@ export class PSStorage {
 			if (this.loaded === true) return;
 			return this.loaded;
 		}
+		console.log("Checking for default server connection.");
 		if (Config.testclient) {
 			return;
 		} else if (`${location.protocol}//${location.hostname}` === PSStorage.origin) {
 			// Same origin, everything can be kept as default
 			Config.server ||= Config.defaultserver;
+			console.log("Same origin, default accepted. Returning.");
 			return;
 		}
 
@@ -244,7 +246,7 @@ export class PSStorage {
 			PS.alert("Sorry, psim connections are unsupported by your browser.");
 			return;
 		}
-
+		console.log("About to check for Crossdomain.");
 		window.addEventListener('message', this.onMessage);
 		console.log("Checking for crossdomain:", document.location.hostname !== "play.pokemon" + "showdown.com", document.location.hostname, "play.pokemon" + "showdown.com");
 		// Force check for official server being the host.
@@ -400,11 +402,8 @@ export const PSLoginServer = new class {
 		// 	return Promise.resolve(null);
 		// }
 		data.act = act;
-		let url = '/~~' + PS.server.id + '/action.php';
+		let url = 'http://play.pokemon' + 'showdown.com' +'/~~' + 'showdown' + '/action.php';  // Work around the Cachebuster while also serving static server ip.
 		if (location.pathname.endsWith('.html')) {
-			// Fragmented the url here to make sure the build processes don't overwrite it.
-			// I am not going to support unofficial login server.
-			url = 'https://' + "play.pokemon" + "showdown.com" + url;
 			if (typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY === 'string') {
 				data.sid = POKEMON_SHOWDOWN_TESTCLIENT_KEY.replace(/%2C/g, ',');
 			}
