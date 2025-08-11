@@ -412,7 +412,7 @@ export const PSLoginServer = new class {
 		data.act = act;
 		// Work around the Cachebuster while also serving static server ip.
 		// Custom login servers not supported.
-		let url = 'http://play.pokemon' + 'showdown.com' +'/~~' + 'showdown' + '/action.php';
+		let url = 'https://play.pokemon' + 'showdown.com' +'/~~' + 'showdown' + '/action.php';
 		if (location.pathname.endsWith('.html')) {
 			if (typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY === 'string') {
 				data.sid = POKEMON_SHOWDOWN_TESTCLIENT_KEY.replace(/%2C/g, ',');

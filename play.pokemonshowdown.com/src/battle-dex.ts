@@ -307,7 +307,7 @@ export const Dex = new class implements ModdedDex {
 
 		try {
 			const xhr = new XMLHttpRequest();
-			const serverUrl = `http://${PS.server.host}`;
+			const serverUrl = `https://${PS.server.host}`;
 			console.log(`Attempting to fetch moddata for ${modId} from ${serverUrl}`)
 			xhr.open('GET', `${serverUrl}/data/moddata?mod=${modId}`, false); // false = synchronous. Intentional.
 			xhr.send();
@@ -517,7 +517,7 @@ export const Dex = new class implements ModdedDex {
 		try {
 			console.log('Initializing custom-mods. Requires connection to server with the right endpoint infrastructure.');
 
-			const serverUrl = `http://${PS.server.host}`;
+			const serverUrl = `https://${PS.server.host}`;
 			const availableModsXhr = new XMLHttpRequest();
 			console.log(`Attempting to fetch availablemods from ${serverUrl}`)
 			availableModsXhr.open('GET', `${serverUrl}/data/availablemods`, false); // false = synchronous
