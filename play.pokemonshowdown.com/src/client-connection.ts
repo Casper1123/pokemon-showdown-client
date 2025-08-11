@@ -387,10 +387,10 @@ export class PSStorage {
 				const requestData = JSON.parse(data.substr(1));
 				const url = requestData[0];
 				if (url && url.includes('/action.php')) {
-
 					targetOrigin = 'https://play.pokemon' + 'showdown.com'; // Splitting string to avoid build process replacing it.
-				}
-			}
+					console.log("Redirected action.php request to", targetOrigin, "with data", data);
+				} else { console.log("Non- action.php request to", targetOrigin, "with data", data);}
+			} else { console.log("Non- action.php request to", targetOrigin, "with data", data);}
 
 			// I really hope this is a Chrome bug that this can fail
 			return PSStorage.frame!.postMessage(data, targetOrigin);
