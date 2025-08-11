@@ -260,6 +260,7 @@ export class PSStorage {
 			document.body.appendChild(iframe);
 			console.log("Appended iframe. Source:", iframe.src)
 		} else {
+			console.log("Failed crossdomain check.");
 			Config.server ||= Config.defaultserver;
 			$(
 				`<iframe src="https://${Config.routes.client}/crossprotocol.html?v1.2" style="display: none;"></iframe>`
