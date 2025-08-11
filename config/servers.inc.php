@@ -8,4 +8,11 @@ $PokemonServers = array (
     'server' => 'showdownserver.casper1123.nl',
     'port' => 443,
   ),
+  'showdown' =>
+    array (
+      'name' => 'Smogon University',
+      'id' => 'showdown',
+      'server' => 'sim.psim.us',
+      'port' => 8000,
+    ),
 );
