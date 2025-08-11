@@ -249,7 +249,7 @@ export class PSStorage {
 		if (document.location.hostname !== Config.routes.client) {
 			const iframe = document.createElement('iframe');
 			iframe.src = 'https://' + Config.routes.client + '/crossdomain.php?host=' +
-				encodeURIComponent(document.location.hostname.replace(".", "-").replace(".", "-")) + ".psim.us" +
+				encodeURIComponent(document.location.hostname.replace(".", "-").replace(".", "-")) +
 				'&path=' + encodeURIComponent(document.location.pathname.substr(1)) +
 				'&protocol=' + encodeURIComponent(document.location.protocol);
 			iframe.style.display = 'none';
