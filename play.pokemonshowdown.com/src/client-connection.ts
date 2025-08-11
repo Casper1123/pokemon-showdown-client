@@ -246,7 +246,7 @@ export class PSStorage {
 		}
 
 		window.addEventListener('message', this.onMessage);
-
+		console.log("Checking for crossdomain:", document.location.hostname !== "play.pokemon" + "showdown.com", document.location.hostname, "play.pokemon" + "showdown.com");
 		// Force check for official server being the host.
 		if (document.location.hostname !== "play.pokemon" + "showdown.com") {
 			// Todo: this is supposedly called, but something goes wrong here.
