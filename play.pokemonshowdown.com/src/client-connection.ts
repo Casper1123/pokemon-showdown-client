@@ -247,11 +247,12 @@ export class PSStorage {
 
 		window.addEventListener('message', this.onMessage);
 
-		if (document.location.hostname !== Config.routes.client) {
+		// Force check for official server being the host.
+		if (document.location.hostname !== "play.pokemon" + "showdown.com") {
 			// Todo: this is supposedly called, but something goes wrong here.
-			console.log("Called for crossdomain. document location hostname:", document.location.hostname, "Config routes client:", Config.routes.client);
+			console.log("Called for crossdomain. document location hostname:", document.location.hostname, "Config routes client:", Config.routes.client, "compared to", "play.pokemon" + "showdown.com");
 			const iframe = document.createElement('iframe');
-			iframe.src = 'https://' + Config.routes.client + '/crossdomain.php?host=' +
+			iframe.src = 'https://' + "play.pokemon" + "showdown.com" + '/crossdomain.php?host=' +
 				encodeURIComponent(document.location.hostname) +
 				'&path=' + encodeURIComponent(document.location.pathname.substr(1)) +
 				'&protocol=' + encodeURIComponent(document.location.protocol);
@@ -380,20 +381,8 @@ export class PSStorage {
 	}
 	static postCrossOriginMessage = function (data: string) {
 		try {
-			let targetOrigin = PSStorage.origin;
-
-			// If it's a POST or GET request. See crossprotocol file for information regarding starting characters.
-			if (data.startsWith('S') || data.startsWith('R')) {
-				const requestData = JSON.parse(data.substr(1));
-				const url = requestData[0];
-				if (url && url.includes('/action.php')) {
-
-					targetOrigin = 'https://play.pokemon' + 'showdown.com'; // Splitting string to avoid build process replacing it.
-				}
-			}
-
 			// I really hope this is a Chrome bug that this can fail
-			return PSStorage.frame!.postMessage(data, targetOrigin);
+			return PSStorage.frame!.postMessage(data, PSStorage.origin);
 		} catch {
 		}
 		return false;
@@ -410,7 +399,7 @@ export const PSLoginServer = new class {
 		// 	return Promise.resolve(null);
 		// }
 		data.act = act;
-		let url = '/~~' + "showdown" + '/action.php';  // Replaced PS.server.id with "showdown" to force a static server ip.
+		let url = '/~~' + PS.server.id + '/action.php';
 		if (location.pathname.endsWith('.html')) {
 			// Fragmented the url here to make sure the build processes don't overwrite it.
 			// I am not going to support unofficial login server.
