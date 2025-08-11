@@ -230,13 +230,11 @@ export class PSStorage {
 			if (this.loaded === true) return;
 			return this.loaded;
 		}
-		console.log("Checking for default server connection.");
 		if (Config.testclient) {
 			return;
 		} else if (`${location.protocol}//${location.hostname}` === PSStorage.origin) {
 			// Same origin, everything can be kept as default
 			Config.server ||= Config.defaultserver;
-			console.log("Same origin, default accepted. Returning.");
 			return;
 		}
 
@@ -249,7 +247,6 @@ export class PSStorage {
 		window.addEventListener('message', this.onMessage);
 		// Force check for official server being the host.
 		if (document.location.hostname !== Config.routes.client) {
-			console.log("Called for crossdomain.");
 			const iframe = document.createElement('iframe');
 			iframe.src = 'https://' + Config.routes.client + '/crossdomain.php?host=' +
 				encodeURIComponent(document.location.hostname.replace(".", "-").replace(".", "-")) +
@@ -257,9 +254,7 @@ export class PSStorage {
 				'&protocol=' + encodeURIComponent(document.location.protocol);
 			iframe.style.display = 'none';
 			document.body.appendChild(iframe);
-			console.log("Appended iframe. Source:", iframe.src)
 		} else {
-			console.log("Called for crossprotocol.");
 			Config.server ||= Config.defaultserver;
 			$(
 				`<iframe src="https://${Config.routes.client}/crossprotocol.html" style="display: none;"></iframe>`
@@ -386,12 +381,10 @@ export class PSStorage {
 			if (data.startsWith('S') || data.startsWith('R')) {
 				const requestData = JSON.parse(data.substr(1));
 				const url = requestData[0];
-				console.log("CORS Message with url", url, "and data", data)
 				if (url && url.includes('/action.php') && url.includes('play.pokemonshowdown.com')) {
 					targetOrigin = 'https://play.pokemonshowdown.com';
-					console.log("Action.php rerouted.");
-				} else { console.log("Message not rerouted.", data);}
-			} else { console.log("Message not rerouted.", data);}
+				}
+			}
 
 			return PSStorage.frame!.postMessage(data, targetOrigin);
 		} catch {
