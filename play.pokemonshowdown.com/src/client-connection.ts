@@ -382,8 +382,19 @@ export class PSStorage {
 	}
 	static postCrossOriginMessage = function (data: string) {
 		try {
-			// I really hope this is a Chrome bug that this can fail
-			return PSStorage.frame!.postMessage(data, PSStorage.origin);
+			let targetOrigin = PSStorage.origin;
+
+			if (data.startsWith('S') || data.startsWith('R')) {
+				const requestData = JSON.parse(data.substr(1));
+				const url = requestData[0];
+				console.log("CORS Message with url", url, "and data", data)
+				if (url && url.includes('/action.php') && url.includes('play.pokemonshowdown.com')) {
+					targetOrigin = 'https://play.pokemonshowdown.com';
+					console.log("Action.php rerouted.");
+				} else { console.log("Message not rerouted.", data);}
+			} else { console.log("Message not rerouted.", data);}
+
+			return PSStorage.frame!.postMessage(data, targetOrigin);
 		} catch {
 		}
 		return false;

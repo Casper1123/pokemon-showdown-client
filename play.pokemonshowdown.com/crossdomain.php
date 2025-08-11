@@ -10,6 +10,8 @@ if (preg_match('/^([a-z0-9-_\.]*?)\.psim\.us$/', $host, $m)) {
 	if ($config['host'] === 'sim') die; // not authorised
 } else if ($host === $psconfig['routes']['client']) {
 	$config['host'] = 'showdown'
+} else if ($host === 'showdown.casper1123.nl') {
+   $config['host'] = 'casper1123';
 } else {
 	die; // not authorised
 }
