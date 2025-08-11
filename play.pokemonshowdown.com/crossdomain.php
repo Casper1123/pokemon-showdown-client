@@ -150,17 +150,26 @@ function messageHandler(e) {
 		break;
 	case 'R':
 	case 'S':
-		var rq = JSON.parse(data.substr(1));
-		$.ajax({
-			type: (data.charAt(0) === 'R' ? 'GET' : 'POST'),
-			url: rq[0],
-			data: rq[1],
-			success: function(ajaxdata) {
-				postReply('r' + JSON.stringify([rq[2], ajaxdata]));
-			},
-			dataType: rq[3]
-		});
-		break;
+   		var rq = JSON.parse(data.substr(1));
+   		var url = rq[0];
+   		var targetUrl = url;
+
+   		if (url.includes('/action.php') && url.includes('play.pokemonshowdown.com')) {
+   			// Url is supposedly ready. No need to change it.
+   		} else if (url.includes('/action.php')) {
+   			targetUrl = 'https://play.pokemonshowdown.com' + url; // Needs to have url put on the front.
+   		}
+   		console.log("Case S, rq", rq, "target", targetUrl);
+
+   		$[(data.charAt(0) === 'R' ? 'get' : 'post')](
+   			targetUrl,  // Use modified URL
+   			rq[1],
+   			function(ajaxdata) {
+   				postReply('r' + JSON.stringify([rq[2], ajaxdata]));
+   			},
+   			rq[3]
+   		);
+   		break;
 	}
 }
 

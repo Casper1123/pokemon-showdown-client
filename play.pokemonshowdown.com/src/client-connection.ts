@@ -249,8 +249,7 @@ export class PSStorage {
 		window.addEventListener('message', this.onMessage);
 		// Force check for official server being the host.
 		if (document.location.hostname !== Config.routes.client) {
-			// Todo: this is supposedly called, but something goes wrong here.
-			console.log("Called for crossdomain. document location hostname:", document.location.hostname.replace(".", "-").replace(".", "-"), "Config routes client:", Config.routes.client);
+			console.log("Called for crossdomain.");
 			const iframe = document.createElement('iframe');
 			iframe.src = 'https://' + Config.routes.client + '/crossdomain.php?host=' +
 				encodeURIComponent(document.location.hostname.replace(".", "-").replace(".", "-")) +
@@ -260,7 +259,7 @@ export class PSStorage {
 			document.body.appendChild(iframe);
 			console.log("Appended iframe. Source:", iframe.src)
 		} else {
-			console.log("Failed crossdomain check. Preparing crossprotocol.");
+			console.log("Called for crossprotocol.");
 			Config.server ||= Config.defaultserver;
 			$(
 				`<iframe src="https://${Config.routes.client}/crossprotocol.html" style="display: none;"></iframe>`
@@ -411,7 +410,9 @@ export const PSLoginServer = new class {
 		// 	return Promise.resolve(null);
 		// }
 		data.act = act;
-		let url = 'http://play.pokemon' + 'showdown.com' +'/~~' + 'showdown' + '/action.php';  // Work around the Cachebuster while also serving static server ip.
+		// Work around the Cachebuster while also serving static server ip.
+		// Custom login servers not supported.
+		let url = 'http://play.pokemon' + 'showdown.com' +'/~~' + 'showdown' + '/action.php';
 		if (location.pathname.endsWith('.html')) {
 			if (typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY === 'string') {
 				data.sid = POKEMON_SHOWDOWN_TESTCLIENT_KEY.replace(/%2C/g, ',');
