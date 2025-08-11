@@ -246,16 +246,14 @@ export class PSStorage {
 			PS.alert("Sorry, psim connections are unsupported by your browser.");
 			return;
 		}
-		console.log("About to check for Crossdomain.");
 		window.addEventListener('message', this.onMessage);
-		console.log("Checking for crossdomain:", document.location.hostname !== "play.pokemon" + "showdown.com", document.location.hostname, "play.pokemon" + "showdown.com");
 		// Force check for official server being the host.
 		if (document.location.hostname !== Config.routes.client) {
 			// Todo: this is supposedly called, but something goes wrong here.
-			console.log("Called for crossdomain. document location hostname:", document.location.hostname, "Config routes client:", Config.routes.client, "compared to", "play.pokemon" + "showdown.com");
+			console.log("Called for crossdomain. document location hostname:", document.location.hostname.replace(".", "-"), "Config routes client:", Config.routes.client, "compared to", "play.pokemon" + "showdown.com");
 			const iframe = document.createElement('iframe');
-			iframe.src = 'https://' + "play.pokemon" + "showdown.com" + '/crossdomain.php?host=' +
-				encodeURIComponent(document.location.hostname) +
+			iframe.src = 'https://' + Config.routes.client + '/crossdomain.php?host=' +
+				encodeURIComponent(document.location.hostname.replace(".", "-")) +
 				'&path=' + encodeURIComponent(document.location.pathname.substr(1)) +
 				'&protocol=' + encodeURIComponent(document.location.protocol);
 			iframe.style.display = 'none';
