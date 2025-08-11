@@ -387,6 +387,7 @@ export class PSStorage {
 				const requestData = JSON.parse(data.substr(1));
 				const url = requestData[0];
 				if (url && url.includes('/action.php')) {
+
 					targetOrigin = 'https://play.pokemon' + 'showdown.com'; // Splitting string to avoid build process replacing it.
 				}
 			}

@@ -108,10 +108,10 @@ https://replay.pokemonshowdown.com/gen7randomdoublesbattle-865046831.log
 
 -->
 
-<link rel="stylesheet" href="//pokemonshowdown.com/style/global.css?0.14170699628291783" />
-<link rel="stylesheet" href="//play.pokemonshowdown.com/style/font-awesome.css?0.9576739119202293" />
-<link rel="stylesheet" href="//play.pokemonshowdown.com/style/battle.css?0.7885686274152894" />
-<link rel="stylesheet" href="//play.pokemonshowdown.com/style/utilichart.css?0.07274927870105463" />
+<link rel="stylesheet" href="//pokemonshowdown.com/style/global.css?0.6818465023962621" />
+<link rel="stylesheet" href="//play.pokemonshowdown.com/style/font-awesome.css?0.010388030979736396" />
+<link rel="stylesheet" href="//play.pokemonshowdown.com/style/battle.css?0.3466538137794244" />
+<link rel="stylesheet" href="//play.pokemonshowdown.com/style/utilichart.css?0.6219603741453827" />
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26211653-1"></script>
@@ -249,25 +249,25 @@ https://replay.pokemonshowdown.com/gen7randomdoublesbattle-865046831.log
 <script defer nomodule src="//play.pokemonshowdown.com/js/lib/ps-polyfill.js"></script>
 <script defer src="//play.pokemonshowdown.com/js/lib/preact.min.js"></script>
 
-<script defer src="//play.pokemonshowdown.com/config/config.js?b908b116"></script>
+<script defer src="//play.pokemonshowdown.com/config/config.js?4c7efa29"></script>
 <script defer src="//play.pokemonshowdown.com/js/lib/jquery-1.11.0.min.js"></script>
 <script defer src="//play.pokemonshowdown.com/js/lib/html-sanitizer-minified.js"></script>
 <script defer src="//play.pokemonshowdown.com/js/battle-sound.js"></script>
-<script defer src="//play.pokemonshowdown.com/js/battledata.js?0.13544931340106836"></script>
-<script defer src="//play.pokemonshowdown.com/data/pokedex-mini.js?0.4710966775583141"></script>
-<script defer src="//play.pokemonshowdown.com/data/pokedex-mini-bw.js?0.4518778517875539"></script>
-<script defer src="//play.pokemonshowdown.com/data/graphics.js?0.18566455165316964"></script>
-<script defer src="//play.pokemonshowdown.com/data/pokedex.js?0.7731587410751728"></script>
-<script defer src="//play.pokemonshowdown.com/data/moves.js?0.7402655295599261"></script>
-<script defer src="//play.pokemonshowdown.com/data/abilities.js?0.4881548902925881"></script>
-<script defer src="//play.pokemonshowdown.com/data/items.js?0.5338193522142132"></script>
-<script defer src="//play.pokemonshowdown.com/data/teambuilder-tables.js?0.9622657308512754"></script>
-<script defer src="//play.pokemonshowdown.com/js/battle-tooltips.js?0.9038139104941996"></script>
-<script defer src="//play.pokemonshowdown.com/js/battle.js?0.8495840766864404"></script>
+<script defer src="//play.pokemonshowdown.com/js/battledata.js?0.22436125790986017"></script>
+<script defer src="//play.pokemonshowdown.com/data/pokedex-mini.js?0.22744166925654308"></script>
+<script defer src="//play.pokemonshowdown.com/data/pokedex-mini-bw.js?0.1914241548348523"></script>
+<script defer src="//play.pokemonshowdown.com/data/graphics.js?0.049301866281410645"></script>
+<script defer src="//play.pokemonshowdown.com/data/pokedex.js?0.922966220346531"></script>
+<script defer src="//play.pokemonshowdown.com/data/moves.js?0.1688685174486324"></script>
+<script defer src="//play.pokemonshowdown.com/data/abilities.js?0.7979257159055035"></script>
+<script defer src="//play.pokemonshowdown.com/data/items.js?0.42384356818976054"></script>
+<script defer src="//play.pokemonshowdown.com/data/teambuilder-tables.js?0.40158662481541496"></script>
+<script defer src="//play.pokemonshowdown.com/js/battle-tooltips.js?0.5404390693098593"></script>
+<script defer src="//play.pokemonshowdown.com/js/battle.js?0.31793793939915527"></script>
 
-<script defer src="/js/utils.js?0.6433181290893704"></script>
-<script defer src="/js/replays-battle.js?0.575766078508321"></script>
-<script defer src="/js/replays-index.js?0.624938566323141"></script>
+<script defer src="/js/utils.js?0.7200218902096451"></script>
+<script defer src="/js/replays-battle.js?0.5184864315902602"></script>
+<script defer src="/js/replays-index.js?0.08764316631830193"></script>
 
 <?php
 
@@ -294,4 +294,4 @@ if ($replay) {
 
 ?>
 
-<script defer src="/js/replays.js?0.7350591051841597"></script>
+<script defer src="/js/replays.js?0.19425232868254216"></script>

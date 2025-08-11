@@ -11,8 +11,9 @@
 
 
 
+
 TeambuilderRoom=function(_PSRoom){function TeambuilderRoom(){var _this;for(var _len=arguments.length,args=new Array(_len),_key=0;_key<_len;_key++){args[_key]=arguments[_key];}_this=_PSRoom.call.apply(_PSRoom,[this].concat(args))||this;_this.
-DEFAULT_FORMAT="gen"+Dex.gen;_this.
+DEFAULT_FORMAT=Dex.modid;_this.
 
 
 
@@ -23,6 +24,7 @@ DEFAULT_FORMAT="gen"+Dex.gen;_this.
 
 curFolder='';_this.
 curFolderKeep='';_this.
+searchTerms=[];_this.
 
 clientCommands=_this.parseClientCommands({
 'newteam':function(target){
@@ -43,45 +45,58 @@ this.update(null);
 PS.teams.undelete();
 this.update(null);
 }
-});return _this;}_inheritsLoose(TeambuilderRoom,_PSRoom);var _proto=TeambuilderRoom.prototype;_proto.
-sendDirect=function sendDirect(msg){
-PS.alert("Unrecognized command: "+msg);
-};_proto.
+});_this.
 
-createTeam=function createTeam(copyFrom){var isBox=arguments.length>1&&arguments[1]!==undefined?arguments[1]:false;
-if(copyFrom){
-return{
-name:"Copy of "+copyFrom.name,
-format:copyFrom.format,
-folder:copyFrom.folder,
-packedTeam:copyFrom.packedTeam,
-iconCache:null,
-isBox:copyFrom.isBox,
-key:''
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+updateSearch=function(value){
+if(!value){
+_this.searchTerms=[];
 }else{
-var format=this.curFolder&&!this.curFolder.endsWith('/')?this.curFolder:this.DEFAULT_FORMAT;
-
-
-if(window.FormatModMapping&&window.FormatModMapping[format]){
-var modid=window.FormatModMapping[format];
-if(!window.BattleTeambuilderTable[modid]){
-Dex.loadModData(modid);
+_this.searchTerms=value.split(",").map(function(q){return q.trim().toLowerCase();});
 }
-}
-
-var folder=this.curFolder.endsWith('/')?this.curFolder.slice(0,-1):'';
-return{
-name:(isBox?"Box":"Untitled")+" "+(PS.teams.list.length+1),
-format:format,
-folder:folder,
-packedTeam:'',
-iconCache:null,
-isBox:isBox,
-key:''
-};
-}
-};return TeambuilderRoom;}(PSRoom);var
+};_this.
+matchesSearch=function(team){
+if(!team)return false;
+if(_this.searchTerms.length===0)return true;
+var normalized=team.packedTeam.toLowerCase();
+return _this.searchTerms.every(function(term){return normalized.includes(term);});
+};return _this;}_inheritsLoose(TeambuilderRoom,_PSRoom);var _proto=TeambuilderRoom.prototype;_proto.sendDirect=function sendDirect(msg){PS.alert("Unrecognized command: "+msg);};_proto.createTeam=function createTeam(copyFrom){var isBox=arguments.length>1&&arguments[1]!==undefined?arguments[1]:false;if(copyFrom){return{name:"Copy of "+copyFrom.name,format:copyFrom.format,folder:copyFrom.folder,packedTeam:copyFrom.packedTeam,iconCache:null,isBox:copyFrom.isBox,key:''};}else{var format=this.curFolder&&!this.curFolder.endsWith('/')?this.curFolder:this.DEFAULT_FORMAT;if(window.FormatModMapping&&window.FormatModMapping[format]){var modid=window.FormatModMapping[format];if(!window.BattleTeambuilderTable[modid]){Dex.loadModData(modid);}}var folder=this.curFolder.endsWith('/')?this.curFolder.slice(0,-1):'';return{name:(isBox?"Box":"Untitled")+" "+(PS.teams.list.length+1),format:format,folder:folder,packedTeam:'',iconCache:null,isBox:isBox,key:''};}};return TeambuilderRoom;}(PSRoom);var
 
 
 TeambuilderPanel=function(_PSRoomPanel){function TeambuilderPanel(){var _this2;for(var _len2=arguments.length,args=new Array(_len2),_key2=0;_key2<_len2;_key2++){args[_key2]=arguments[_key2];}_this2=_PSRoomPanel.call.apply(_PSRoomPanel,[this].concat(args))||this;_this2.
@@ -278,10 +293,21 @@ team.format=value;
 PS.teams.save();
 ev.stopImmediatePropagation();
 _this2.forceUpdate();
-};return _this2;}_inheritsLoose(TeambuilderPanel,_PSRoomPanel);var _proto2=TeambuilderPanel.prototype;_proto2.getDraggedTeam=function getDraggedTeam(ev){var _PS$dragging4,_ref;if(((_PS$dragging4=PS.dragging)==null?void 0:_PS$dragging4.type)==='team')return PS.dragging.team;var dataTransfer=ev.dataTransfer;if(!dataTransfer)return null;PS.dragging={type:'?'};console.log("dragging: "+dataTransfer.types+" | "+((_ref=[].concat(dataTransfer.files))==null?void 0:_ref.map(function(file){return file.name;})));if(!(dataTransfer.types.includes!=null&&dataTransfer.types.includes('Files')))return null;if(dataTransfer.files[0]&&!dataTransfer.files[0].name.endsWith('.txt'))return null;PS.dragging={type:'team',team:0,folder:null};return PS.dragging.team;};TeambuilderPanel.extractDraggedTeam=function extractDraggedTeam(ev){var _ev$dataTransfer,_file$text;var file=(_ev$dataTransfer=ev.dataTransfer)==null||(_ev$dataTransfer=_ev$dataTransfer.files)==null?void 0:_ev$dataTransfer[0];if(!file)return null;var name=file.name;if(name.slice(-4).toLowerCase()!=='.txt'){return null;}name=name.slice(0,-4);return file.text==null||(_file$text=file.text())==null?void 0:_file$text.then(function(result){var sets;try{sets=PSTeambuilder.importTeam(result);}catch(_unused){PS.alert("Your file \""+file.name+"\" is not a valid team.");return null;}var format='';var bracketIndex=name.indexOf(']');var isBox=false;if(bracketIndex>=0){format=name.slice(1,bracketIndex);if(!format.startsWith('gen'))format='gen6'+format;if(format.endsWith('-box')){format=format.slice(0,-4);isBox=true;}name=name.slice(bracketIndex+1).trim();}return{name:name,format:format,folder:'',packedTeam:Teams.pack(sets),iconCache:null,key:'',isBox:isBox};});};TeambuilderPanel.addDraggedTeam=function addDraggedTeam(ev,folder){var _PS$dragging5,_this$extractDraggedT;var index=(_PS$dragging5=PS.dragging)==null?void 0:_PS$dragging5.team;if(typeof index!=='number')index=0;return(_this$extractDraggedT=this.extractDraggedTeam(ev))==null?void 0:_this$extractDraggedT.then(function(team){if(!team){return;}if(folder!=null&&folder.endsWith('/')){team.folder=folder.slice(0,-1);}else if(folder){team.format=folder;}PS.teams.push(team);PS.teams.list.pop();PS.teams.list.splice(index,0,team);PS.teams.save();PS.join('teambuilder');PS.update();});};TeambuilderPanel.
-handleDrop=function handleDrop(ev){var _PS$rooms$teambuilder;
-return!!this.addDraggedTeam(ev,(_PS$rooms$teambuilder=PS.rooms['teambuilder'])==null?void 0:_PS$rooms$teambuilder.curFolder);
-};_proto2.
+};_this2.
+
+
+
+updateSearch=function(ev){
+var target=ev.currentTarget;
+_this2.props.room.updateSearch(target.value);
+_this2.forceUpdate();
+};_this2.
+clearSearch=function(){
+var target=_this2.base.querySelector('input[type="search"]');
+if(!target)return;
+target.value='';
+_this2.props.room.updateSearch('');
+};return _this2;}_inheritsLoose(TeambuilderPanel,_PSRoomPanel);var _proto2=TeambuilderPanel.prototype;_proto2.getDraggedTeam=function getDraggedTeam(ev){var _PS$dragging4,_ref;if(((_PS$dragging4=PS.dragging)==null?void 0:_PS$dragging4.type)==='team')return PS.dragging.team;var dataTransfer=ev.dataTransfer;if(!dataTransfer)return null;PS.dragging={type:'?'};console.log("dragging: "+dataTransfer.types+" | "+((_ref=[].concat(dataTransfer.files))==null?void 0:_ref.map(function(file){return file.name;})));if(!(dataTransfer.types.includes!=null&&dataTransfer.types.includes('Files')))return null;if(dataTransfer.files[0]&&!dataTransfer.files[0].name.endsWith('.txt'))return null;PS.dragging={type:'team',team:0,folder:null};return PS.dragging.team;};TeambuilderPanel.extractDraggedTeam=function extractDraggedTeam(ev){var _ev$dataTransfer,_file$text;var file=(_ev$dataTransfer=ev.dataTransfer)==null||(_ev$dataTransfer=_ev$dataTransfer.files)==null?void 0:_ev$dataTransfer[0];if(!file)return null;var name=file.name;if(name.slice(-4).toLowerCase()!=='.txt'){return null;}name=name.slice(0,-4);return file.text==null||(_file$text=file.text())==null?void 0:_file$text.then(function(result){var sets;try{sets=PSTeambuilder.importTeam(result);}catch(_unused){PS.alert("Your file \""+file.name+"\" is not a valid team.");return null;}var format='';var bracketIndex=name.indexOf(']');var isBox=false;if(bracketIndex>=0){format=name.slice(1,bracketIndex);if(!format.startsWith('gen'))format='gen6'+format;if(format.endsWith('-box')){format=format.slice(0,-4);isBox=true;}name=name.slice(bracketIndex+1).trim();}return{name:name,format:format,folder:'',packedTeam:Teams.pack(sets),iconCache:null,key:'',isBox:isBox};});};TeambuilderPanel.addDraggedTeam=function addDraggedTeam(ev,folder){var _PS$dragging5,_this$extractDraggedT;var index=(_PS$dragging5=PS.dragging)==null?void 0:_PS$dragging5.team;if(typeof index!=='number')index=0;return(_this$extractDraggedT=this.extractDraggedTeam(ev))==null?void 0:_this$extractDraggedT.then(function(team){if(!team){return;}if(folder!=null&&folder.endsWith('/')){team.folder=folder.slice(0,-1);}else if(folder){team.format=folder;}PS.teams.push(team);PS.teams.list.pop();PS.teams.list.splice(index,0,team);PS.teams.save();PS.join('teambuilder');PS.update();});};TeambuilderPanel.handleDrop=function handleDrop(ev){var _PS$rooms$teambuilder;return!!this.addDraggedTeam(ev,(_PS$rooms$teambuilder=PS.rooms['teambuilder'])==null?void 0:_PS$rooms$teambuilder.curFolder);};_proto2.
 renderFolder=function renderFolder(value){var _PS$dragging6;
 var room=this.props.room;
 var cur=room.curFolder===value;
@@ -437,15 +463,20 @@ teams.splice(undeleteIndex,0,null);
 
 var filterFolder=null;
 var filterFormat=null;
+var teamTerm='team';
 if(room.curFolder){
 if(room.curFolder.endsWith('/')){
 filterFolder=room.curFolder.slice(0,-1);
 teams=teams.filter(function(team){return!team||team.folder===filterFolder;});
+teamTerm='team in folder';
 }else{
 filterFormat=room.curFolder;
 teams=teams.filter(function(team){return!team||team.format===filterFormat;});
+if(filterFormat!==Dex.modid)teamTerm=BattleLog.formatName(filterFormat)+' team';
 }
 }
+
+var filteredTeams=teams.filter(room.matchesSearch);
 
 return preact.h(PSPanelWrapper,{room:room},
 preact.h("div",{"class":"folderpane"},
@@ -470,13 +501,25 @@ preact.h("h2",null,preact.h("i",{"class":"fa fa-folder-open-o","aria-hidden":tru
 preact.h("h2",null,"All Teams ",preact.h("small",null,"(",teams.length,")")),
 
 preact.h("p",null,
-preact.h("button",{"data-cmd":"/newteam","class":"button big"},preact.h("i",{"class":"fa fa-plus-circle","aria-hidden":true})," New Team")," ",
-preact.h("button",{"data-cmd":"/newteam box","class":"button"},preact.h("i",{"class":"fa fa-archive","aria-hidden":true})," New Box")
+preact.h("button",{"data-cmd":"/newteam","class":"button big"},
+preact.h("i",{"class":"fa fa-plus-circle","aria-hidden":true})," New ",teamTerm
+)," ",
+preact.h("button",{"data-cmd":"/newteam box","class":"button"},
+preact.h("i",{"class":"fa fa-archive","aria-hidden":true})," New box"
+),
+preact.h("input",{
+type:"search","class":"textbox",placeholder:"Search teams",
+style:"margin-left:5px;",onKeyUp:this.updateSearch}
+)
 ),
 preact.h("ul",{"class":"teamlist"},
-teams.map(function(team){var _team$uploaded;return team?
+!teams.length?
+preact.h("li",null,preact.h("em",null,"you have no teams lol")):
+!filteredTeams.length?
+preact.h("li",null,preact.h("em",null,"you have no teams matching ",preact.h("code",null,room.searchTerms.join(", ")))):
+filteredTeams.map(function(team){var _team$uploaded;return team?
 preact.h("li",{key:team.key,onDragEnter:_this3.dragEnterTeam,"data-teamkey":team.key},
-preact.h(TeamBox,{team:team})," ",
+preact.h(TeamBox,{team:team,onClick:_this3.clearSearch})," ",
 !team.uploaded&&preact.h("button",{"data-cmd":"/deleteteam "+team.key,"class":"option"},
 preact.h("i",{"class":"fa fa-trash","aria-hidden":true})," Delete"
 )," ",
@@ -503,8 +546,12 @@ preact.h("i",{"class":"fa fa-undo","aria-hidden":true})," Undo delete"
 )
 ),
 preact.h("p",null,
-preact.h("button",{"data-cmd":"/newteam bottom","class":"button"},preact.h("i",{"class":"fa fa-plus-circle","aria-hidden":true})," New Team")," ",
-preact.h("button",{"data-cmd":"/newteam box bottom","class":"button"},preact.h("i",{"class":"fa fa-archive","aria-hidden":true})," New Box")
+preact.h("button",{"data-cmd":"/newteam bottom","class":"button"},
+preact.h("i",{"class":"fa fa-plus-circle","aria-hidden":true})," New ",teamTerm
+)," ",
+preact.h("button",{"data-cmd":"/newteam box bottom","class":"button"},
+preact.h("i",{"class":"fa fa-archive","aria-hidden":true})," New box"
+)
 )
 )
 );

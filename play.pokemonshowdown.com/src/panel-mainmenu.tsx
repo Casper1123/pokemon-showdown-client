@@ -458,7 +458,6 @@ class NewsPanel extends PSRoomPanel {
 		}
 	};
 	override render() {
-		const cookieSet = document.cookie.includes('preactalpha=1');
 		return <PSPanelWrapper room={this.props.room} fullSize scrollable>
 			<div class="construction">
 				This is a custom modification of the Pokémon Showdown! beta test client.

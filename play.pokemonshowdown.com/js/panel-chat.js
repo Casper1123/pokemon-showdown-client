@@ -314,6 +314,7 @@ this.cancelChallenge();
 'reject':function(target){
 this.challenged=null;
 this.update(null);
+this.sendDirect("/reject "+target);
 },
 'clear':function(){var _this$log;
 (_this$log=this.log)==null||_this$log.reset();
@@ -438,6 +439,7 @@ _this2.add("|html|"+buffer);
 'play':function(){
 if(!this.battle)return this.add('|error|You are not in a battle');
 if(this.battle.atQueueEnd){
+if(this.battle.ended)this.battle.isReplay=true;
 this.battle.reset();
 }
 this.battle.play();
@@ -1137,6 +1139,16 @@ return true;
 return false;
 };_this8.
 makeChallenge=function(e,format,team){
+var elem=e.target;
+var now=Date.now();
+var lastChallenged=PS.mainmenu.lastChallenged||0;
+if(now-lastChallenged<5_000){
+PS.alert("Please wait 5 seconds before challenging again.",{
+parentElem:elem
+});
+return;
+}
+
 PS.requestNotifications();
 var room=_this8.props.room;
 var packedTeam=team?team.packedTeam:'';
@@ -1149,6 +1161,7 @@ room.challenging={
 formatName:format,
 teamFormat:format
 };
+PS.mainmenu.lastChallenged=now;
 room.update(null);
 };_this8.
 acceptChallenge=function(e,format,team){

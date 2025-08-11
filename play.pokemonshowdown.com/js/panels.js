@@ -171,8 +171,8 @@ roomid=possibleRoomid;
 if(typeof e.state==='string'){
 var _ref=e.state.split('..'),leftRoomid=_ref[0],rightRoomid=_ref[1];
 if(rightRoomid){
-PS.addRoom({id:leftRoomid,location:'left'},true);
-PS.addRoom({id:rightRoomid,location:'right'},true);
+PS.addRoom({id:leftRoomid,location:'left',autofocus:false});
+PS.addRoom({id:rightRoomid,location:'right',autofocus:false});
 PS.leftPanel=PS.rooms[leftRoomid]||PS.leftPanel;
 PS.rightPanel=PS.rooms[rightRoomid]||PS.rightPanel;
 }

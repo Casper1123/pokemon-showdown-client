@@ -308,8 +308,9 @@ _this3.forceUpdate();
 render=function render(){
 if(PS.leftPanelWidth!==null)return null;
 
-var notificationsCount=0;for(var _i6=0,_PS$leftRoomList2=
-PS.leftRoomList;_i6<_PS$leftRoomList2.length;_i6++){var _PS$rooms$roomid2;var roomid=_PS$leftRoomList2[_i6];
+var notificationsCount=0;
+var notificationRooms=[].concat(PS.leftRoomList,PS.rightRoomList);for(var _i6=0;_i6<
+notificationRooms.length;_i6++){var _PS$rooms$roomid2;var roomid=notificationRooms[_i6];
 var miniNotifications=(_PS$rooms$roomid2=PS.rooms[roomid])==null?void 0:_PS$rooms$roomid2.notifications;
 if(miniNotifications!=null&&miniNotifications.length)notificationsCount++;
 }

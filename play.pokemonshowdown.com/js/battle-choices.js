@@ -442,7 +442,7 @@ throw new Error("Move "+((_move$name=move==null?void 0:move.name)!=null?_move$na
 return current;
 }
 
-if(choice.startsWith('switch ')||choice.startsWith('team ')){
+if(choice.startsWith('switch ')||choice.startsWith('team ')){var _this$request$side;
 choice=choice.slice(choice.startsWith('team ')?5:7);
 var isTeamPreview=request.requestType==='team';
 var _current={
@@ -486,8 +486,13 @@ if(!isTeamPreview&&_current.targetPokemon-1<this.requestLength()){
 throw new Error("That Pok\xE9mon is already in battle!");
 }
 var target=request.side.pokemon[_current.targetPokemon-1];
+var isReviving=(_this$request$side=this.request.side)==null?void 0:_this$request$side.pokemon.some(function(p){return p.reviving;});
 if(!target){
 throw new Error("Couldn't find Pok\xE9mon \""+choice+"\" to switch to!");
+}
+if(isReviving&&target.fainted)return _current;
+if(isReviving&&!target.fainted){
+throw new Error(target.name+" still has energy to battle!");
 }
 if(target.fainted){
 throw new Error(target.name+" is fainted and cannot battle!");

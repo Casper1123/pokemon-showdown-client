@@ -289,7 +289,12 @@ PS.dragging={type:'team',team:team,folder:null};
 };return PSTeambuilder;}();PSTeambuilder.draggedTeam=null;
 
 
-function TeamBox(props){
+function TeamBox(props)
+
+
+
+
+{
 var team=props.team;
 var contents;
 if(team){
@@ -303,7 +308,7 @@ function(pokemon){return PSIcon({pokemon:pokemon});}
 preact.h("em",null,"(empty ",team.isBox?'box':'team',")"));
 
 var format=team.format;
-if(format.startsWith("gen"+Dex.gen))format=format.slice(4);
+if(format.startsWith(Dex.modid))format=format.slice(4);
 format=(format?"["+format+"] ":"")+(team.folder?team.folder+"/":"");
 contents=[
 preact.h("strong",null,team.isBox&&preact.h("i",{"class":"fa fa-archive"})," ",format&&preact.h("span",null,format),team.name),
@@ -325,7 +330,10 @@ return preact.h("div",{"class":className},
 contents
 );
 }
-return preact.h("a",{href:"team-"+(team?team.key:''),"class":className,draggable:true,onDragStart:PSTeambuilder.dragStart},
+return preact.h("a",{
+href:"team-"+(team?team.key:''),"class":className,draggable:true,
+onDragStart:PSTeambuilder.dragStart,onClick:props.onClick},
+
 contents
 );
 }var

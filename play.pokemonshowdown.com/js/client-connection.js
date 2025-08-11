@@ -225,6 +225,7 @@ PSStorage=function(){function PSStorage(){}PSStorage.
 
 
 init=function init(){var _this5=this;
+
 if(this.loaded){
 if(this.loaded===true)return;
 return this.loaded;
@@ -247,6 +248,8 @@ return;
 window.addEventListener('message',this.onMessage);
 
 if(document.location.hostname!==Config.routes.client){
+
+console.log("Called for crossdomain. document location hostname:",document.location.hostname,"Config routes client:",Config.routes.client);
 var iframe=document.createElement('iframe');
 iframe.src='https://'+Config.routes.client+'/crossdomain.php?host='+
 encodeURIComponent(document.location.hostname)+
@@ -254,6 +257,7 @@ encodeURIComponent(document.location.hostname)+
 '&protocol='+encodeURIComponent(document.location.protocol);
 iframe.style.display='none';
 document.body.appendChild(iframe);
+console.log("Appended iframe. Source:",iframe.src);
 }else{var _Config2;
 (_Config2=Config).server||(_Config2.server=Config.defaultserver);
 $("<iframe src=\"https://"+

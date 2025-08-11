@@ -53,13 +53,6 @@ Dex.loadModData(modid);
 };_proto.
 load=function load(){var _PS$teams$loadTeam,_this2=this;
 (_PS$teams$loadTeam=PS.teams.loadTeam(this.team,true))==null||_PS$teams$loadTeam.then(function(){
-var team=_this2.team;
-if(team.uploadedPackedTeam&&team.uploadedPackedTeam!==team.packedTeam){
-if(_this2.stripNicknames(team.packedTeam)===team.uploadedPackedTeam){
-
-team.uploadedPackedTeam=team.packedTeam;
-}
-}
 _this2.update(null);
 });
 };_proto.

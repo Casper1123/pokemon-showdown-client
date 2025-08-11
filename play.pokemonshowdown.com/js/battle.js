@@ -1022,6 +1022,7 @@ this.foe=null;
 
 
 
+
 Battle=function(){
 
 

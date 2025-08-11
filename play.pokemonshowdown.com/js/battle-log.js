@@ -1177,8 +1177,6 @@ return str.replace(/&quot;/g,'"').replace(/&gt;/g,'>').replace(/&lt;/g,'<').repl
 
 
 
-
-
 hashColor=function hashColor(name){
 return"color:"+this.usernameColor(name)+";";
 };BattleLog.
@@ -1841,7 +1839,7 @@ if(!replayFile){
 return'javascript:alert("You will need to click Download again once the replay file is at the end.");void 0';
 }
 return'data:text/plain;base64,'+encodeURIComponent(btoa(unescape(encodeURIComponent(replayFile))));
-};return BattleLog;}();BattleLog.colorCache={hecate:"black; text-shadow: 0 0 6px white"};BattleLog.interstice=function(){var whitelist=Config.whitelist||[];var patterns=whitelist.map(function(entry){return new RegExp("^(https?:)?//([A-Za-z0-9-]*\\.)?"+entry.replace(/\./g,'\\.')+"(/.*)?",'i');});return{isWhitelisted:function(uri){if(uri.startsWith('/')&&uri[1]!=='/'){return true;}for(var _i22=0;_i22<patterns.length;_i22++){var pattern=patterns[_i22];if(pattern.test(uri))return true;}return false;},getURI:function(uri){return"http://"+Config.routes.root+"/interstice?uri="+encodeURIComponent(uri);}};}();BattleLog.players=[];BattleLog.ytLoading=null;BattleLog.tagPolicy=null;
+};return BattleLog;}();BattleLog.colorCache={};BattleLog.interstice=function(){var whitelist=Config.whitelist||[];var patterns=whitelist.map(function(entry){return new RegExp("^(https?:)?//([A-Za-z0-9-]*\\.)?"+entry.replace(/\./g,'\\.')+"(/.*)?",'i');});return{isWhitelisted:function(uri){if(uri.startsWith('/')&&uri[1]!=='/'){return true;}for(var _i22=0;_i22<patterns.length;_i22++){var pattern=patterns[_i22];if(pattern.test(uri))return true;}return false;},getURI:function(uri){return"http://"+Config.routes.root+"/interstice?uri="+encodeURIComponent(uri);}};}();BattleLog.players=[];BattleLog.ytLoading=null;BattleLog.tagPolicy=null;
 
 
 if(window.Net){

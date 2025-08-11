@@ -47,8 +47,9 @@ MainMenuRoom=function(_PSRoom){
 
 
 
+
 function MainMenuRoom(options){var _this;
-_this=_PSRoom.call(this,options)||this;_this.classType='mainmenu';_this.userdetailsCache={};_this.roomsCache={};_this.searchCountdown=null;_this.searchSent=false;_this.search={searching:[],games:null};_this.disallowSpectators=PS.prefs.disallowspectators;_this.
+_this=_PSRoom.call(this,options)||this;_this.classType='mainmenu';_this.userdetailsCache={};_this.roomsCache={};_this.searchCountdown=null;_this.searchSent=false;_this.search={searching:[],games:null};_this.disallowSpectators=PS.prefs.disallowspectators;_this.lastChallenged=null;_this.
 
 
 
@@ -349,8 +350,9 @@ var room=PS.rooms[roomid];
 if(!room){
 PS.addRoom({
 id:roomid,
-args:{pmTarget:pmTarget}
-},true);
+args:{pmTarget:pmTarget},
+autofocus:false
+});
 room=PS.rooms[roomid];
 }else{
 room.updateTarget(pmTarget);
@@ -447,7 +449,7 @@ NewsPanel=function(_PSRoomPanel){function NewsPanel(){var _this2;for(var _len=ar
 change=function(ev){
 var target=ev.currentTarget;
 if(target.value==='1'){
-document.cookie="preactalpha=1; expires=Thu, 1 Aug 2025 12:00:00 UTC; path=/";
+document.cookie="preactalpha=1; expires=Thu, 1 Sep 2025 12:00:00 UTC; path=/";
 }else{
 document.cookie="preactalpha=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 }
@@ -458,23 +460,11 @@ document.location.href="/";
 render=function render(){
 var cookieSet=document.cookie.includes('preactalpha=1');
 return preact.h(PSPanelWrapper,{room:this.props.room,fullSize:true,scrollable:true},
-preact.h("div",{"class":"construction"},"This is the client rewrite beta test.",
+preact.h("div",{"class":"construction"},"This is a custom modification of the Pok\xE9mon Showdown! beta test client. Source code can be found ",
 
-preact.h("form",null,
-preact.h("label",{"class":"checkbox"},
-preact.h("input",{type:"radio",name:"preactalpha",value:"1",onChange:this.change,checked:cookieSet})," ","Use Rewrite always"
+preact.h("a",{href:"https://github.com/Casper1123/pokemon-showdown-client"},"for this client")," and ",preact.h("a",{href:"https://github.com/smogon/pokemon-showdown-client"},"the vanilla one"),". If you are using this through my website, then we have a ",
+preact.h("a",{href:"https://discord.gg/NC2pwmVRQ7"},"discord server")," related to the mods we host. If you are from the Showdown team and want to tell me I did things incorrectly and I should stop it, please contact me through either Discord or Github."
 
-),
-preact.h("label",{"class":"checkbox"},
-preact.h("input",{type:"radio",name:"preactalpha",value:"0",onChange:this.change,checked:!cookieSet})," ","Use Rewrite with URL"
-
-),
-preact.h("label",{"class":"checkbox"},
-preact.h("input",{type:"radio",name:"preactalpha",value:"leave",onChange:this.change})," ","Back to the old client"
-
-)
-),"Provide feedback in ",
-preact.h("a",{href:"development",style:"color:black"},"the Dev chatroom"),"."
 ),
 preact.h("div",{"class":"readable-bg",dangerouslySetInnerHTML:{__html:PS.newsHTML}})
 );
@@ -788,11 +778,18 @@ format='';_this7.
 changeFormat=function(ev){
 _this7.format=ev.target.value;
 };_this7.
-submit=function(ev,validate){
+submit=function(ev,validate){var _window$BattleFormats2;
 ev.preventDefault();
 var format=_this7.format;
-var teamKey=_this7.base.querySelector('button[name=team]').value;
+var teamElement=_this7.base.querySelector('button[name=team]');
+var teamKey=teamElement.value;
 var team=teamKey?PS.teams.byKey[teamKey]:undefined;
+if(!((_window$BattleFormats2=window.BattleFormats[toID(format)])!=null&&_window$BattleFormats2.team)&&!team){
+PS.alert('You need to go into the Teambuilder and build a team for this format.',{
+parentElem:teamElement
+});
+return;
+}
 PS.teams.loadTeam(team).then(function(){var _ref3;
 (_ref3=validate==='validate'?_this7.props.onValidate:_this7.props.onSubmit)==null||_ref3(ev,format,team);
 });
