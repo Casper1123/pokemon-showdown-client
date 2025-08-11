@@ -476,6 +476,7 @@ class NetRequest {
 			if (opts.query) {
 				uri += (uri.includes('?') ? '&' : '?') + Net.encodeQuery(opts.query);
 			}
+			console.log("Get-request with uri", uri, "and request options", opts);
 			xhr.open(opts.method || 'GET', uri);
 			xhr.onreadystatechange = function () {
 				const DONE = 4;
