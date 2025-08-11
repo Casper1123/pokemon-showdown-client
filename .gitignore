@@ -13,4 +13,4 @@ config/testclient-key.js
 play.pokemonshowdown.com/data
 /caches
 play.pokemonshowdown.com/config/testclient-key.js
-/play.pokemonshowdown.com/js
+play.pokemonshowdown.com/config/config.js
