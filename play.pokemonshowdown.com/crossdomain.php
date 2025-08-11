@@ -10,8 +10,6 @@ if (preg_match('/^([a-z0-9-_\.]*?)\.psim\.us$/', $host, $m)) {
 	if ($config['host'] === 'sim') die; // not authorised
 } else if ($host === $psconfig['routes']['client']) {
 	$config['host'] = 'showdown'
-} else if ($host === 'showdown.casper1123.nl') {
-   $config['host'] = 'casper1123';
 } else {
 	die; // not authorised
 }
@@ -151,25 +149,16 @@ function messageHandler(e) {
 	case 'R':
 	case 'S':
    		var rq = JSON.parse(data.substr(1));
-   		var url = rq[0];
-   		var targetUrl = url;
-
-   		if (url.includes('/action.php') && url.includes('play.pokemonshowdown.com')) {
-   			// Url is supposedly ready. No need to change it.
-   		} else if (url.includes('/action.php')) {
-   			targetUrl = 'https://play.pokemonshowdown.com' + url; // Needs to have url put on the front.
-   		}
-   		console.log("Case S, rq", rq, "target", targetUrl);
-
-   		$[(data.charAt(0) === 'R' ? 'get' : 'post')](
-   			targetUrl,  // Use modified URL
-   			rq[1],
-   			function(ajaxdata) {
-   				postReply('r' + JSON.stringify([rq[2], ajaxdata]));
-   			},
-   			rq[3]
-   		);
-   		break;
+			$.ajax({
+				type: (data.charAt(0) === 'R' ? 'GET' : 'POST'),
+				url: rq[0],
+				data: rq[1],
+				success: function(ajaxdata) {
+					postReply('r' + JSON.stringify([rq[2], ajaxdata]));
+				},
+				dataType: rq[3]
+			});
+			break;
 	}
 }
 

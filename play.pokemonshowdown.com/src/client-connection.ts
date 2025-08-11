@@ -249,7 +249,7 @@ export class PSStorage {
 		if (document.location.hostname !== Config.routes.client) {
 			const iframe = document.createElement('iframe');
 			iframe.src = 'https://' + Config.routes.client + '/crossdomain.php?host=' +
-				encodeURIComponent(document.location.hostname.replace(".", "-").replace(".", "-")) +
+				encodeURIComponent(document.location.hostname.replace(".", "-").replace(".", "-")) + ".psim.us" +
 				'&path=' + encodeURIComponent(document.location.pathname.substr(1)) +
 				'&protocol=' + encodeURIComponent(document.location.protocol);
 			iframe.style.display = 'none';
@@ -405,8 +405,9 @@ export const PSLoginServer = new class {
 		data.act = act;
 		// Work around the Cachebuster while also serving static server ip.
 		// Custom login servers not supported.
-		let url = 'https://play.pokemon' + 'showdown.com' +'/~~' + 'showdown' + '/action.php';
+		let url = '/~~' + PS.server.id + '/action.php';
 		if (location.pathname.endsWith('.html')) {
+			url = "https://play.pokemonshowdown.com" + url;
 			if (typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY === 'string') {
 				data.sid = POKEMON_SHOWDOWN_TESTCLIENT_KEY.replace(/%2C/g, ',');
 			}
