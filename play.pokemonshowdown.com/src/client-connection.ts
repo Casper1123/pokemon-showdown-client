@@ -250,10 +250,10 @@ export class PSStorage {
 		// Force check for official server being the host.
 		if (document.location.hostname !== Config.routes.client) {
 			// Todo: this is supposedly called, but something goes wrong here.
-			console.log("Called for crossdomain. document location hostname:", document.location.hostname.replace(".", "-"), "Config routes client:", Config.routes.client, "compared to", "play.pokemon" + "showdown.com");
+			console.log("Called for crossdomain. document location hostname:", document.location.hostname.replace(".", "-").replace(".", "-"), "Config routes client:", Config.routes.client);
 			const iframe = document.createElement('iframe');
 			iframe.src = 'https://' + Config.routes.client + '/crossdomain.php?host=' +
-				encodeURIComponent(document.location.hostname.replace(".", "-")) +
+				encodeURIComponent(document.location.hostname.replace(".", "-").replace(".", "-")) +
 				'&path=' + encodeURIComponent(document.location.pathname.substr(1)) +
 				'&protocol=' + encodeURIComponent(document.location.protocol);
 			iframe.style.display = 'none';
