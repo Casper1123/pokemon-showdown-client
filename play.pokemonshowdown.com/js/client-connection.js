@@ -248,7 +248,7 @@ return;
 window.addEventListener('message',this.onMessage);
 console.log("Checking for crossdomain:",document.location.hostname!=="play.pokemon"+"showdown.com",document.location.hostname,"play.pokemon"+"showdown.com");
 
-if(document.location.hostname!=="play.pokemon"+"showdown.com"){
+if(document.location.hostname!==Config.routes.client){
 
 console.log("Called for crossdomain. document location hostname:",document.location.hostname,"Config routes client:",Config.routes.client,"compared to","play.pokemon"+"showdown.com");
 var iframe=document.createElement('iframe');
@@ -260,10 +260,10 @@ iframe.style.display='none';
 document.body.appendChild(iframe);
 console.log("Appended iframe. Source:",iframe.src);
 }else{var _Config2;
-console.log("Failed crossdomain check.");
+console.log("Failed crossdomain check. Running");
 (_Config2=Config).server||(_Config2.server=Config.defaultserver);
 $("<iframe src=\"https://"+
-Config.routes.client+"/crossprotocol.html?v1.2\" style=\"display: none;\"></iframe>"
+Config.routes.client+"/crossprotocol.html\" style=\"display: none;\"></iframe>"
 ).appendTo('body');
 setTimeout(function(){
 

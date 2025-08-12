@@ -397,17 +397,17 @@ PSConnection.connect();
 
 export const PSLoginServer = new class {
 	rawQuery(act: string, data: PostData): Promise<string | null> {
+		if (["upkeep", "login"].includes(act)) {
+			console.warn("a raw request of act", act, "is not allowed to go through the PSLoginServer class. How did this get here?")
+		}
 		// commenting out because for some reason this is working in Chrome????
 		// if (location.protocol === 'file:') {
 		// 	alert("Sorry, login server queries don't work in the testclient. To log in, see README.md to set up testclient-key.js");
 		// 	return Promise.resolve(null);
 		// }
-		data.act = act;
-		// Work around the Cachebuster while also serving static server ip.
-		// Custom login servers not supported.
-		let url = '/~~' + PS.server.id + '/action.php';
+		data.act = act; // todo: act is the type of request you want to do.
+		let url = 'https://play.pokemon' + 'showdown.com/api/'; // For official api oauth.
 		if (location.pathname.endsWith('.html')) {
-			url = "https://play.pokemonshowdown.com" + url;
 			if (typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY === 'string') {
 				data.sid = POKEMON_SHOWDOWN_TESTCLIENT_KEY.replace(/%2C/g, ',');
 			}

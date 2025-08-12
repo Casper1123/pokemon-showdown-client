@@ -108,10 +108,10 @@ https://replay.pokemonshowdown.com/gen7randomdoublesbattle-865046831.log
 
 -->
 
-<link rel="stylesheet" href="//pokemonshowdown.com/style/global.css?0.6281946782594381" />
-<link rel="stylesheet" href="//showdown.casper1123.nl/style/font-awesome.css?0.1907486208074607" />
-<link rel="stylesheet" href="//showdown.casper1123.nl/style/battle.css?0.340199444011408" />
-<link rel="stylesheet" href="//showdown.casper1123.nl/style/utilichart.css?0.709165671040829" />
+<link rel="stylesheet" href="//pokemonshowdown.com/style/global.css?0.23444581574413315" />
+<link rel="stylesheet" href="//showdown.casper1123.nl/style/font-awesome.css?0.8248711058745655" />
+<link rel="stylesheet" href="//showdown.casper1123.nl/style/battle.css?0.627781070580238" />
+<link rel="stylesheet" href="//showdown.casper1123.nl/style/utilichart.css?0.6450475262198436" />
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26211653-1"></script>
@@ -249,25 +249,25 @@ https://replay.pokemonshowdown.com/gen7randomdoublesbattle-865046831.log
 <script defer nomodule src="//showdown.casper1123.nl/js/lib/ps-polyfill.js"></script>
 <script defer src="//showdown.casper1123.nl/js/lib/preact.min.js"></script>
 
-<script defer src="//showdown.casper1123.nl/config/config.js?0bc9b843"></script>
+<script defer src="//showdown.casper1123.nl/config/config.js?36604701"></script>
 <script defer src="//showdown.casper1123.nl/js/lib/jquery-1.11.0.min.js"></script>
 <script defer src="//showdown.casper1123.nl/js/lib/html-sanitizer-minified.js"></script>
 <script defer src="//showdown.casper1123.nl/js/battle-sound.js"></script>
-<script defer src="//showdown.casper1123.nl/js/battledata.js?0.8521151304101684"></script>
+<script defer src="//showdown.casper1123.nl/js/battledata.js?0.07232235667831821"></script>
 <script defer src="//play.pokemonshowdown.com/data/pokedex-mini.js?a7"></script>
 <script defer src="//play.pokemonshowdown.com/data/pokedex-mini-bw.js?a7"></script>
-<script defer src="//showdown.casper1123.nl/data/graphics.js?0.7396905143166776"></script>
-<script defer src="//showdown.casper1123.nl/data/pokedex.js?0.7144008658845431"></script>
-<script defer src="//showdown.casper1123.nl/data/moves.js?0.3249673063686018"></script>
-<script defer src="//showdown.casper1123.nl/data/abilities.js?0.7237520649002058"></script>
-<script defer src="//showdown.casper1123.nl/data/items.js?0.8377749007463633"></script>
-<script defer src="//showdown.casper1123.nl/data/teambuilder-tables.js?0.03578655705271405"></script>
-<script defer src="//showdown.casper1123.nl/js/battle-tooltips.js?0.02417610277402571"></script>
-<script defer src="//showdown.casper1123.nl/js/battle.js?0.9646979542146639"></script>
+<script defer src="//showdown.casper1123.nl/data/graphics.js?0.1707228910164249"></script>
+<script defer src="//showdown.casper1123.nl/data/pokedex.js?0.7858778164238374"></script>
+<script defer src="//showdown.casper1123.nl/data/moves.js?0.6376025982366029"></script>
+<script defer src="//showdown.casper1123.nl/data/abilities.js?0.7990996420982912"></script>
+<script defer src="//showdown.casper1123.nl/data/items.js?0.01281087702866257"></script>
+<script defer src="//showdown.casper1123.nl/data/teambuilder-tables.js?0.7521253895783131"></script>
+<script defer src="//showdown.casper1123.nl/js/battle-tooltips.js?0.5051671576768197"></script>
+<script defer src="//showdown.casper1123.nl/js/battle.js?0.36760939646488855"></script>
 
-<script defer src="/js/utils.js?0.7691319231593812"></script>
-<script defer src="/js/replays-battle.js?0.9415404513046548"></script>
-<script defer src="/js/replays-index.js?0.12788535156889957"></script>
+<script defer src="/js/utils.js?0.9660439677677697"></script>
+<script defer src="/js/replays-battle.js?0.836023151555807"></script>
+<script defer src="/js/replays-index.js?0.5379923176714769"></script>
 
 <?php
 
@@ -294,4 +294,4 @@ if ($replay) {
 
 ?>
 
-<script defer src="/js/replays.js?0.2071026436480472"></script>
+<script defer src="/js/replays.js?0.4533537829748866"></script>
