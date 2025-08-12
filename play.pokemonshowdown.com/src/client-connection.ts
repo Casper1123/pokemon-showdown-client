@@ -419,6 +419,7 @@ export const PSLoginServer = new class {
 		);
 	}
 	query(act: string, data: PostData = {}): Promise<{ [k: string]: any } | null> {
+		// Todo: this is where queries are placed with corresponding data. Is this where we should intercept?
 		return this.rawQuery(act, data).then(
 			res => res ? JSON.parse(res.slice(1)) : null
 		).catch(
