@@ -1,6 +1,6 @@
 export class OfficialAuthError extends Error {
-	constructor(operation: string) {
-		super(`Official auth error in operation '${operation}'`);
+	constructor(operation: string, statusCode: number | null) {
+		super(`Official auth error in operation '${operation}'.` + statusCode? " Status code: " + statusCode.toString() : "");
 		this.name = 'OfficialAuthError';
 
 		Object.setPrototypeOf(this, OfficialAuthError.prototype);
@@ -149,7 +149,7 @@ export const OfficialAuth = new class {
 				expires: data.expires
 			};
 		} else {
-			return { error: 'Token refresh failed' };
+			throw new OfficialAuthError(`refreshToken`, data.status);
 		}
 	}
 }
