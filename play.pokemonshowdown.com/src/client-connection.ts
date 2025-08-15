@@ -6,6 +6,7 @@
  */
 
 import { Config, PS } from "./client-main";
+import { OfficialAuth } from "./official-auth";
 
 declare const SockJS: any;
 declare const POKEMON_SHOWDOWN_TESTCLIENT_KEY: string | undefined;
@@ -225,7 +226,6 @@ export class PSStorage {
 	static loader?: () => void;
 	static loaded: Promise<void> | boolean = false;
 	static init(): void | Promise<void> {
-		// Todo: find potential issues going on over here! This is supposed to be called, but nothing is really happening.
 		if (this.loaded) {
 			if (this.loaded === true) return;
 			return this.loaded;
@@ -406,7 +406,7 @@ export const PSLoginServer = new class {
 		// 	return Promise.resolve(null);
 		// }
 		data.act = act; // todo: act is the type of request you want to do.
-		let url = 'https://play.pokemon' + 'showdown.com/api/'; // For official api oauth.
+		let url = 'https://play.pokemonshowdown.com/api/'; // For official api oauth.
 		if (location.pathname.endsWith('.html')) {
 			if (typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY === 'string') {
 				data.sid = POKEMON_SHOWDOWN_TESTCLIENT_KEY.replace(/%2C/g, ',');
