@@ -666,9 +666,7 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 		}
 		this.loggingIn = name;
 		this.update(null);
-		PSLoginServer.rawQuery(
-			'getassertion', { userid, challstr: this.challstr }
-		).then(res => {
+		OfficialAuth.getAssertion(this).then(res => {
 			this.handleAssertion(name, res);
 			this.updateRegExp();
 		});
@@ -691,7 +689,7 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 				// success!
 				const username = data.curuser.loggedin.username;
 				this.registered = { name: username, userid: toID(username) };
-				this.handleAssertion(name, data.assertion);
+				OfficialAuth.authorize(this);
 			} else {
 				// wrong password
 				if (special.needsGoogle) {
@@ -751,6 +749,7 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 		PS.send(`/logout`);
 		PS.connection?.disconnect();
 
+		OfficialAuth.revoke().then();
 		PS.alert("You have been logged out and disconnected.\n\nIf you wanted to change your name while staying connected, use the 'Change Name' button or the '/nick' command.");
 		this.name = "";
 		this.group = '';

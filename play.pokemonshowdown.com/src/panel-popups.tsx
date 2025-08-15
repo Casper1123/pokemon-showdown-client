@@ -11,6 +11,7 @@ import { type BattleRoom } from "./panel-battle";
 import { ChatUserList, type ChatRoom } from "./panel-chat";
 import { PSRoomPanel, PSPanelWrapper, PSView } from "./panels";
 import { PSHeader } from "./panel-topbar";
+import {OfficialAuth} from "./official-auth";
 
 /**
  * User popup
@@ -1167,7 +1168,7 @@ class RegisterPanel extends PSRoomPanel {
 			if (data?.curuser?.loggedin) {
 				let name = data.curuser.username;
 				PS.user.registered = { name, userid: toID(name) };
-				if (data?.assertion) PS.user.handleAssertion(name, data?.assertion);
+				OfficialAuth.authorize(PS.user);
 				this.close();
 				PS.alert("You have been successfully registered.");
 			}

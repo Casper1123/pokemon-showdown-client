@@ -161,6 +161,31 @@ export const OfficialAuth = new class {
 		return data; // This is our assertion!
 	}
 
+	async revoke() {
+		// todo: Revoke token access here.
+		// oauth/api/revoke: { success: boolean }
+		// We can ignore the token access check, because it should revoke all things for this client_id anyways.
+		const response = await fetch(this.requestUrl("api/revoke"), {
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+			},
+			body: new URLSearchParams({
+				uri: this.redirectURI
+			})
+		})
+
+		const responseText = await response.text();
+		// Remove the ']' CSRF protection prefix
+		const jsonData = responseText.startsWith(']') ? responseText.slice(1) : responseText;
+		const data = JSON.parse(jsonData);
+		if (!data.success) {
+			throw new OfficialAuthError("revoke", response.status);
+		}
+
+		this.clearTokenStorage();
+	}
+
 	clearTokenStorage() {
 		localStorage.removeItem("ps-token");
 		localStorage.removeItem("ps-token-expiry");
