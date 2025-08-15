@@ -127,15 +127,53 @@ export const OfficialAuth = new class {
 	}
 
 	/**
-	 * Returns an assertion if there's a valid token.
+	 * Returns an assertion for the given user if there's a valid token.
+	 * Otherwise returns an empty string.
 	 */
-	async getAssertion(user: PSUser): Promise<string> {
-		// If token && valid; refresh
-		// If token !& valid, re-auth?
-		// If !token, auth? Is that even possible?
+	async getAssertion(user: PSUser): Promise<string | null> {
+		if (!await this.authorized()) {
+			return null;
+		}
+		const token = localStorage.getItem("ps-token");
+		console.assert(token !== null, "Token was null during getAssertion call.");
+		// Due to authorized call we can assume a valid token.
+
+		const response = await fetch(this.requestUrl("api/getassertion"), {
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+			},
+			body: new URLSearchParams({
+				client_id: this.clientId,
+				challenge: user.challstr,
+				token: token as string, // Casting because token === null is excluded by Authorized.
+			})
+		})
+
+		const responseText = await response.text();
+		// Remove the ']' CSRF protection prefix
+		const jsonData = responseText.startsWith(']') ? responseText.slice(1) : responseText;
+		const data = JSON.parse(jsonData);
+		// oauth/api/getassertion: { success: false } | string
+		if (typeof data !== "string") {
+			throw new OfficialAuthError(`getAssertion`, data.status);
+		}
+		return data; // This is our assertion!
+	}
+
+	clearTokenStorage() {
+		localStorage.removeItem("ps-token");
+		localStorage.removeItem("ps-token-expiry");
+	}
+
+	/**
+	 * True if a valid token is in storage, false if the user must re-authorize due to lack of valid token credentials.
+	 */
+	async authorized(): Promise<boolean> {
 		const token = localStorage.getItem("ps-token");
 		const tokenExpiry_string = localStorage.getItem("ps-token-expiry");
-		let refresh = false; let reauth = false;
+		let refresh = false;
+		let reauth = false;
 		if (!token) {
 			reauth = true;
 		} else if (!tokenExpiry_string) {
@@ -157,30 +195,10 @@ export const OfficialAuth = new class {
 		}
 
 		if (reauth) {
-			return ""; // Returning empty. Just display the login error. It's not my problem (for now)
+			this.clearTokenStorage()
+			return false; // Returning empty. Just display the login error. It's not my problem (for now)
 		}
 
-		// Phew. I can finally assume we have a valid token. Great.
-		const response = await fetch(this.requestUrl("api/getassertion"), {
-			method: "POST",
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded',
-			},
-			body: new URLSearchParams({
-				client_id: this.clientId,
-				challenge: user.challstr,
-				token: token as string, // Casting because token === null is excluded up above.
-			})
-		})
-
-		const responseText = await response.text();
-		// Remove the ']' CSRF protection prefix
-		const jsonData = responseText.startsWith(']') ? responseText.slice(1) : responseText;
-		const data = JSON.parse(jsonData);
-		// oauth/api/getassertion: { success: false } | string
-		if (typeof data !== "string") {
-			throw new OfficialAuthError(`getAssertion`, data.status);
-		}
-		return data; // This is our assertion!
+		return true;
 	}
 }
