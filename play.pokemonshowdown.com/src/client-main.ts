@@ -18,7 +18,7 @@ import { Dex, toID, type ID } from './battle-dex';
 import { BattleTextParser, type Args } from './battle-text-parser';
 import type { BattleRoom } from './panel-battle';
 import { Teams } from './battle-teams';
-import {BattleLog} from "./battle-log";
+import { OfficialAuth } from "./official-auth";
 
 declare const BattleTextAFD: any;
 declare const BattleTextNotAFD: any;
@@ -596,7 +596,7 @@ class PSTeams extends PSStreamModel<'team' | 'format'> {
  *********************************************************************/
 
 export type PSLoginState = { error?: string, success?: true, name?: string, needsPassword?: true, needsGoogle?: true };
-class PSUser extends PSStreamModel<PSLoginState | null> {
+export class PSUser extends PSStreamModel<PSLoginState | null> {
 	name = "";
 	group = '';
 	userid = "" as ID;
