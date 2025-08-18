@@ -346,7 +346,37 @@ export class BattleLog {
 			this.message(`Bug? Report it to <a href="http://www.smogon.com/forums/showthread.php?t=3453192">the replay viewer's Smogon thread</a>`);
 			if (this.scene) this.scene.wait(1000);
 			return;
-			
+
+		case 'b':
+		case 'B':
+			// Note: this is a custom implementation! This has not been implemented in the mainline beta yet.
+			console.debug(`Constructing |b| message.`)
+			const id = args[1];
+			const name = args[2];
+			const name2 = args[3];
+			const silent = (args[0] === 'B');
+
+			// Parse battle ID to extract format - you'll need to implement parseBattleID equivalent
+			// or use a regex to extract format from battle ID
+			const battleIdMatch = id.match(/^battle-([^-]+)/);
+			if (!battleIdMatch) {
+				return; // bogus room ID could be used to inject JavaScript
+			}
+			let format = BattleLog.escapeHTML(battleIdMatch[1]);
+			format = BattleLog.formatName(format);
+			if (silent && !BattleLog.prefs('showbattles')) return;
+
+			let battletype = 'Battle';
+			if (format) {
+				battletype = format + ' battle';
+				if (format === 'Random Battle') battletype = 'Random Battle';
+			}
+
+			const battleLink = `<a href="${window.app?.root || '/'}${id}" class="ilink">${BattleLog.escapeHTML(battletype)} started between <strong style="${BattleLog.hashColor(toUserid(name))}">${BattleLog.escapeHTML(name)}</strong> and <strong style="${BattleLog.hashColor(toUserid(name2))}">${BattleLog.escapeHTML(name2)}</strong>.</a>`;
+
+			this.addDiv('notice', battleLink);
+			break;
+
 		case 'variation':
 			this.addDiv('', '<small>Variation: <em>' + BattleLog.escapeHTML(args[1]) + '</em></small>');
 			break;
