@@ -17,7 +17,7 @@ import { TeamBox, type SelectType } from "./panel-teamdropdown";
 import { Dex, toID, type ID } from "./battle-dex";
 import type { Args } from "./battle-text-parser";
 import { BattleLog } from "./battle-log";
-import {OfficialAuth} from "./official-auth"; // optional
+import { OfficialAuth } from "./official-auth"; // optional
 
 export type RoomInfo = {
 	title: string, desc?: string, userCount?: number, section?: string, privacy?: 'hidden',
