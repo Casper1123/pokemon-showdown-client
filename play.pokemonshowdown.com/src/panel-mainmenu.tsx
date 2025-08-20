@@ -16,7 +16,8 @@ import type { RoomsRoom } from "./panel-rooms";
 import { TeamBox, type SelectType } from "./panel-teamdropdown";
 import { Dex, toID, type ID } from "./battle-dex";
 import type { Args } from "./battle-text-parser";
-import { BattleLog } from "./battle-log"; // optional
+import { BattleLog } from "./battle-log";
+import { OfficialAuth } from "./official-auth"; // optional
 
 export type RoomInfo = {
 	title: string, desc?: string, userCount?: number, section?: string, privacy?: 'hidden',
@@ -129,7 +130,13 @@ export class MainMenuRoom extends PSRoom {
 				if (res.loggedin) {
 					PS.user.registered = { name: res.username, userid: toID(res.username) };
 				}
-				PS.user.handleAssertion(res.username, res.assertion);
+				OfficialAuth.getAssertion(PS.user).then(ass => {
+					if (ass === null) {
+						OfficialAuth.authorize(PS.user);
+					} else {
+						PS.user.handleAssertion(res.username, ass);
+					}
+				});
 			});
 			return;
 		} case 'updateuser': {

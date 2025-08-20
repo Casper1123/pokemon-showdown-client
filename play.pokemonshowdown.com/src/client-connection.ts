@@ -6,6 +6,7 @@
  */
 
 import { Config, PS } from "./client-main";
+import { OfficialAuth } from "./official-auth";
 
 declare const SockJS: any;
 declare const POKEMON_SHOWDOWN_TESTCLIENT_KEY: string | undefined;
@@ -225,7 +226,6 @@ export class PSStorage {
 	static loader?: () => void;
 	static loaded: Promise<void> | boolean = false;
 	static init(): void | Promise<void> {
-		// Todo: find potential issues going on over here! This is supposed to be called, but nothing is really happening.
 		if (this.loaded) {
 			if (this.loaded === true) return;
 			return this.loaded;
@@ -391,22 +391,18 @@ export class PSStorage {
 		}
 		return false;
 	};
-};
+}
 
 PSConnection.connect();
 
 export const PSLoginServer = new class {
 	rawQuery(act: string, data: PostData): Promise<string | null> {
-		if (["upkeep", "login"].includes(act)) {
-			console.warn("a raw request of act", act, "is not allowed to go through the PSLoginServer class. How did this get here?")
-		}
 		// commenting out because for some reason this is working in Chrome????
 		// if (location.protocol === 'file:') {
 		// 	alert("Sorry, login server queries don't work in the testclient. To log in, see README.md to set up testclient-key.js");
 		// 	return Promise.resolve(null);
 		// }
-		data.act = act; // todo: act is the type of request you want to do.
-		let url = 'https://play.pokemon' + 'showdown.com/api/'; // For official api oauth.
+		let url = 'https://play.pokemonshowdown.com/api/' + act;
 		if (location.pathname.endsWith('.html')) {
 			if (typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY === 'string') {
 				data.sid = POKEMON_SHOWDOWN_TESTCLIENT_KEY.replace(/%2C/g, ',');

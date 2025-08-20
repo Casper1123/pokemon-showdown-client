@@ -16,6 +16,7 @@
 
 
 
+
 UserRoom=function(_PSRoom){
 
 
@@ -893,68 +894,12 @@ _this9.setState({passwordShown:!_this9.state.passwordShown});
 };return _this9;}_inheritsLoose(LoginPanel,_PSRoomPanel6);var _proto8=LoginPanel.prototype;_proto8.componentDidMount=function componentDidMount(){var _this0=this;_PSRoomPanel6.prototype.componentDidMount.call(this);this.subscriptions.push(PS.user.subscribe(function(args){if(args){if(args.success){_this0.close();return;}_this0.props.room.args=args;setTimeout(function(){return _this0.focus();},1);}_this0.forceUpdate();}));};_proto8.getUsername=function getUsername(){var _this$props$room$args,_this$base;var loginName=PS.user.loggingIn||((_this$props$room$args=this.props.room.args)==null?void 0:_this$props$room$args.name);if(loginName)return loginName;var input=(_this$base=this.base)==null?void 0:_this$base.querySelector('input[name=username]');if(input&&!input.disabled){return input.value;}return PS.user.named?PS.user.name:'';};_proto8.focus=function focus(){var _ref;var passwordBox=this.base.querySelector('input[name=password]');var usernameBox=this.base.querySelector('input[name=username]');(_ref=passwordBox||usernameBox)==null||_ref.select();};_proto8.
 render=function render(){
 var room=this.props.room;
-var loginState=room.args;
+OfficialAuth.authorize(PS.user);
 return preact.h(PSPanelWrapper,{room:room,width:280},preact.h("div",{"class":"pad"},
-preact.h("h3",null,"Log in"),
-preact.h("form",{onSubmit:this.handleSubmit},
-(loginState==null?void 0:loginState.error)&&preact.h("p",{"class":"error"},loginState.error),
-preact.h("p",null,preact.h("label",{"class":"label"},"Username: ",
-preact.h("small",{"class":"preview",style:"color:"+BattleLog.usernameColor(toID(this.getUsername()))},"(color)"),
-preact.h("input",{
-"class":"textbox",type:"text",name:"username",
-onInput:this.update,onChange:this.update,autocomplete:"username",
-value:this.getUsername(),disabled:!!PS.user.loggingIn||!!(loginState!=null&&loginState.name)}
-)
-)),
-PS.user.named&&!loginState&&preact.h("p",null,
-preact.h("small",null,"(Others will be able to see your name change. To change name privately, use \"Log out\")")
-),
-(loginState==null?void 0:loginState.needsPassword)&&preact.h("p",null,
-preact.h("i",{"class":"fa fa-level-up fa-rotate-90","aria-hidden":true})," ",preact.h("strong",null,"if you registered this name:"),
-preact.h("label",{"class":"label"},"Password: ",
-
-preact.h("input",{
-"class":"textbox",type:this.state.passwordShown?'text':'password',name:"password",
-autocomplete:"current-password",style:"width:173px"}
-),
-preact.h("button",{
-type:"button",onClick:this.handleShowPassword,"aria-label":"Show password",
-"class":"button",style:"float:right;margin:-21px 0 10px;padding: 2px 6px"},
-preact.h("i",{"class":"fa fa-eye","aria-hidden":true}))
-)
-),
-(loginState==null?void 0:loginState.needsGoogle)&&preact.h(preact.Fragment,null,
-preact.h("p",null,preact.h("i",{"class":"fa fa-level-up fa-rotate-90","aria-hidden":true})," ",preact.h("strong",null,"if you registered this name:")),
-preact.h("p",null,preact.h(GooglePasswordBox,{name:this.getUsername()}))
-),
+preact.h("h3",null,"Authorization Required"),
+preact.h("p",null,"Please authorize using the popup to continue."),
 preact.h("p",{"class":"buttonbar"},
-PS.user.loggingIn?
-preact.h("button",{disabled:true,"class":"cur"},"Logging in..."):
-loginState!=null&&loginState.needsPassword?
-preact.h(preact.Fragment,null,
-preact.h("button",{type:"submit","class":"button"},preact.h("strong",null,"Log in"))," ",
-preact.h("button",{type:"button",onClick:this.reset,"class":"button"},"Cancel")
-):
-loginState!=null&&loginState.needsGoogle?
-preact.h("button",{type:"button",onClick:this.reset,"class":"button"},"Cancel"):
-
-preact.h(preact.Fragment,null,
-preact.h("button",{type:"submit","class":"button"},preact.h("strong",null,"Choose name"))," ",
-preact.h("button",{type:"button",name:"closeRoom","class":"button"},"Cancel")
-),
-" "
-),
-(loginState==null?void 0:loginState.name)&&preact.h("div",null,
-preact.h("p",null,
-preact.h("i",{"class":"fa fa-level-up fa-rotate-90","aria-hidden":true})," ",preact.h("strong",null,"if not:")
-),
-preact.h("p",{style:{maxWidth:'210px',margin:'0 auto'}},"This is someone else's account. Sorry."
-
-),
-preact.h("p",{"class":"buttonbar"},
-preact.h("button",{"class":"button",onClick:this.reset},"Try another name")
-)
-)
+preact.h("button",{type:"button",name:"closeRoom","class":"button"},"Close")
 )
 ));
 };return LoginPanel;}(PSRoomPanel);LoginPanel.id='login';LoginPanel.routes=['login'];LoginPanel.location='semimodal-popup';var
@@ -1167,7 +1112,7 @@ if(data!=null&&data.actionerror)_this11.setState({errorMsg:data==null?void 0:dat
 if(data!=null&&(_data$curuser=data.curuser)!=null&&_data$curuser.loggedin){
 var name=data.curuser.username;
 PS.user.registered={name:name,userid:toID(name)};
-if(data!=null&&data.assertion)PS.user.handleAssertion(name,data==null?void 0:data.assertion);
+OfficialAuth.authorize(PS.user);
 _this11.close();
 PS.alert("You have been successfully registered.");
 }

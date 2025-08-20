@@ -18,7 +18,7 @@ import { Dex, toID, type ID } from './battle-dex';
 import { BattleTextParser, type Args } from './battle-text-parser';
 import type { BattleRoom } from './panel-battle';
 import { Teams } from './battle-teams';
-import {BattleLog} from "./battle-log";
+import { OfficialAuth } from "./official-auth";
 
 declare const BattleTextAFD: any;
 declare const BattleTextNotAFD: any;
@@ -596,7 +596,7 @@ class PSTeams extends PSStreamModel<'team' | 'format'> {
  *********************************************************************/
 
 export type PSLoginState = { error?: string, success?: true, name?: string, needsPassword?: true, needsGoogle?: true };
-class PSUser extends PSStreamModel<PSLoginState | null> {
+export class PSUser extends PSStreamModel<PSLoginState | null> {
 	name = "";
 	group = '';
 	userid = "" as ID;
@@ -666,47 +666,20 @@ class PSUser extends PSStreamModel<PSLoginState | null> {
 		}
 		this.loggingIn = name;
 		this.update(null);
-		PSLoginServer.rawQuery(
-			'getassertion', { userid, challstr: this.challstr }
-		).then(res => {
-			this.handleAssertion(name, res);
+		OfficialAuth.getAssertion(this).then(res => {
+			if (res === null) {
+				OfficialAuth.authorize(this);
+			} else {
+				this.handleAssertion(name, res);
+			}
 			this.updateRegExp();
 		});
 	}
 	changeNameWithPassword(name: string, password: string, special: PSLoginState = { needsPassword: true }) {
-		this.loggingIn = name;
-		if (!password && !special) {
-			this.updateLogin({
-				name,
-				error: "Password can't be empty.",
-				...special as any,
-			});
+		if (!PS.rooms['login']) {
+			PS.join('login' as RoomID);
+			return;
 		}
-		this.update(null);
-		PSLoginServer.query(
-			'login', { name, pass: password, challstr: this.challstr }
-		).then(data => {
-			this.loggingIn = null;
-			if (data?.curuser?.loggedin) {
-				// success!
-				const username = data.curuser.loggedin.username;
-				this.registered = { name: username, userid: toID(username) };
-				this.handleAssertion(name, data.assertion);
-			} else {
-				// wrong password
-				if (special.needsGoogle) {
-					try {
-						// @ts-expect-error gapi included dynamically
-						gapi.auth2.getAuthInstance().signOut();
-					} catch {}
-				}
-				this.updateLogin({
-					name,
-					error: data?.error || 'Wrong password.',
-					...special as any,
-				});
-			}
-		});
 	}
 	updateLogin(update: PSLoginState) {
 		this.update(update);
@@ -751,6 +724,7 @@ class PSUser extends PSStreamModel<PSLoginState | null> {
 		PS.send(`/logout`);
 		PS.connection?.disconnect();
 
+		OfficialAuth.revoke().then();
 		PS.alert("You have been logged out and disconnected.\n\nIf you wanted to change your name while staying connected, use the 'Change Name' button or the '/nick' command.");
 		this.name = "";
 		this.group = '';
@@ -2056,70 +2030,7 @@ export const PS = new class extends PSModel {
 		super.update();
 	}
 
-	handleCustomGroupsMessage(data: string): boolean {
-		if (!data.startsWith('|customgroups|')) return false;
-		console.debug("pre parsing:", data);
-		try {
-			const nlIndex = data.indexOf('\n');
-			if (nlIndex > 0) {
-				// Process any additional messages after the customgroups data
-				this.receive(data.substr(nlIndex + 1));
-			}
-
-			const groupsData = data.slice(14, nlIndex > 0 ? nlIndex : undefined);
-			this.parseGroups(groupsData);
-			return true;
-		} catch (e) { return false; }
-
-	}
-
-	parseGroups(groupsList: string): void {
-		let data: any[] | null = null;
-		try {
-			data = JSON.parse(groupsList);
-		} catch (e) {
-			return;
-		}
-		if (!data) return;
-		console.debug("post-parsing:", data);
-		console.debug(this.server.groups);
-
-		const groups: { [symbol: string]: PSGroup } = {};
-
-		for (let i = 0; i < data.length; i++) {
-			const entry = data[i];
-			console.debug("entry: ", entry);
-			if (!entry) continue;
-
-			const symbol = entry.symbol || ' ';
-			const groupName = entry.name;
-			const groupType = entry.type || 'normal';
-
-			// Handle default positioning for undeclared groups
-			if (groupType === 'normal' && !this.server.defaultGroup.order) {
-				this.server.defaultGroup.order = i + 0.5;
-			}
-			if (!groupName) {
-				this.server.defaultGroup = { order: i + 1 };
-			}
-
-			groups[symbol] = {
-				name: groupName ? BattleLog.escapeHTML(groupName + ' (' + symbol + ')') : undefined,
-				type: groupType as 'leadership' | 'staff' | 'punishment',
-				order: i + 1
-			};
-		}
-
-		this.server.groups = groups;
-		console.debug("Done!", this.server.groups);
-	}
-
 	receive(msg: string) {
-		// Handling the change of rooms here. The message pisses me off. Unhappy with how this is done but it is what it is.
-		if (this.handleCustomGroupsMessage(msg)) {
-			return;
-		}
-
 		msg = msg.endsWith('\n') ? msg.slice(0, -1) : msg;
 		let roomid = '' as RoomID;
 		if (msg.startsWith('>')) {

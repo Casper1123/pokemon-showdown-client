@@ -1,3 +1,5 @@
+import { OfficialAuth } from "../../src/official-auth";
+
 export = preact;
 export as namespace preact;
 
