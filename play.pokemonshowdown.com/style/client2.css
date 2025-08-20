@@ -1068,10 +1068,10 @@ form.menugroup {
 	position: absolute;
 	left: -30px;
 	bottom: -5px;
-	background: url(https://play.pokemonshowdown.com/sprites/gen5/meloetta.png) center no-repeat;
+	background: url(https://play.pokemonshowdown.com/sprites/gen5/wooloo.png) center no-repeat;
 }
 .roomcounters .button:hover .usercount {
-	background: url(https://play.pokemonshowdown.com/sprites/gen5ani/meloetta.gif) center no-repeat;
+	background: url(https://play.pokemonshowdown.com/sprites/gen5ani/wooloo.gif) center no-repeat;
 }
 .roomcounters .battlecount {
 	display: block;
@@ -1080,10 +1080,10 @@ form.menugroup {
 	position: absolute;
 	right: -30px;
 	bottom: -10px;
-	background: url(https://play.pokemonshowdown.com/sprites/gen5/meloetta-pirouette.png) center no-repeat;
+	background: url(https://play.pokemonshowdown.com/sprites/gen5/snom.png) center no-repeat;
 }
 .roomcounters .button:hover .battlecount {
-	background: url(https://play.pokemonshowdown.com/sprites/gen5ani/meloetta-pirouette.gif) center no-repeat;
+	background: url(https://play.pokemonshowdown.com/sprites/gen5ani/snom.gif) center no-repeat;
 }
 
 .roomlist {
