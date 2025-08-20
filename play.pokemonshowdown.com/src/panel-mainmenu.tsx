@@ -130,7 +130,13 @@ export class MainMenuRoom extends PSRoom {
 				if (res.loggedin) {
 					PS.user.registered = { name: res.username, userid: toID(res.username) };
 				}
-				OfficialAuth.getAssertion(PS.user).then(ass => PS.user.handleAssertion(res.username, ass));
+				OfficialAuth.getAssertion(PS.user).then(ass => {
+					if (ass === null) {
+						OfficialAuth.authorize(PS.user);
+					} else {
+						PS.user.handleAssertion(res.username, ass);
+					}
+				});
 			});
 			return;
 		} case 'updateuser': {

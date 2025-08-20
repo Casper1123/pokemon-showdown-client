@@ -1,4 +1,4 @@
-import type {PSUser} from "./client-main";
+import { Config, PS, type PSUser, type RoomID } from "./client-main";
 
 export class OfficialAuthError extends Error {
 	constructor(operation: string, statusCode: number | null = null) {
@@ -13,9 +13,9 @@ export class OfficialAuthError extends Error {
  * Please check pre and post conditions.
  */
 export const OfficialAuth = new class {
-	apiUrl = "play.pokemonshowdown.com/api/oauth/";
-	clientId = ""; // Todo: fill in once received.
-	redirectURI = "";
+	apiUrl = "https://play.pokemonshowdown.com/api/oauth/";
+	clientId = "7065ebd4d6219ec30a4b";
+	redirectURI = Config.routes.client;
 
 	/**
 	 * Returns a new URL object with the given api endpoint.
@@ -47,6 +47,9 @@ export const OfficialAuth = new class {
 		if (tokenExpiry >= now){
 			return false; // Equal because it takes a tiny bit of time to send and process the request. Might not even be large enough a buffer.
 		}
+		if (now < tokenExpiry - 259200) {
+			return true; // Only refresh if token still lasts for like 3 days or so. Just hope it's not invalidated.
+		}
 
 		const response = await fetch(this.requestUrl("api/refreshtoken"), {
 			method: "POST",
@@ -54,8 +57,8 @@ export const OfficialAuth = new class {
 				'Content-Type': 'application/x-www-form-urlencoded',
 			},
 			body: new URLSearchParams({
-				client_id: this.clientId,
-				token: token,
+				client_id: encodeURIComponent(this.clientId),
+				token: encodeURIComponent(token),
 			})
 		})
 
@@ -83,10 +86,12 @@ export const OfficialAuth = new class {
 	 * @param user The user to authorize.
 	 */
 	authorize(user: PSUser): void {
+		this.clearTokenStorage();
+
 		const authorizeUrl = this.requestUrl("authorize");
-		authorizeUrl.searchParams.append('redirect_uri', this.redirectURI);
-		authorizeUrl.searchParams.append('client_id', this.clientId);
-		authorizeUrl.searchParams.append('challenge', user.challstr);
+		authorizeUrl.searchParams.append('redirect_uri', encodeURIComponent(this.redirectURI));
+		authorizeUrl.searchParams.append('client_id', encodeURIComponent(this.clientId));
+		authorizeUrl.searchParams.append('challenge', encodeURIComponent(user.challstr));
 
 		const popup = window.open(authorizeUrl, undefined, 'popup=1');
 		const checkIfUpdated = () => {
@@ -94,14 +99,14 @@ export const OfficialAuth = new class {
 				if (popup?.closed) { return null; } // Give up.
 				else if (popup?.location?.href?.startsWith(this.redirectURI)) {
 					const url = new URL(popup.location.href);
-					const token = url.searchParams.get('token');
+					const token = decodeURIComponent(url.searchParams.get('token') as string);
 					if (!token) {
 						console.error('Received no token')
 						return;
 					}
 					localStorage.setItem('ps-token', token);
 
-					const tokenExpiry = url.searchParams.get('expires');
+					const tokenExpiry = decodeURIComponent(url.searchParams.get('expires') as string);
 					if (!tokenExpiry) {
 						console.error('Received no token expiry');
 						return;
@@ -109,13 +114,19 @@ export const OfficialAuth = new class {
 					// @ts-ignore if an expiry timestamp has been received, it's safe to assume it's a number. If not, make an issue here: https://github.com/smogon/pokemon-showdown-loginserver
 					localStorage.setItem('ps-token-expiry', Number(tokenExpiry))
 
-					const assertion = url.searchParams.get('assertion');
+					const assertion = decodeURIComponent(url.searchParams.get('assertion') as string);
 					if (!assertion) {
 						console.error('Received no assertion');
 						return;
 					}
+					const username = decodeURIComponent(url.searchParams.get('user') as string);
+					if (!username) {
+						console.error('Received no username');
+						return;
+					}
 					popup.close();
-					user.handleAssertion(user.name, assertion);
+					PS.leave('login' as RoomID); // Close login popup if it's open.
+					user.handleAssertion(username, assertion);
 				} else {
 					setTimeout(checkIfUpdated, 500);
 				}
@@ -144,9 +155,9 @@ export const OfficialAuth = new class {
 				'Content-Type': 'application/x-www-form-urlencoded',
 			},
 			body: new URLSearchParams({
-				client_id: this.clientId,
-				challenge: user.challstr,
-				token: token as string, // Casting because token === null is excluded by Authorized.
+				client_id: encodeURIComponent(this.clientId),
+				challenge: encodeURIComponent(user.challstr),
+				token: encodeURIComponent(token as string), // Casting because token === null is excluded by Authorized.
 			})
 		})
 
@@ -162,7 +173,6 @@ export const OfficialAuth = new class {
 	}
 
 	async revoke() {
-		// todo: Revoke token access here.
 		// oauth/api/revoke: { success: boolean }
 		// We can ignore the token access check, because it should revoke all things for this client_id anyways.
 		const response = await fetch(this.requestUrl("api/revoke"), {
@@ -171,7 +181,7 @@ export const OfficialAuth = new class {
 				'Content-Type': 'application/x-www-form-urlencoded',
 			},
 			body: new URLSearchParams({
-				uri: this.redirectURI
+				uri: encodeURIComponent(this.redirectURI)
 			})
 		})
 

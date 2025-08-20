@@ -667,44 +667,19 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 		this.loggingIn = name;
 		this.update(null);
 		OfficialAuth.getAssertion(this).then(res => {
-			this.handleAssertion(name, res);
+			if (res === null) {
+				OfficialAuth.authorize(this);
+			} else {
+				this.handleAssertion(name, res);
+			}
 			this.updateRegExp();
 		});
 	}
 	changeNameWithPassword(name: string, password: string, special: PSLoginState = { needsPassword: true }) {
-		this.loggingIn = name;
-		if (!password && !special) {
-			this.updateLogin({
-				name,
-				error: "Password can't be empty.",
-				...special as any,
-			});
+		if (!PS.rooms['login']) {
+			PS.join('login' as RoomID);
+			return;
 		}
-		this.update(null);
-		PSLoginServer.query(
-			'login', { name, pass: password, challstr: this.challstr }
-		).then(data => {
-			this.loggingIn = null;
-			if (data?.curuser?.loggedin) {
-				// success!
-				const username = data.curuser.loggedin.username;
-				this.registered = { name: username, userid: toID(username) };
-				OfficialAuth.authorize(this);
-			} else {
-				// wrong password
-				if (special.needsGoogle) {
-					try {
-						// @ts-expect-error gapi included dynamically
-						gapi.auth2.getAuthInstance().signOut();
-					} catch {}
-				}
-				this.updateLogin({
-					name,
-					error: data?.error || 'Wrong password.',
-					...special as any,
-				});
-			}
-		});
 	}
 	updateLogin(update: PSLoginState) {
 		this.update(update);

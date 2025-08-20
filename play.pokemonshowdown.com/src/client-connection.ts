@@ -397,15 +397,12 @@ PSConnection.connect();
 
 export const PSLoginServer = new class {
 	rawQuery(act: string, data: PostData): Promise<string | null> {
-		if (["upkeep", "login"].includes(act)) {
-			console.warn("a raw request of act", act, "is not allowed to go through the PSLoginServer class. How did this get here?")
-		}
 		// commenting out because for some reason this is working in Chrome????
 		// if (location.protocol === 'file:') {
 		// 	alert("Sorry, login server queries don't work in the testclient. To log in, see README.md to set up testclient-key.js");
 		// 	return Promise.resolve(null);
 		// }
-		data.act = act; // todo: act is the type of request you want to do.
+		data.act = act;
 		let url = 'https://play.pokemonshowdown.com/api/'; // For official api oauth.
 		if (location.pathname.endsWith('.html')) {
 			if (typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY === 'string') {
@@ -419,7 +416,6 @@ export const PSLoginServer = new class {
 		);
 	}
 	query(act: string, data: PostData = {}): Promise<{ [k: string]: any } | null> {
-		// Todo: this is where queries are placed with corresponding data. Is this where we should intercept?
 		return this.rawQuery(act, data).then(
 			res => res ? JSON.parse(res.slice(1)) : null
 		).catch(
