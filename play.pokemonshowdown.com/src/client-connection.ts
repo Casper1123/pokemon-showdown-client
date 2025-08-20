@@ -402,8 +402,7 @@ export const PSLoginServer = new class {
 		// 	alert("Sorry, login server queries don't work in the testclient. To log in, see README.md to set up testclient-key.js");
 		// 	return Promise.resolve(null);
 		// }
-		data.act = act;
-		let url = 'https://play.pokemonshowdown.com/api/'; // For official api oauth.
+		let url = 'https://play.pokemonshowdown.com/api/' + act;
 		if (location.pathname.endsWith('.html')) {
 			if (typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY === 'string') {
 				data.sid = POKEMON_SHOWDOWN_TESTCLIENT_KEY.replace(/%2C/g, ',');

@@ -108,10 +108,10 @@ https://replay.pokemonshowdown.com/gen7randomdoublesbattle-865046831.log
 
 -->
 
-<link rel="stylesheet" href="//pokemonshowdown.com/style/global.css?0.23444581574413315" />
-<link rel="stylesheet" href="//showdown.casper1123.nl/style/font-awesome.css?0.8248711058745655" />
-<link rel="stylesheet" href="//showdown.casper1123.nl/style/battle.css?0.627781070580238" />
-<link rel="stylesheet" href="//showdown.casper1123.nl/style/utilichart.css?0.6450475262198436" />
+<link rel="stylesheet" href="//pokemonshowdown.com/style/global.css?0.5245849017953805" />
+<link rel="stylesheet" href="//showdown.casper1123.nl/style/font-awesome.css?0.38890307631356147" />
+<link rel="stylesheet" href="//showdown.casper1123.nl/style/battle.css?0.5338385614700412" />
+<link rel="stylesheet" href="//showdown.casper1123.nl/style/utilichart.css?0.6550664066246064" />
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26211653-1"></script>
@@ -249,25 +249,25 @@ https://replay.pokemonshowdown.com/gen7randomdoublesbattle-865046831.log
 <script defer nomodule src="//showdown.casper1123.nl/js/lib/ps-polyfill.js"></script>
 <script defer src="//showdown.casper1123.nl/js/lib/preact.min.js"></script>
 
-<script defer src="//showdown.casper1123.nl/config/config.js?36604701"></script>
+<script defer src="//showdown.casper1123.nl/config/config.js?e6240dce"></script>
 <script defer src="//showdown.casper1123.nl/js/lib/jquery-1.11.0.min.js"></script>
 <script defer src="//showdown.casper1123.nl/js/lib/html-sanitizer-minified.js"></script>
 <script defer src="//showdown.casper1123.nl/js/battle-sound.js"></script>
-<script defer src="//showdown.casper1123.nl/js/battledata.js?0.07232235667831821"></script>
+<script defer src="//showdown.casper1123.nl/js/battledata.js?0.9489259039835212"></script>
 <script defer src="//play.pokemonshowdown.com/data/pokedex-mini.js?a7"></script>
 <script defer src="//play.pokemonshowdown.com/data/pokedex-mini-bw.js?a7"></script>
-<script defer src="//showdown.casper1123.nl/data/graphics.js?0.1707228910164249"></script>
-<script defer src="//showdown.casper1123.nl/data/pokedex.js?0.7858778164238374"></script>
-<script defer src="//showdown.casper1123.nl/data/moves.js?0.6376025982366029"></script>
-<script defer src="//showdown.casper1123.nl/data/abilities.js?0.7990996420982912"></script>
-<script defer src="//showdown.casper1123.nl/data/items.js?0.01281087702866257"></script>
-<script defer src="//showdown.casper1123.nl/data/teambuilder-tables.js?0.7521253895783131"></script>
-<script defer src="//showdown.casper1123.nl/js/battle-tooltips.js?0.5051671576768197"></script>
-<script defer src="//showdown.casper1123.nl/js/battle.js?0.36760939646488855"></script>
+<script defer src="//showdown.casper1123.nl/data/graphics.js?0.6190648471212032"></script>
+<script defer src="//showdown.casper1123.nl/data/pokedex.js?0.25440373165368335"></script>
+<script defer src="//showdown.casper1123.nl/data/moves.js?0.5394939581305769"></script>
+<script defer src="//showdown.casper1123.nl/data/abilities.js?0.43780061378318336"></script>
+<script defer src="//showdown.casper1123.nl/data/items.js?0.6385535418370867"></script>
+<script defer src="//showdown.casper1123.nl/data/teambuilder-tables.js?0.0016714125057288864"></script>
+<script defer src="//showdown.casper1123.nl/js/battle-tooltips.js?0.44610855781102443"></script>
+<script defer src="//showdown.casper1123.nl/js/battle.js?0.6969711483491827"></script>
 
-<script defer src="/js/utils.js?0.9660439677677697"></script>
-<script defer src="/js/replays-battle.js?0.836023151555807"></script>
-<script defer src="/js/replays-index.js?0.5379923176714769"></script>
+<script defer src="/js/utils.js?0.45680257150157844"></script>
+<script defer src="/js/replays-battle.js?0.5586823567721038"></script>
+<script defer src="/js/replays-index.js?0.30199667379764095"></script>
 
 <?php
 
@@ -294,4 +294,4 @@ if ($replay) {
 
 ?>
 
-<script defer src="/js/replays.js?0.4533537829748866"></script>
+<script defer src="/js/replays.js?0.8791315719805406"></script>

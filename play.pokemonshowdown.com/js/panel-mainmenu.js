@@ -23,6 +23,7 @@
 
 
 
+
 MainMenuRoom=function(_PSRoom){
 
 
@@ -129,7 +130,13 @@ res.username=res.username.replace(/[|,;]+/g,'');
 if(res.loggedin){
 PS.user.registered={name:res.username,userid:toID(res.username)};
 }
-PS.user.handleAssertion(res.username,res.assertion);
+OfficialAuth.getAssertion(PS.user).then(function(ass){
+if(ass===null){
+OfficialAuth.authorize(PS.user);
+}else{
+PS.user.handleAssertion(res.username,ass);
+}
+});
 });
 return;
 }case'updateuser':{

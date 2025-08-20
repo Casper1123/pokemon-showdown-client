@@ -10,6 +10,7 @@
 
 
 
+
 PSConnection=function(){
 
 
@@ -225,7 +226,6 @@ PSStorage=function(){function PSStorage(){}PSStorage.
 
 
 init=function init(){var _this5=this;
-
 if(this.loaded){
 if(this.loaded===true)return;
 return this.loaded;
@@ -244,23 +244,17 @@ if(!('postMessage'in window)){
 PS.alert("Sorry, psim connections are unsupported by your browser.");
 return;
 }
-
 window.addEventListener('message',this.onMessage);
-console.log("Checking for crossdomain:",document.location.hostname!=="play.pokemon"+"showdown.com",document.location.hostname,"play.pokemon"+"showdown.com");
 
 if(document.location.hostname!==Config.routes.client){
-
-console.log("Called for crossdomain. document location hostname:",document.location.hostname,"Config routes client:",Config.routes.client,"compared to","play.pokemon"+"showdown.com");
 var iframe=document.createElement('iframe');
-iframe.src='https://'+"play.pokemon"+"showdown.com"+'/crossdomain.php?host='+
-encodeURIComponent(document.location.hostname)+
+iframe.src='https://'+Config.routes.client+'/crossdomain.php?host='+
+encodeURIComponent(document.location.hostname.replace(".","-").replace(".","-"))+
 '&path='+encodeURIComponent(document.location.pathname.substr(1))+
 '&protocol='+encodeURIComponent(document.location.protocol);
 iframe.style.display='none';
 document.body.appendChild(iframe);
-console.log("Appended iframe. Source:",iframe.src);
 }else{var _Config2;
-console.log("Failed crossdomain check. Running");
 (_Config2=Config).server||(_Config2.server=Config.defaultserver);
 $("<iframe src=\"https://"+
 Config.routes.client+"/crossprotocol.html\" style=\"display: none;\"></iframe>"
@@ -382,13 +376,22 @@ PSStorage.postCrossOriginMessage((type==='GET'?'R':'S')+JSON.stringify([uri,data
 };return PSStorage;}();_PSStorage=PSStorage;PSStorage.frame=null;PSStorage.requests=null;PSStorage.requestCount=0;PSStorage.origin="https://"+Config.routes.client;PSStorage.loader=void 0;PSStorage.loaded=false;PSStorage.onMessage=function(e){if(e.origin!==_PSStorage.origin)return;_PSStorage.frame=e.source;var data=e.data;switch(data.charAt(0)){case'c':Config.server=JSON.parse(data.substr(1));if(Config.server.registered&&Config.server.id!=='showdown'&&Config.server.id!=='smogtours'){var link=document.createElement('link');link.rel='stylesheet';link.href="//"+Config.routes.client+"/customcss.php?server="+encodeURIComponent(Config.server.id);document.head.appendChild(link);}Object.assign(PS.server,Config.server);break;case'p':var newData=JSON.parse(data.substr(1));if(newData)PS.prefs.load(newData,true);PS.prefs.save=function(){var prefData=JSON.stringify(PS.prefs.storage);_PSStorage.postCrossOriginMessage('P'+prefData);try{localStorage.setItem('showdown_prefs',prefData);}catch(_unused3){}};PS.prefs.update(null);break;case't':if(window.nodewebkit)return;var oldTeams;if(PS.teams.list.length){oldTeams=PS.teams.list;}PS.teams.unpackAll(data.substr(1));PS.teams.save=function(){var packedTeams=PS.teams.packAll(PS.teams.list);_PSStorage.postCrossOriginMessage('T'+packedTeams);if(document.location.hostname===Config.routes.client){try{localStorage.setItem('showdown_teams_local',packedTeams);}catch(_unused4){}}PS.teams.update('team');};if(oldTeams){PS.teams.list=PS.teams.list.concat(oldTeams);PS.teams.save();localStorage.removeItem('showdown_teams');}if(data==='tnull'&&!PS.teams.list.length){PS.teams.unpackAll(localStorage.getItem('showdown_teams_local'));}break;case'a':if(data==='a0'){PS.alert("Your browser doesn't support third-party cookies. Some things might not work correctly.");}if(!window.nodewebkit){try{_PSStorage.frame.postMessage("",_PSStorage.origin);}catch(_unused5){return;}_PSStorage.requests={};}_PSStorage.loaded=true;_PSStorage.loader==null||_PSStorage.loader();_PSStorage.loader=undefined;break;case'r':var reqData=JSON.parse(data.slice(1));var idx=reqData[0];if(_PSStorage.requests[idx]){_PSStorage.requests[idx](reqData[1]);delete _PSStorage.requests[idx];}break;}};PSStorage.
 postCrossOriginMessage=function(data){
 try{
+var targetOrigin=_PSStorage.origin;
 
-return _PSStorage.frame.postMessage(data,_PSStorage.origin);
+if(data.startsWith('S')||data.startsWith('R')){
+var requestData=JSON.parse(data.substr(1));
+var url=requestData[0];
+if(url&&url.includes('/action.php')&&url.includes('play.pokemonshowdown.com')){
+targetOrigin='https://play.pokemonshowdown.com';
+}
+}
+
+return _PSStorage.frame.postMessage(data,targetOrigin);
 }catch(_unused6){
 }
 return false;
 };
-;
+
 
 PSConnection.connect();
 
@@ -400,11 +403,8 @@ rawQuery=function rawQuery(act,data){
 
 
 data.act=act;
-var url='/~~'+PS.server.id+'/action.php';
+var url='https://play.pokemonshowdown.com/api/';
 if(location.pathname.endsWith('.html')){
-
-
-url='https://'+"play.pokemon"+"showdown.com"+url;
 if(typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY==='string'){
 data.sid=POKEMON_SHOWDOWN_TESTCLIENT_KEY.replace(/%2C/g,',');
 }
