@@ -44,10 +44,10 @@ export const OfficialAuth = new class {
 			return false;
 		}
 		const now = Date.now();
-		if (tokenExpiry >= now){
+		if (tokenExpiry <= now) {
 			return false; // Equal because it takes a tiny bit of time to send and process the request. Might not even be large enough a buffer.
 		}
-		if (now < tokenExpiry - 259200) {
+		if (now < tokenExpiry - 259200000) {
 			return true; // Only refresh if token still lasts for like 3 days or so. Just hope it's not invalidated.
 		}
 
