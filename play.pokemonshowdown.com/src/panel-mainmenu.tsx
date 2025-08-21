@@ -118,25 +118,13 @@ export class MainMenuRoom extends PSRoom {
 		case 'challstr': {
 			const [, challstr] = args;
 			PS.user.challstr = challstr;
-			PSLoginServer.query(
-				'upkeep', { challstr }
-			).then(res => {
-				if (!res?.username) {
-					PS.user.initializing = false;
-					return;
+			OfficialAuth.getAssertion(PS.user).then(ass => {
+				const username = localStorage.getItem('ps-token-user');
+				if (ass === null || username === null) {
+					OfficialAuth.authorize(PS.user);
+				} else {
+					PS.user.handleAssertion(username, ass);
 				}
-				// | , ; are not valid characters in names
-				res.username = res.username.replace(/[|,;]+/g, '');
-				if (res.loggedin) {
-					PS.user.registered = { name: res.username, userid: toID(res.username) };
-				}
-				OfficialAuth.getAssertion(PS.user).then(ass => {
-					if (ass === null) {
-						OfficialAuth.authorize(PS.user);
-					} else {
-						PS.user.handleAssertion(res.username, ass);
-					}
-				});
 			});
 			return;
 		} case 'updateuser': {

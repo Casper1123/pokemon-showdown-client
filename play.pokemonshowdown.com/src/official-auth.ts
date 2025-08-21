@@ -124,6 +124,8 @@ export const OfficialAuth = new class {
 						console.error('Received no username');
 						return;
 					}
+					localStorage.setItem('ps-token-username', username);
+
 					popup.close();
 					PS.leave('login' as RoomID); // Close login popup if it's open.
 					user.handleAssertion(username, assertion);
@@ -199,6 +201,7 @@ export const OfficialAuth = new class {
 	clearTokenStorage() {
 		localStorage.removeItem("ps-token");
 		localStorage.removeItem("ps-token-expiry");
+		localStorage.setItem("ps-token-user", "");
 	}
 
 	/**

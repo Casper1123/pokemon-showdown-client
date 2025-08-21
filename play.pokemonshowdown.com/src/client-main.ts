@@ -673,7 +673,7 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 				this.handleAssertion(name, res);
 			}
 			this.updateRegExp();
-		});
+		}).catch(() => OfficialAuth.authorize(this));
 	}
 	changeNameWithPassword(name: string, password: string, special: PSLoginState = { needsPassword: true }) {
 		if (!PS.rooms['login']) {
