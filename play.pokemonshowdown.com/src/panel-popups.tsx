@@ -152,7 +152,7 @@ class UserPanel extends PSRoomPanel<UserRoom> {
 				buttonbar.push(
 					<hr />,
 					<p class="buttonbar" style="text-align: right">
-						<button class="button" data-href="login"><i class="fa fa-pencil" aria-hidden></i> Change name</button> {}
+						<button class="button" data-href="login"><i class="fa fa-pencil" aria-hidden></i> Log in</button> {}
 						<button class="button" data-cmd="/logout"><i class="fa fa-power-off" aria-hidden></i> Log out</button>
 					</p>
 				);
@@ -798,7 +798,7 @@ class OptionsPanel extends PSRoomPanel {
 			</p>
 			<hr />
 			{PS.user.named ? <p class="buttonbar" style="text-align: right">
-				<button class="button" data-href="login"><i class="fa fa-pencil" aria-hidden></i> Change name</button> {}
+				<button class="button" data-href="login"><i class="fa fa-pencil" aria-hidden></i> Log in</button> {}
 				<button class="button" data-cmd="/logout"><i class="fa fa-power-off" aria-hidden></i> Log out</button>
 			</p> : <p class="buttonbar" style="text-align: right">
 				<button class="button" data-href="login"><i class="fa fa-pencil" aria-hidden></i> Choose name</button>
