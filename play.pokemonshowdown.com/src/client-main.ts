@@ -2805,7 +2805,7 @@ export const OfficialAuth = new class {
 		this.clearTokenStorage();
 
 		const authorizeUrl = this.requestUrl("authorize");
-		authorizeUrl.searchParams.append('redirect_uri', encodeURIComponent(this.redirectURI));
+		authorizeUrl.searchParams.append('redirect_uri', this.redirectURI);
 		authorizeUrl.searchParams.append('client_id', encodeURIComponent(this.clientId));
 		authorizeUrl.searchParams.append('challenge', encodeURIComponent(user.challstr));
 
