@@ -2760,8 +2760,8 @@ export const OfficialAuth = new class {
 		if (tokenExpiry <= now) {
 			return false; // Equal because it takes a tiny bit of time to send and process the request. Might not even be large enough a buffer.
 		}
-		if (now < tokenExpiry - 259200000) {
-			return true; // Only refresh if token still lasts for like 3 days or so. Just hope it's not invalidated.
+		if (now < tokenExpiry - 1123200000) {
+			return true; // Only refresh if token it's more than a day old.
 		}
 
 		const response = await fetch(this.requestUrl("api/refreshtoken"), {
