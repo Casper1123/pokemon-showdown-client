@@ -2793,12 +2793,15 @@ export const OfficialAuth = new class {
 		return true;
 	}
 
+	activeAuthRequest: boolean = false;
 	/**
 	 * Requests authorization from the user by opening a popup to the documentation defined endpoint.
 	 * Will log in the user once it's done.
 	 * @param user The user to authorize.
 	 */
 	authorize(user: PSUser): void {
+		if (this.activeAuthRequest) { return; } // Do not open excess popups.
+		this.activeAuthRequest = true;
 		this.clearTokenStorage();
 
 		const authorizeUrl = this.requestUrl("authorize");
@@ -2809,7 +2812,11 @@ export const OfficialAuth = new class {
 		const popup = window.open(authorizeUrl, undefined, 'popup=1');
 		const checkIfUpdated = () => {
 			try {
-				if (popup?.closed) { return null; } // Give up.
+				if (popup?.closed) {
+					this.activeAuthRequest = false;
+					return null;
+				} // Give up.
+
 				else if (popup?.location?.href?.startsWith(this.redirectURI)) {
 					const url = new URL(popup.location.href);
 					const token = decodeURIComponent(url.searchParams.get('token') as string);
@@ -2841,6 +2848,7 @@ export const OfficialAuth = new class {
 
 					popup.close();
 					PS.leave('login' as RoomID); // Close login popup if it's open.
+					this.activeAuthRequest = false;
 					user.handleAssertion(userid, assertion);
 				} else {
 					setTimeout(checkIfUpdated, 500);
