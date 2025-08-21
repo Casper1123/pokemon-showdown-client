@@ -119,16 +119,16 @@ export const OfficialAuth = new class {
 						console.error('Received no assertion');
 						return;
 					}
-					const username = decodeURIComponent(url.searchParams.get('user') as string);
-					if (!username) {
-						console.error('Received no username');
+					const userid = decodeURIComponent(url.searchParams.get('user') as string);
+					if (!userid) {
+						console.error('Received no userid');
 						return;
 					}
-					localStorage.setItem('ps-token-username', username);
+					localStorage.setItem('ps-token-userid', userid);
 
 					popup.close();
 					PS.leave('login' as RoomID); // Close login popup if it's open.
-					user.handleAssertion(username, assertion);
+					user.handleAssertion(userid, assertion);
 				} else {
 					setTimeout(checkIfUpdated, 500);
 				}
@@ -201,7 +201,7 @@ export const OfficialAuth = new class {
 	clearTokenStorage() {
 		localStorage.removeItem("ps-token");
 		localStorage.removeItem("ps-token-expiry");
-		localStorage.setItem("ps-token-user", "");
+		localStorage.setItem("ps-token-userid", "");
 	}
 
 	/**

@@ -119,7 +119,7 @@ export class MainMenuRoom extends PSRoom {
 			const [, challstr] = args;
 			PS.user.challstr = challstr;
 			OfficialAuth.getAssertion(PS.user).then(ass => {
-				const username = localStorage.getItem('ps-token-user');
+				const username = localStorage.getItem('ps-token-userid');
 				if (ass === null || username === null) {
 					OfficialAuth.authorize(PS.user);
 				} else {
