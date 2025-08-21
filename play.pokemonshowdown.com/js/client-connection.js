@@ -10,7 +10,6 @@
 
 
 
-
 PSConnection=function(){
 
 
@@ -402,8 +401,7 @@ rawQuery=function rawQuery(act,data){
 
 
 
-data.act=act;
-var url='https://play.pokemonshowdown.com/api/';
+var url='https://play.pokemonshowdown.com/api/'+act;
 if(location.pathname.endsWith('.html')){
 if(typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY==='string'){
 data.sid=POKEMON_SHOWDOWN_TESTCLIENT_KEY.replace(/%2C/g,',');

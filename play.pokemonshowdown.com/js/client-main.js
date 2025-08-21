@@ -673,7 +673,7 @@ OfficialAuth.authorize(_this5);
 _this5.handleAssertion(name,res);
 }
 _this5.updateRegExp();
-});
+})["catch"](function(){return OfficialAuth.authorize(_this5);});
 };_proto3.
 changeNameWithPassword=function changeNameWithPassword(name,password){var special=arguments.length>2&&arguments[2]!==undefined?arguments[2]:{needsPassword:true};
 if(!PS.rooms['login']){

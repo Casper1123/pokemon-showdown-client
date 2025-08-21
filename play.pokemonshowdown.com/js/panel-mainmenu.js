@@ -118,25 +118,13 @@ switch(cmd){
 case'challstr':{
 var challstr=args[1];
 PS.user.challstr=challstr;
-PSLoginServer.query(
-'upkeep',{challstr:challstr}
-).then(function(res){
-if(!(res!=null&&res.username)){
-PS.user.initializing=false;
-return;
-}
-
-res.username=res.username.replace(/[|,;]+/g,'');
-if(res.loggedin){
-PS.user.registered={name:res.username,userid:toID(res.username)};
-}
 OfficialAuth.getAssertion(PS.user).then(function(ass){
-if(ass===null){
+var username=localStorage.getItem('ps-token-userid');
+if(ass===null||username===null){
 OfficialAuth.authorize(PS.user);
 }else{
-PS.user.handleAssertion(res.username,ass);
+PS.user.handleAssertion(username,ass);
 }
-});
 });
 return;
 }case'updateuser':{

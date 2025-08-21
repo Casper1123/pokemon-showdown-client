@@ -44,10 +44,10 @@ if(!tokenExpiry){
 return false;
 }
 var now=Date.now();
-if(tokenExpiry>=now){
+if(tokenExpiry<=now){
 return false;
 }
-if(now<tokenExpiry-259200){
+if(now<tokenExpiry-259200000){
 return true;
 }
 
@@ -119,14 +119,16 @@ if(!assertion){
 console.error('Received no assertion');
 return;
 }
-var username=decodeURIComponent(url.searchParams.get('user'));
-if(!username){
-console.error('Received no username');
+var userid=decodeURIComponent(url.searchParams.get('user'));
+if(!userid){
+console.error('Received no userid');
 return;
 }
+localStorage.setItem('ps-token-userid',userid);
+
 popup.close();
 PS.leave('login');
-user.handleAssertion(username,assertion);
+user.handleAssertion(userid,assertion);
 }else{
 setTimeout(checkIfUpdated,500);
 }
@@ -199,6 +201,7 @@ this.clearTokenStorage();
 clearTokenStorage=function clearTokenStorage(){
 localStorage.removeItem("ps-token");
 localStorage.removeItem("ps-token-expiry");
+localStorage.setItem("ps-token-userid","");
 };_proto.
 
 
