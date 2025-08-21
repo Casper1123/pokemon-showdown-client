@@ -6,7 +6,6 @@
  */
 
 import { Config, PS } from "./client-main";
-import { OfficialAuth } from "./official-auth";
 
 declare const SockJS: any;
 declare const POKEMON_SHOWDOWN_TESTCLIENT_KEY: string | undefined;
