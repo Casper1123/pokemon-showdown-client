@@ -717,20 +717,16 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 		}
 	}
 	logOut() {
-		PSLoginServer.query(
-			'logout', { userid: this.userid }
-		);
-		PS.send(`/logout`);
-		PS.connection?.disconnect();
-
-		OfficialAuth.revoke().then();
-		PS.alert("You have been logged out and disconnected.\n\nIf you wanted to change your name while staying connected, use the 'Change Name' button or the '/nick' command.");
-		this.name = "";
-		this.group = '';
-		this.userid = "" as ID;
-		this.named = false;
-		this.registered = null;
-		this.update(null);
+		OfficialAuth.revoke().then(() => {
+			PS.send(`/logout`);
+			PS.alert("You have been logged out.\n\nIf you wanted to change your name while staying connected, use the 'Change Name' button or the '/nick' command.");
+			this.name = "";
+			this.group = '';
+			this.userid = "" as ID;
+			this.named = false;
+			this.registered = null;
+			this.update(null);
+		});
 	}
 
 	updateRegExp() {
@@ -2819,19 +2815,19 @@ export const OfficialAuth = new class {
 						console.debug("url:", url);
 						const token = url.searchParams.get('token');
 						console.debug('token', token);
-						if (!token) {
+						if (!token || token === "null") {
 							console.error('Received no token');
 						} else {
 							localStorage.setItem('ps-token', decodeURIComponent(token as string));
 						}
 
-						const tokenExpiry = url.searchParams.get('expires');
+						let tokenExpiry = url.searchParams.get('expires');
 						console.debug('tokenExpiry', tokenExpiry);
 						if (!tokenExpiry) {
-							console.error('Received no token expiry'); // FIXME: token expiry seems to be optional.
+							localStorage.setItem('ps-token-expiry', String(Date.now() + 1209600000)); // Now + 13 days (shaves off a bit yes, but that's fine imo)
 						} else {
 							// @ts-ignore if an expiry timestamp has been received, it's safe to assume it's a number. If not, make an issue here: https://github.com/smogon/pokemon-showdown-loginserver
-							localStorage.setItem('ps-token-expiry', Number(decodeURIComponent(tokenExpiry  as string)));
+							localStorage.setItem('ps-token-expiry', decodeURIComponent(tokenExpiry  as string));
 						}
 
 
@@ -2939,16 +2935,18 @@ export const OfficialAuth = new class {
 		let reauth = false;
 		if (!token) {
 			reauth = true;
-		} else if (!tokenExpiry_string) {
+		} else if (!tokenExpiry_string || tokenExpiry_string === "") {
 			refresh = true;
 		}
 
-		try {
-			const tokenExpiry = Number(tokenExpiry_string);
-			if (tokenExpiry <= Date.now()) {
-				refresh = true;
-			}
-		} catch (e) { reauth = true; } // If it fails, well be damned we should probably just try from scratch.
+		if (!refresh) {
+			try {
+				const tokenExpiry = Number(tokenExpiry_string);
+				if (tokenExpiry <= Date.now()) {
+					refresh = true;
+				}
+			} catch (e) { reauth = true; } // If it fails, well be damned we should probably just try from scratch.
+		}
 
 		if (refresh && !reauth) { // Skip if reauth because it's already been determined to not be a good idea.
 			const success = await this.refreshToken();
@@ -2956,11 +2954,6 @@ export const OfficialAuth = new class {
 				reauth = true;
 			}
 		}
-
-		if (reauth) {
-			return false; // Returning empty. Just display the login error. It's not my problem (for now)
-		}
-
-		return true;
+		return !reauth;
 	}
 }
