@@ -2813,8 +2813,8 @@ export const OfficialAuth = new class {
 
 		const popup = window.open(authorizeUrl, undefined, 'popup=1');
 		const checkIfUpdated = () => {
-			console.debug("Checking popup at", popup?.location, "Active auth request:", this.activeAuthRequest, "Redirecturi:", this.redirectURI, "popup location href:", popup?.location?.href);
 			try {
+				console.debug("Checking popup at", popup?.location, "Active auth request:", this.activeAuthRequest, "Redirecturi:", this.redirectURI, "popup location href:", popup?.location);
 				if (popup?.location?.href?.startsWith(this.redirectURI)) {
 					console.debug("Processing.")
 					popup.close();
@@ -2846,7 +2846,7 @@ export const OfficialAuth = new class {
 					}
 					const userid = decodeURIComponent(url.searchParams.get('user') as string);
 					console.debug('userid', userid);
-					if (!userid) {
+					if (!userid || userid === "undefined") { // Note: If userid undefined logs in it's impossible lmao.
 						console.error('Received no userid');
 					}
 					localStorage.setItem('ps-token-userid', userid);
