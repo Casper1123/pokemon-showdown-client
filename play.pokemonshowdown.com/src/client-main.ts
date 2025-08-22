@@ -2810,11 +2810,12 @@ export const OfficialAuth = new class {
 		const checkIfUpdated = () => {
 			try {
 				console.debug("Checking popup at", popup?.location, "Redirecturi:", this.redirectURI, "popup location href:", popup?.location);
-				if (popup?.location?.origin.startsWith(this.redirectURI)) {
+				if (popup?.location?.href?.startsWith(this.redirectURI)) {
 					console.debug("Processing.")
+					popup.close();
 
-					const url = new URL(JSON.parse(JSON.stringify(popup.location))["href"]);
-					console.debug(url.toString());
+					const url = new URL(popup.location.href);
+					console.debug("url:", url);
 					const token = decodeURIComponent(url.searchParams.get('token') as string);
 					console.debug('token', token);
 					if (!token) {
@@ -2846,7 +2847,6 @@ export const OfficialAuth = new class {
 					localStorage.setItem('ps-token-userid', userid);
 
 					PS.leave('login' as RoomID); // Close login popup if it's open.
-					popup.close();
 					user.handleAssertion(userid, assertion);
 				} else {
 					console.debug("Setting timeout.");
