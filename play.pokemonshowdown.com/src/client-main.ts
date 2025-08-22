@@ -2883,16 +2883,8 @@ export const OfficialAuth = new class {
 				token: encodeURIComponent(token as string), // Casting because token === null is excluded by Authorized.
 			})
 		})
-
-		const responseText = await response.text();
-		// Remove the ']' CSRF protection prefix
-		const jsonData = responseText.startsWith(']') ? responseText.slice(1) : responseText;
-		const data = JSON.parse(jsonData);
-		// oauth/api/getassertion: { success: false } | string
-		if (typeof data !== "string") {
-			throw new OfficialAuthError(`getAssertion`, data.status);
-		}
-		return data; // This is our assertion!
+		
+		return await response.text(); // This is our assertion!
 	}
 
 	async revoke() {
