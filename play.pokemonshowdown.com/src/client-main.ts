@@ -2812,7 +2812,7 @@ export const OfficialAuth = new class {
 		const popup = window.open(authorizeUrl, undefined, 'popup=1');
 		const checkIfUpdated = () => {
 			try {
-				if (popup?.closed) {
+				if (!popup || popup.closed) {
 					this.activeAuthRequest = false;
 					return null;
 				} // Give up.
@@ -2856,10 +2856,10 @@ export const OfficialAuth = new class {
 					this.activeAuthRequest = false;
 					user.handleAssertion(userid, assertion);
 				} else {
-					setTimeout(checkIfUpdated, 500);
+					setTimeout(checkIfUpdated, 10);
 				}
 			} catch (DOMException) {
-				setTimeout(checkIfUpdated, 500);
+				setTimeout(checkIfUpdated, 10);
 			}
 		};
 		checkIfUpdated();
