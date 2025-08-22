@@ -2819,7 +2819,9 @@ export const OfficialAuth = new class {
 
 				else if (popup?.location?.href?.startsWith(this.redirectURI)) {
 					const url = new URL(popup.location.href);
+					console.debug(url.toString());
 					const token = decodeURIComponent(url.searchParams.get('token') as string);
+					console.debug('token', token);
 					if (!token) {
 						console.error('Received no token')
 						return;
@@ -2827,6 +2829,7 @@ export const OfficialAuth = new class {
 					localStorage.setItem('ps-token', token);
 
 					const tokenExpiry = decodeURIComponent(url.searchParams.get('expires') as string);
+					console.debug('tokenExpiry', tokenExpiry);
 					if (!tokenExpiry) {
 						console.error('Received no token expiry');
 						return;
@@ -2835,11 +2838,13 @@ export const OfficialAuth = new class {
 					localStorage.setItem('ps-token-expiry', Number(tokenExpiry))
 
 					const assertion = decodeURIComponent(url.searchParams.get('assertion') as string);
+					console.debug('assertion', assertion);
 					if (!assertion) {
 						console.error('Received no assertion');
 						return;
 					}
 					const userid = decodeURIComponent(url.searchParams.get('user') as string);
+					console.debug('userid', userid);
 					if (!userid) {
 						console.error('Received no userid');
 						return;
