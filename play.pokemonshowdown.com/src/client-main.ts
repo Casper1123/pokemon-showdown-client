@@ -2729,7 +2729,7 @@ export const OfficialAuth = new class {
 	apiUrl = "https://play.pokemonshowdown.com/api/oauth/";
 	clientId = "7065ebd4d6219ec30a4b";
 	// redirectURI = document.location.protocol + "//" + Config.routes.client;
-	redirectURI = "https://casper1123.nl/";
+	redirectURI = "https://casper1123.nl";
 
 	/**
 	 * Returns a new URL object with the given api endpoint.
@@ -2815,11 +2815,11 @@ export const OfficialAuth = new class {
 		const checkIfUpdated = () => {
 			try {
 				console.debug("Checking popup at", popup?.location, "Active auth request:", this.activeAuthRequest, "Redirecturi:", this.redirectURI, "popup location href:", popup?.location);
-				if (popup?.location?.href.startsWith(this.redirectURI)) {
+				if (popup?.location?.origin.startsWith(this.redirectURI)) {
 					console.debug("Processing.")
 					popup.close();
 
-					const url = new URL(popup.location.href);
+					const url = new URL(popup.location.origin + popup.location.pathname + popup.location.search);
 					console.debug(url.toString());
 					const token = decodeURIComponent(url.searchParams.get('token') as string);
 					console.debug('token', token);
