@@ -2729,7 +2729,7 @@ export const OfficialAuth = new class {
 	apiUrl = "https://play.pokemonshowdown.com/api/oauth/";
 	clientId = "7065ebd4d6219ec30a4b";
 	// redirectURI = document.location.protocol + "//" + Config.routes.client;
-	redirectURI = "https://casper1123.nl";
+	redirectURI = "https://casper1123.nl/";
 
 	/**
 	 * Returns a new URL object with the given api endpoint.
@@ -2854,12 +2854,7 @@ export const OfficialAuth = new class {
 					PS.leave('login' as RoomID); // Close login popup if it's open.
 					this.activeAuthRequest = false;
 					user.handleAssertion(userid, assertion);
-				} else if (!popup || popup.closed) {
-					console.debug("Popup closed, giving up.", popup, popup?.closed, "(popup, popup.closed)");
-					this.activeAuthRequest = false;
-					return null;
-				} // Give up.
-				else {
+				} else {
 					console.debug("Setting timeout.");
 					setTimeout(checkIfUpdated, 500);
 				}
