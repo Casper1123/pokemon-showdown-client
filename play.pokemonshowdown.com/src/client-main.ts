@@ -2729,7 +2729,6 @@ export const OfficialAuth = new class {
 	apiUrl = "https://play.pokemonshowdown.com/api/oauth/";
 	clientId = "7065ebd4d6219ec30a4b";
 	redirectURI = document.location.protocol + "//" + Config.routes.client;
-	// redirectURI = "https://casper1123.nl";
 
 	/**
 	 * Returns a new URL object with the given api endpoint.
@@ -2794,16 +2793,12 @@ export const OfficialAuth = new class {
 		return true;
 	}
 
-	activeAuthRequest: boolean = false;
 	/**
 	 * Requests authorization from the user by opening a popup to the documentation defined endpoint.
 	 * Will log in the user once it's done.
 	 * @param user The user to authorize.
 	 */
 	authorize(user: PSUser): void {
-		console.debug("active request:", this.activeAuthRequest);
-		if (this.activeAuthRequest) { return; } // Do not open excess popups.
-		this.activeAuthRequest = true;
 		// this.clearTokenStorage(); // Todo: Revoke? Seeing as Expiry is optional if for some reason the app already has auth.
 
 		const authorizeUrl = this.requestUrl("authorize");
@@ -2814,7 +2809,7 @@ export const OfficialAuth = new class {
 		const popup = window.open(authorizeUrl, undefined, 'popup=1');
 		const checkIfUpdated = () => {
 			try {
-				console.debug("Checking popup at", popup?.location, "Active auth request:", this.activeAuthRequest, "Redirecturi:", this.redirectURI, "popup location href:", JSON.parse(JSON.stringify(popup.location))["href"]);
+				console.debug("Checking popup at", popup?.location, "Redirecturi:", this.redirectURI, "popup location href:", JSON.parse(JSON.stringify(popup.location))["href"]);
 				if (popup?.location?.origin.startsWith(this.redirectURI)) {
 					console.debug("Processing.")
 					popup.close();
@@ -2852,7 +2847,6 @@ export const OfficialAuth = new class {
 					localStorage.setItem('ps-token-userid', userid);
 
 					PS.leave('login' as RoomID); // Close login popup if it's open.
-					this.activeAuthRequest = false;
 					user.handleAssertion(userid, assertion);
 				} else {
 					console.debug("Setting timeout.");
