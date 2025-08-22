@@ -2815,7 +2815,7 @@ export const OfficialAuth = new class {
 		const checkIfUpdated = () => {
 			try {
 				console.debug("Checking popup at", popup?.location, "Active auth request:", this.activeAuthRequest, "Redirecturi:", this.redirectURI, "popup location href:", popup?.location);
-				if (popup?.location?.href?.startsWith(this.redirectURI)) {
+				if (popup?.location?.href.startsWith(this.redirectURI)) {
 					console.debug("Processing.")
 					popup.close();
 
@@ -2859,6 +2859,7 @@ export const OfficialAuth = new class {
 					setTimeout(checkIfUpdated, 500);
 				}
 			} catch (DOMException) {
+				console.error(DOMException);
 				setTimeout(checkIfUpdated, 500);
 			}
 		};
