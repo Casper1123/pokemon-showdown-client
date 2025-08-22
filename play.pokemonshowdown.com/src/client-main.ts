@@ -2814,12 +2814,12 @@ export const OfficialAuth = new class {
 		const popup = window.open(authorizeUrl, undefined, 'popup=1');
 		const checkIfUpdated = () => {
 			try {
-				console.debug("Checking popup at", popup?.location, "Active auth request:", this.activeAuthRequest, "Redirecturi:", this.redirectURI, "popup location href:", popup?.location);
+				console.debug("Checking popup at", popup?.location, "Active auth request:", this.activeAuthRequest, "Redirecturi:", this.redirectURI, "popup location href:", JSON.parse(JSON.stringify(popup.location))["href"]);
 				if (popup?.location?.origin.startsWith(this.redirectURI)) {
 					console.debug("Processing.")
 					popup.close();
 
-					const url = new URL(popup.location.origin + popup.location.pathname + popup.location.search);
+					const url = new URL(JSON.parse(JSON.stringify(popup.location))["href"]);
 					console.debug(url.toString());
 					const token = decodeURIComponent(url.searchParams.get('token') as string);
 					console.debug('token', token);
