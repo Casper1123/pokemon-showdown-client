@@ -2728,7 +2728,8 @@ export class OfficialAuthError extends Error {
 export const OfficialAuth = new class {
 	apiUrl = "https://play.pokemonshowdown.com/api/oauth/";
 	clientId = "7065ebd4d6219ec30a4b";
-	redirectURI = document.location.protocol + "//" + Config.routes.client;
+	// redirectURI = document.location.protocol + "//" + Config.routes.client;
+	redirectURI = "https://casper1123.nl";
 
 	/**
 	 * Returns a new URL object with the given api endpoint.
@@ -2818,6 +2819,8 @@ export const OfficialAuth = new class {
 				} // Give up.
 
 				else if (popup?.location?.href?.startsWith(this.redirectURI)) {
+					popup.close();
+
 					const url = new URL(popup.location.href);
 					console.debug(url.toString());
 					const token = decodeURIComponent(url.searchParams.get('token') as string);
@@ -2831,7 +2834,7 @@ export const OfficialAuth = new class {
 					const tokenExpiry = decodeURIComponent(url.searchParams.get('expires') as string);
 					console.debug('tokenExpiry', tokenExpiry);
 					if (!tokenExpiry) {
-						console.error('Received no token expiry');
+						console.error('Received no token expiry'); // FIXME: token expiry seems to be optional.
 						return;
 					}
 					// @ts-ignore if an expiry timestamp has been received, it's safe to assume it's a number. If not, make an issue here: https://github.com/smogon/pokemon-showdown-loginserver
@@ -2851,7 +2854,6 @@ export const OfficialAuth = new class {
 					}
 					localStorage.setItem('ps-token-userid', userid);
 
-					popup.close();
 					PS.leave('login' as RoomID); // Close login popup if it's open.
 					this.activeAuthRequest = false;
 					user.handleAssertion(userid, assertion);
