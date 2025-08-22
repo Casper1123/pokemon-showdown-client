@@ -2799,66 +2799,69 @@ export const OfficialAuth = new class {
 	 * @param user The user to authorize.
 	 */
 	authorize(user: PSUser): void {
-		this.clearTokenStorage(); // Todo: Revoke? Seeing as Expiry is optional if for some reason the app already has auth.
+		const authPopupHandle = () => {
+			if (window.location.pathname?.startsWith("/auth/")) { return; } // Prevent recursively opening if already at this page.
 
-		const authorizeUrl = this.requestUrl("authorize");
-		authorizeUrl.searchParams.append('redirect_uri', this.redirectURI);
-		authorizeUrl.searchParams.append('client_id', encodeURIComponent(this.clientId));
-		authorizeUrl.searchParams.append('challenge', encodeURIComponent(user.challstr));
+			const authorizeUrl = this.requestUrl("authorize");
+			authorizeUrl.searchParams.append('redirect_uri', this.redirectURI);
+			authorizeUrl.searchParams.append('client_id', encodeURIComponent(this.clientId));
+			authorizeUrl.searchParams.append('challenge', encodeURIComponent(user.challstr));
 
-		const popup = window.open(authorizeUrl, undefined, 'popup=1');
-		const checkIfUpdated = () => {
-			try {
-				console.debug("Checking popup at", popup?.location, "Redirecturi:", this.redirectURI, "popup location href:", popup?.location);
-				if (popup?.location?.href?.startsWith(this.redirectURI)) {
-					console.debug("Processing.")
-					popup.close();
+			const popup = window.open(authorizeUrl, undefined, 'popup=1');
+			const checkIfUpdated = () => {
+				try {
+					console.debug("Checking popup at", popup?.location, "Redirecturi:", this.redirectURI, "popup location href:", popup?.location);
+					if (popup?.location?.href?.startsWith(this.redirectURI)) {
+						console.debug("Processing.");
+						popup.close();
 
-					const url = new URL(popup.location.href);
-					console.debug("url:", url);
-					const token = url.searchParams.get('token');
-					console.debug('token', token);
-					if (!token) {
-						console.error('Received no token')
+						const url = new URL(popup.location.href);
+						console.debug("url:", url);
+						const token = url.searchParams.get('token');
+						console.debug('token', token);
+						if (!token) {
+							console.error('Received no token');
+						} else {
+							localStorage.setItem('ps-token', decodeURIComponent(token as string));
+						}
+
+						const tokenExpiry = url.searchParams.get('expires');
+						console.debug('tokenExpiry', tokenExpiry);
+						if (!tokenExpiry) {
+							console.error('Received no token expiry'); // FIXME: token expiry seems to be optional.
+						} else {
+							// @ts-ignore if an expiry timestamp has been received, it's safe to assume it's a number. If not, make an issue here: https://github.com/smogon/pokemon-showdown-loginserver
+							localStorage.setItem('ps-token-expiry', Number(decodeURIComponent(tokenExpiry  as string)));
+						}
+
+
+						const assertion = url.searchParams.get('assertion');
+						console.debug('assertion', assertion);
+						if (!assertion) {
+							console.error('Received no assertion');
+						}
+						let userid = url.searchParams.get('user');
+						console.debug('userid', userid);
+						if (!userid || userid === "undefined") { // Note: If userid undefined logs in it's impossible lmao.
+							console.error('Received no userid');
+						}
+						userid = decodeURIComponent(userid as string);
+						localStorage.setItem('ps-token-userid', userid);
+
+						PS.leave('login' as RoomID); // Close login popup if it's open.
+						user.handleAssertion(userid, decodeURIComponent(assertion as string));
 					} else {
-						localStorage.setItem('ps-token', decodeURIComponent(token as string));
+						console.debug("Setting timeout.");
+						setTimeout(checkIfUpdated, 500);
 					}
-
-					const tokenExpiry = url.searchParams.get('expires');
-					console.debug('tokenExpiry', tokenExpiry);
-					if (!tokenExpiry) {
-						console.error('Received no token expiry'); // FIXME: token expiry seems to be optional.
-					} else {
-						// @ts-ignore if an expiry timestamp has been received, it's safe to assume it's a number. If not, make an issue here: https://github.com/smogon/pokemon-showdown-loginserver
-						localStorage.setItem('ps-token-expiry', Number(decodeURIComponent(tokenExpiry  as string)));
-					}
-
-
-					const assertion = url.searchParams.get('assertion');
-					console.debug('assertion', assertion);
-					if (!assertion) {
-						console.error('Received no assertion');
-					}
-					let userid = url.searchParams.get('user');
-					console.debug('userid', userid);
-					if (!userid || userid === "undefined") { // Note: If userid undefined logs in it's impossible lmao.
-						console.error('Received no userid');
-					}
-					userid = decodeURIComponent(userid as string);
-					localStorage.setItem('ps-token-userid', userid);
-
-					PS.leave('login' as RoomID); // Close login popup if it's open.
-					user.handleAssertion(userid, decodeURIComponent(assertion as string));
-				} else {
-					console.debug("Setting timeout.");
-					setTimeout(checkIfUpdated, 50);
+				} catch (DOMException) {
+					console.error(DOMException);
+					setTimeout(checkIfUpdated, 500);
 				}
-			} catch (DOMException) {
-				console.error(DOMException);
-				setTimeout(checkIfUpdated, 50);
-			}
-		};
-		checkIfUpdated();
+			};
+			checkIfUpdated();
+		}
+		this.revoke().then(() => { authPopupHandle() }).catch(() => { authPopupHandle() });
 	}
 
 	/**
@@ -2915,7 +2918,7 @@ export const OfficialAuth = new class {
 		const jsonData = responseText.startsWith(']') ? responseText.slice(1) : responseText;
 		const data = JSON.parse(jsonData);
 		if (!data.success) {
-			throw new OfficialAuthError("revoke", response.status);
+			throw new OfficialAuthError("revoke");
 		}
 	}
 
