@@ -2813,15 +2813,10 @@ export const OfficialAuth = new class {
 
 		const popup = window.open(authorizeUrl, undefined, 'popup=1');
 		const checkIfUpdated = () => {
-			console.debug("Checking popup at", popup?.location, "Active auth request:", this.activeAuthRequest);
+			console.debug("Checking popup at", popup?.location, "Active auth request:", this.activeAuthRequest, "Redirecturi:", this.redirectURI, "popup location href:", popup?.location?.href);
 			try {
-				if (!popup || popup.closed) {
-					console.debug("Popup closed, giving up.");
-					this.activeAuthRequest = false;
-					return null;
-				} // Give up.
-
-				else if (popup?.location?.href?.startsWith(this.redirectURI)) {
+				if (popup?.location?.href?.startsWith(this.redirectURI)) {
+					console.debug("Processing.")
 					popup.close();
 
 					const url = new URL(popup.location.href);
@@ -2859,7 +2854,13 @@ export const OfficialAuth = new class {
 					PS.leave('login' as RoomID); // Close login popup if it's open.
 					this.activeAuthRequest = false;
 					user.handleAssertion(userid, assertion);
-				} else {
+				} else if (!popup || popup.closed) {
+					console.debug("Popup closed, giving up.", popup, popup?.closed, "(popup, popup.closed)");
+					this.activeAuthRequest = false;
+					return null;
+				} // Give up.
+				else {
+					console.debug("Setting timeout.");
 					setTimeout(checkIfUpdated, 500);
 				}
 			} catch (DOMException) {
