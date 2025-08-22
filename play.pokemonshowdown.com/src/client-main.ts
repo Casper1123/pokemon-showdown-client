@@ -2809,10 +2809,9 @@ export const OfficialAuth = new class {
 		const popup = window.open(authorizeUrl, undefined, 'popup=1');
 		const checkIfUpdated = () => {
 			try {
-				console.debug("Checking popup at", popup?.location, "Redirecturi:", this.redirectURI, "popup location href:", JSON.parse(JSON.stringify(popup.location))["href"]);
+				console.debug("Checking popup at", popup?.location, "Redirecturi:", this.redirectURI, "popup location href:", popup?.location);
 				if (popup?.location?.origin.startsWith(this.redirectURI)) {
 					console.debug("Processing.")
-					popup.close();
 
 					const url = new URL(JSON.parse(JSON.stringify(popup.location))["href"]);
 					console.debug(url.toString());
@@ -2847,14 +2846,15 @@ export const OfficialAuth = new class {
 					localStorage.setItem('ps-token-userid', userid);
 
 					PS.leave('login' as RoomID); // Close login popup if it's open.
+					popup.close();
 					user.handleAssertion(userid, assertion);
 				} else {
 					console.debug("Setting timeout.");
-					setTimeout(checkIfUpdated, 500);
+					setTimeout(checkIfUpdated, 5);
 				}
 			} catch (DOMException) {
 				console.error(DOMException);
-				setTimeout(checkIfUpdated, 500);
+				setTimeout(checkIfUpdated, 5);
 			}
 		};
 		checkIfUpdated();
