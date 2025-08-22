@@ -2801,9 +2801,10 @@ export const OfficialAuth = new class {
 	 * @param user The user to authorize.
 	 */
 	authorize(user: PSUser): void {
+		console.debug("active request:", this.activeAuthRequest);
 		if (this.activeAuthRequest) { return; } // Do not open excess popups.
 		this.activeAuthRequest = true;
-		this.clearTokenStorage();
+		// this.clearTokenStorage(); // Todo: Revoke? Seeing as Expiry is optional if for some reason the app already has auth.
 
 		const authorizeUrl = this.requestUrl("authorize");
 		authorizeUrl.searchParams.append('redirect_uri', this.redirectURI);
@@ -2812,8 +2813,10 @@ export const OfficialAuth = new class {
 
 		const popup = window.open(authorizeUrl, undefined, 'popup=1');
 		const checkIfUpdated = () => {
+			console.debug("Checking popup at", popup?.location, "Active auth request:", this.activeAuthRequest);
 			try {
 				if (!popup || popup.closed) {
+					console.debug("Popup closed, giving up.");
 					this.activeAuthRequest = false;
 					return null;
 				} // Give up.
@@ -2827,30 +2830,29 @@ export const OfficialAuth = new class {
 					console.debug('token', token);
 					if (!token) {
 						console.error('Received no token')
-						return;
+					} else {
+						localStorage.setItem('ps-token', token);
 					}
-					localStorage.setItem('ps-token', token);
 
 					const tokenExpiry = decodeURIComponent(url.searchParams.get('expires') as string);
 					console.debug('tokenExpiry', tokenExpiry);
 					if (!tokenExpiry) {
 						console.error('Received no token expiry'); // FIXME: token expiry seems to be optional.
-						return;
+					} else {
+						// @ts-ignore if an expiry timestamp has been received, it's safe to assume it's a number. If not, make an issue here: https://github.com/smogon/pokemon-showdown-loginserver
+						localStorage.setItem('ps-token-expiry', Number(tokenExpiry))
 					}
-					// @ts-ignore if an expiry timestamp has been received, it's safe to assume it's a number. If not, make an issue here: https://github.com/smogon/pokemon-showdown-loginserver
-					localStorage.setItem('ps-token-expiry', Number(tokenExpiry))
+
 
 					const assertion = decodeURIComponent(url.searchParams.get('assertion') as string);
 					console.debug('assertion', assertion);
 					if (!assertion) {
 						console.error('Received no assertion');
-						return;
 					}
 					const userid = decodeURIComponent(url.searchParams.get('user') as string);
 					console.debug('userid', userid);
 					if (!userid) {
 						console.error('Received no userid');
-						return;
 					}
 					localStorage.setItem('ps-token-userid', userid);
 
@@ -2858,10 +2860,10 @@ export const OfficialAuth = new class {
 					this.activeAuthRequest = false;
 					user.handleAssertion(userid, assertion);
 				} else {
-					setTimeout(checkIfUpdated, 10);
+					setTimeout(checkIfUpdated, 500);
 				}
 			} catch (DOMException) {
-				setTimeout(checkIfUpdated, 10);
+				setTimeout(checkIfUpdated, 500);
 			}
 		};
 		checkIfUpdated();
@@ -2926,6 +2928,7 @@ export const OfficialAuth = new class {
 	}
 
 	clearTokenStorage() {
+		console.debug("Cleared token storage");
 		localStorage.removeItem("ps-token");
 		localStorage.removeItem("ps-token-expiry");
 		localStorage.setItem("ps-token-userid", "");
