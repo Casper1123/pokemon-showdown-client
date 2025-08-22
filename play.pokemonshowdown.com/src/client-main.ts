@@ -2728,7 +2728,7 @@ export class OfficialAuthError extends Error {
 export const OfficialAuth = new class {
 	apiUrl = "https://play.pokemonshowdown.com/api/oauth/";
 	clientId = "7065ebd4d6219ec30a4b";
-	redirectURI = document.location.protocol + "//" + Config.routes.client;
+	redirectURI = document.location.protocol + "//" + Config.routes.client + "/auth/";
 
 	/**
 	 * Returns a new URL object with the given api endpoint.

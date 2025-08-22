@@ -118,10 +118,6 @@ RewriteRule ^lobby/?$ / [R=302,L]
 RewriteCond %{DOCUMENT_ROOT}/$1 !-d
 RewriteRule ^([A-Za-z0-9][A-Za-z0-9-]*)/$ /$1 [R=301,L]
 
-# Redirect URLs with auth parameters to root
-RewriteCond %{QUERY_STRING} assertion=.*&token=.*&user=.*
-RewriteRule ^([A-Za-z0-9][A-Za-z0-9-]*)/?$ /preactalpha.html [L,E=INDEX_PAGE:1]
-
 # Anything that looks like a roomid: connect to the server
 RewriteCond %{HTTP_COOKIE} ^.*preactalpha=1.*$
 RewriteRule ^(|[A-Za-z0-9][A-Za-z0-9-]*)$ ./preactalpha.html [L,E=INDEX_PAGE:1]
