@@ -2781,7 +2781,7 @@ export const OfficialAuth = new class {
 		const data = JSON.parse(jsonData);
 
 		if (!data.success) {
-			throw new OfficialAuthError(`refreshToken`, data.status);
+			throw new OfficialAuthError(`refreshToken`, response.status);
 		}
 
 		localStorage.setItem("ps-token", data.success);
