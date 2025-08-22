@@ -2715,7 +2715,7 @@ export const PS = new class extends PSModel {
  *********************************************************************/
 export class OfficialAuthError extends Error {
 	constructor(operation: string, statusCode: number | null = null) {
-		super(`Official auth error in operation '${operation}'.` + statusCode !== null ? ` Status code: ${statusCode!.toString()}` : "");
+		super(`Official auth error in operation '${operation}'.` + (statusCode !== null ? "" : `Status code: ${statusCode!.toString()}`));
 		this.name = 'OfficialAuthError';
 		Object.setPrototypeOf(this, OfficialAuthError.prototype);
 	}
@@ -2799,7 +2799,7 @@ export const OfficialAuth = new class {
 	 * @param user The user to authorize.
 	 */
 	authorize(user: PSUser): void {
-		// this.clearTokenStorage(); // Todo: Revoke? Seeing as Expiry is optional if for some reason the app already has auth.
+		this.clearTokenStorage(); // Todo: Revoke? Seeing as Expiry is optional if for some reason the app already has auth.
 
 		const authorizeUrl = this.requestUrl("authorize");
 		authorizeUrl.searchParams.append('redirect_uri', this.redirectURI);
@@ -2816,45 +2816,46 @@ export const OfficialAuth = new class {
 
 					const url = new URL(popup.location.href);
 					console.debug("url:", url);
-					const token = decodeURIComponent(url.searchParams.get('token') as string);
+					const token = url.searchParams.get('token');
 					console.debug('token', token);
 					if (!token) {
 						console.error('Received no token')
 					} else {
-						localStorage.setItem('ps-token', token);
+						localStorage.setItem('ps-token', decodeURIComponent(token as string));
 					}
 
-					const tokenExpiry = decodeURIComponent(url.searchParams.get('expires') as string);
+					const tokenExpiry = url.searchParams.get('expires');
 					console.debug('tokenExpiry', tokenExpiry);
 					if (!tokenExpiry) {
 						console.error('Received no token expiry'); // FIXME: token expiry seems to be optional.
 					} else {
 						// @ts-ignore if an expiry timestamp has been received, it's safe to assume it's a number. If not, make an issue here: https://github.com/smogon/pokemon-showdown-loginserver
-						localStorage.setItem('ps-token-expiry', Number(tokenExpiry))
+						localStorage.setItem('ps-token-expiry', Number(decodeURIComponent(tokenExpiry  as string)));
 					}
 
 
-					const assertion = decodeURIComponent(url.searchParams.get('assertion') as string);
+					const assertion = url.searchParams.get('assertion');
 					console.debug('assertion', assertion);
 					if (!assertion) {
 						console.error('Received no assertion');
 					}
-					const userid = decodeURIComponent(url.searchParams.get('user') as string);
+					let userid = url.searchParams.get('user');
 					console.debug('userid', userid);
 					if (!userid || userid === "undefined") { // Note: If userid undefined logs in it's impossible lmao.
 						console.error('Received no userid');
 					}
+					userid = decodeURIComponent(userid as string);
 					localStorage.setItem('ps-token-userid', userid);
 
 					PS.leave('login' as RoomID); // Close login popup if it's open.
-					user.handleAssertion(userid, assertion);
+					user.handleAssertion(userid, decodeURIComponent(assertion as string));
 				} else {
 					console.debug("Setting timeout.");
-					setTimeout(checkIfUpdated, 5);
+					setTimeout(checkIfUpdated, 50);
 				}
 			} catch (DOMException) {
 				console.error(DOMException);
-				setTimeout(checkIfUpdated, 5);
+				setTimeout(checkIfUpdated, 50);
 			}
 		};
 		checkIfUpdated();
