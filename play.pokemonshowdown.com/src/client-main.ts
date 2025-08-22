@@ -2954,7 +2954,6 @@ export const OfficialAuth = new class {
 		}
 
 		if (reauth) {
-			this.clearTokenStorage()
 			return false; // Returning empty. Just display the login error. It's not my problem (for now)
 		}
 
