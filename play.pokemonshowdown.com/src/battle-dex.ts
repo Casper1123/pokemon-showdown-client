@@ -390,7 +390,6 @@ export const Dex = new class implements ModdedDex {
 				learnsets: {},
 				overrideTier: {},
 				overrideTypeChart: {},
-				moveData: {},
 			};
 		}
 
@@ -420,11 +419,14 @@ export const Dex = new class implements ModdedDex {
 		// todo: add Abilities here. This is for Abilities functionality. I'm not sure this is even needed.
 		// Merge move entries
 		console.debug(`Merging move entries.`);
+		if (!window.BattleTeambuilderTable[modId].moveData || window.BattleTeambuilderTable[modId].moveData === undefined) {
+			window.BattleTeambuilderTable[modId].moveData = {};
+		}
 		for (const move in modData.moves) {
 			const moveData = modData.moves[move];
 			console.debug(`Applying modification for move ${move}. inherit = ${moveData.inherit}`);
 			if (!moveData.inherit) {
-				window.BattleTeambuilderTable[modId].moveData[move] = moveData;
+				window.BattleTeambuilderTable[modId].overrideMoveData[move] = moveData;
 				console.debug(`Replaced move data for ${move} due to inherit = ${moveData.inherit}`);
 				continue;
 			}
@@ -1317,6 +1319,19 @@ export class ModdedDex {
 				name = BattleAliases[id];
 				id = toID(name);
 			}
+
+			// Allows for the introduction of new Custom moves *per mod* keeping everything isolated.
+			if (window.AvailableCustomMods && window.AvailableCustomMods.includes(this.modid)) {
+				const table = window.BattleTeambuilderTable[this.modid];
+				if (table && table.moveData && table.moveData[id]) {
+					// Create move from custom moveData
+					const customMoveData = table.moveData[id];
+					const move = new Move(id, name, customMoveData);
+					this.cache.Moves[id] = move;
+					return move;
+				}
+			}
+
 			if (this.cache.Moves.hasOwnProperty(id)) return this.cache.Moves[id];
 
 			let data = { ...Dex.moves.get(name) };
