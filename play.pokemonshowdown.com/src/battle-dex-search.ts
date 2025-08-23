@@ -1912,24 +1912,27 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		}
 
 		let formatModdedMoves: SearchRow[] = [];
-		console.debug("Getting BattleMoveSearch base results for mod", this.dex.modid, this.species, window.AvailableCustomMods);
-		if (window.AvailableCustomMods && window.AvailableCustomMods.includes(this.dex.modid)) {
-			console.debug("This is a custom mod.");
-			const table = window.BattleTeambuilderTable[this.dex.modid];
-			if (table && table.overrideMoveData) {
-				console.debug("Which also has a moveData table entry.", table.overrideMoveData, usableMoves);
-				for (const moveId in table.overrideMoveData) {
-					console.debug("Trying", moveId);
-					const id = toID(moveId);
-					if (this.species && this.canLearn(this.species, id) && !usableMoves.includes(['move', id])) {
-						console.debug(this.species, "cannot learn", id);
-						formatModdedMoves.push(['move', id]);
-					} else {
-						console.debug(this.species, "cannot learn", id);
+		try {
+			console.debug("Getting BattleMoveSearch base results for mod", this.dex.modid, this.species, window.AvailableCustomMods);
+			if (window.AvailableCustomMods && window.AvailableCustomMods.includes(this.dex.modid)) {
+				console.debug("This is a custom mod.");
+				const table = window.BattleTeambuilderTable[this.dex.modid];
+				if (table && table.overrideMoveData) {
+					console.debug("Which also has a overrideMoveData table entry.", table.overrideMoveData, usableMoves, table.learnsets?[species]);
+					for (const moveId in table.overrideMoveData) {
+						console.debug("Trying", moveId);
+						const id = toID(moveId);
+						if (this.species && table.learnsets?[species]?[moveId] && !usableMoves.includes(['move', id])) {
+							console.debug(this.species, "learns", id);
+							formatModdedMoves.push(['move', id]);
+						} else {
+							console.debug(this.species, "cannot learn", id);
+						}
 					}
-				}
-			} else { console.debug(table, "Uh oh."); }
-		} else { console.debug("This is not a custom mod."); }
+				} else { console.debug(table, "Uh oh."); }
+			} else { console.debug("This is not a custom mod."); }
+		} catch (error) { console.debug(e); }
+
 		return [...usableMoves, ...uselessMoves, ...formatModdedMoves];
 	}
 	filter(row: SearchRow, filters: string[][]) {
