@@ -1919,7 +1919,10 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				for (const moveId in table.moveData) {
 					const id = toID(moveId);
 					if (this.species && this.canLearn(this.species, id)) {
+						console.debug(this.species, "cannot learn", id);
 						formatModdedMoves.push(['move', id]);
+					} else {
+						console.debug(this.species, "cannot learn", id);
 					}
 				}
 			}
