@@ -1912,11 +1912,14 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		}
 
 		let formatModdedMoves: SearchRow[] = [];
-		console.debug("Getting BattleMoveSearch base results for mod", this.dex.modid, this.species);
+		console.debug("Getting BattleMoveSearch base results for mod", this.dex.modid, this.species, window.AvailableCustomMods);
 		if (window.AvailableCustomMods && window.AvailableCustomMods.includes(this.dex.modid)) {
+			console.debug("This is a custom mod.");
 			const table = window.BattleTeambuilderTable[this.dex.modid];
 			if (table && table.moveData) {
+				console.debug("Which also has a moveData table entry.", table.moveData);
 				for (const moveId in table.moveData) {
+					console.debug("Trying", moveId);
 					const id = toID(moveId);
 					if (this.species && this.canLearn(this.species, id)) {
 						console.debug(this.species, "cannot learn", id);
@@ -1926,7 +1929,7 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 					}
 				}
 			}
-		}
+		} else { console.debug("This is not a custom mod."); }
 		return [...usableMoves, ...uselessMoves, ...formatModdedMoves];
 	}
 	filter(row: SearchRow, filters: string[][]) {
