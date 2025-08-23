@@ -390,6 +390,7 @@ export const Dex = new class implements ModdedDex {
 				learnsets: {},
 				overrideTier: {},
 				overrideTypeChart: {},
+				moveData: {},
 			};
 		}
 
@@ -426,7 +427,7 @@ export const Dex = new class implements ModdedDex {
 			const moveData = modData.moves[move];
 			console.debug(`Applying modification for move ${move}. inherit = ${moveData.inherit}`);
 			if (!moveData.inherit) {
-				window.BattleTeambuilderTable[modId].overrideMoveData[move] = moveData;
+				window.BattleTeambuilderTable[modId].moveData[move] = moveData;
 				console.debug(`Replaced move data for ${move} due to inherit = ${moveData.inherit}`);
 				continue;
 			}

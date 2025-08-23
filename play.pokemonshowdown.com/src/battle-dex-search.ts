@@ -1912,6 +1912,7 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		}
 
 		let formatModdedMoves: SearchRow[] = [];
+		console.debug("Getting BattleMoveSearch base results for mod", this.dex.modid, this.species);
 		if (window.AvailableCustomMods && window.AvailableCustomMods.includes(this.dex.modid)) {
 			const table = window.BattleTeambuilderTable[this.dex.modid];
 			if (table && table.moveData) {
