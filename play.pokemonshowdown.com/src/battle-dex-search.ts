@@ -490,7 +490,7 @@ export class DexSearch {
 		let buf: SearchRow[] = [];
 		let illegalBuf: SearchRow[] = [];
 		let illegal = this.typedSearch?.illegalReasons;
-		if (searchType === 'pokemon') {
+		if (searchType === 'pokemon') { // Todo: allow for filtering on pokémon as well.
 			switch (fType) {
 			case 'type':
 				let type = fId.charAt(0).toUpperCase() + fId.slice(1) as Dex.TypeName;
@@ -514,12 +514,29 @@ export class DexSearch {
 				break;
 			}
 		} else if (searchType === 'move') {
+			let moveDex = { ...BattleMoveDex };  // Copy into object as we don't want to mutate the global pool.
+			// Mutate object
+			console.debug("Mutating instafilter moveDex");
+			if (this.dex.modid && window.AvailableCustomMods?.includes(this.dex.modid)) {
+				console.debug("Mutating for custom mod", this.dex.modid);
+				const table = window.BattleTeambuilderTable[this.dex.modid];
+				if (table && table.moveData) {
+					for (const moveId in table.moveData) {
+						const moveData = table.moveData[moveId];
+						if (!moveData.inherit) { // FIXME: Figure out if it's a better idea to check for 'num' value.
+							console.debug("Adding", moveId, "to moveDex");
+							moveDex[moveId] = moveData;
+						}
+					}
+				}
+			}
+
 			switch (fType) {
 			case 'type':
 				let type = fId.charAt(0).toUpperCase() + fId.slice(1);
 				buf.push(['header', `${type}-type moves`]);
-				for (let id in BattleMovedex) {
-					if (BattleMovedex[id].type === type) {
+				for (let id in moveDex) {
+					if (moveDex[id].type === type) {
 						(illegal && id in illegal ? illegalBuf : buf).push(['move', id as ID]);
 					}
 				}
@@ -527,14 +544,16 @@ export class DexSearch {
 			case 'category':
 				let category = fId.charAt(0).toUpperCase() + fId.slice(1);
 				buf.push(['header', `${category} moves`]);
-				for (let id in BattleMovedex) {
-					if (BattleMovedex[id].category === category) {
+				for (let id in moveDex) {
+					if (moveDex[id].category === category) {
 						(illegal && id in illegal ? illegalBuf : buf).push(['move', id as ID]);
 					}
 				}
 				break;
 			}
 		}
+
+
 		return [...buf, ...illegalBuf];
 	}
 
