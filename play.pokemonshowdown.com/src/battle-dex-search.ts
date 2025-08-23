@@ -1918,7 +1918,7 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				console.debug("This is a custom mod.");
 				const table = window.BattleTeambuilderTable[this.dex.modid];
 				if (table && table.overrideMoveData) {
-					console.debug("Which also has a overrideMoveData table entry.", table.overrideMoveData, usableMoves, table.learnsets?[species]);
+					console.debug("Which also has a overrideMoveData table entry.", table.overrideMoveData, usableMoves);
 					for (const moveId in table.overrideMoveData) {
 						console.debug("Trying", moveId);
 						if (table.overrideMoveData[moveId] && table.overrideMoveData[moveId].inherit) {
@@ -1926,7 +1926,7 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 							continue;
 						}
 						const id = toID(moveId);
-						if (this.species && table.learnsets?[species]?[moveId] && !usableMoves.includes(['move', id])) {
+						if (this.species && table.learnsets && table.learnsets[this.species] && !(usableMoves.includes(['move', id]) || uselessMoves.includes(['move', id])) && table.learnsets[this.species][moveId]) {
 							console.debug(this.species, "learns", id);
 							formatModdedMoves.push(['move', id]);
 						} else {
