@@ -1910,7 +1910,20 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				uselessMoves.push(['move', id as ID]);
 			}
 		}
-		return [...usableMoves, ...uselessMoves];
+
+		let formatModdedMoves: SearchRow[] = [];
+		if (window.AvailableCustomMods && window.AvailableCustomMods.includes(this.dex.modid)) {
+			const table = window.BattleTeambuilderTable[this.dex.modid];
+			if (table && table.moveData) {
+				for (const moveId in table.moveData) {
+					const id = toID(moveId);
+					if (this.species && this.canLearn(this.species, id)) {
+						formatModdedMoves.push(['move', id]);
+					}
+				}
+			}
+		}
+		return [...usableMoves, ...uselessMoves, ...formatModdedMoves];
 	}
 	filter(row: SearchRow, filters: string[][]) {
 		if (!filters) return true;
