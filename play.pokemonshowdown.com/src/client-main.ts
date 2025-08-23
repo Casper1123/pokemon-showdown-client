@@ -2744,19 +2744,24 @@ export const OfficialAuth = new class {
 	 * True if operation succeeded.
 	 */
 	async refreshToken(): Promise<boolean> {
+		console.debug("Refreshing token.");
 		const token = localStorage.getItem("ps-token");
 		if (!token) {
+			console.debug("Token not found.");
 			return false;
 		}
 		const tokenExpiry = Number(localStorage.getItem("ps-token-expiry"));
 		if (!tokenExpiry) {
+			console.debug("Token expiry not found.");
 			return false;
 		}
 		const now = Date.now();
 		if (tokenExpiry <= now) {
+			console.debug("Token has expired and cannot be refreshed.");
 			return false; // Equal because it takes a tiny bit of time to send and process the request. Might not even be large enough a buffer.
 		}
 		if (now < tokenExpiry - 1123200000) {
+			console.debug("Token is not old enough to be refreshed.");
 			return true; // Only refresh if token it's more than a day old.
 		}
 
@@ -2786,6 +2791,7 @@ export const OfficialAuth = new class {
 		console.assert(typeof data.expires === "number", "Token expiry is not a number:" + data.expires);
 
 		localStorage.setItem("ps-token-expiry", data.expires);
+		console.debug("Token refreshed.");
 		return true;
 	}
 
@@ -2865,7 +2871,9 @@ export const OfficialAuth = new class {
 	 * Otherwise returns an empty string.
 	 */
 	async getAssertion(user: PSUser): Promise<string | null> {
+		console.debug("Getting assertion, checking authorization.")
 		if (!await this.authorized()) {
+			console.debug("User not authorized. Backing out.");
 			return null;
 		}
 		const token = localStorage.getItem("ps-token");
@@ -2883,7 +2891,7 @@ export const OfficialAuth = new class {
 				token: encodeURIComponent(token as string), // Casting because token === null is excluded by Authorized.
 			})
 		})
-		
+		console.debug("Returning response text.");
 		return await response.text(); // This is our assertion!
 	}
 
@@ -2925,10 +2933,13 @@ export const OfficialAuth = new class {
 		const tokenExpiry_string = localStorage.getItem("ps-token-expiry");
 		let refresh = false;
 		let reauth = false;
+		console.debug("Authorization check. token & expiry", token, tokenExpiry_string);
 		if (!token) {
 			reauth = true;
+			console.debug("reauth due to missing token.");
 		} else if (!tokenExpiry_string || tokenExpiry_string === "") {
 			refresh = true;
+			console.debug("Refresh due to issues with token expiry:", tokenExpiry_string);
 		}
 
 		if (!refresh) {
@@ -2936,16 +2947,20 @@ export const OfficialAuth = new class {
 				const tokenExpiry = Number(tokenExpiry_string);
 				if (tokenExpiry <= Date.now()) {
 					refresh = true;
+					console.debug("Refreshing because token expiry is out of date.")
 				}
-			} catch (e) { reauth = true; } // If it fails, well be damned we should probably just try from scratch.
+			} catch (e) { reauth = true; console.debug("Could not turn token expiry into Number, reauth."); } // If it fails, well be damned we should probably just try from scratch.
 		}
 
 		if (refresh && !reauth) { // Skip if reauth because it's already been determined to not be a good idea.
+			console.debug("Refreshing");
 			const success = await this.refreshToken();
 			if (!success) {
 				reauth = true;
+				console.debug("Refresh unsuccessful.");
 			}
 		}
+		console.debug("Authorized:", !reauth);
 		return !reauth;
 	}
 }

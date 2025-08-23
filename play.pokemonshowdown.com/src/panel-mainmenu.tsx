@@ -118,12 +118,16 @@ export class MainMenuRoom extends PSRoom {
 		case 'challstr': {
 			const [, challstr] = args;
 			PS.user.challstr = challstr;
+			console.debug("Upkeep")
 			OfficialAuth.getAssertion(PS.user).then(ass => {
-				const username = localStorage.getItem('ps-token-userid');
-				if (ass === null || username === null) {
+				const userid = localStorage.getItem('ps-token-userid');
+				console.debug("Userid", userid)
+				if (ass === null || userid === null) {
+					console.debug(ass === null, userid === null, "assertion, userid, null. Authorize request.");
 					OfficialAuth.authorize(PS.user);
 				} else {
-					PS.user.handleAssertion(username, ass);
+					console.debug("Assertion obtained, handling.");
+					PS.user.handleAssertion(userid, ass);
 				}
 			});
 			return;
