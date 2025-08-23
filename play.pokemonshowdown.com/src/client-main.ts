@@ -2805,7 +2805,7 @@ export const OfficialAuth = new class {
 			if (window.location.pathname?.startsWith("/auth/")) { return; } // Prevent recursively opening if already at this page.
 
 			const authorizeUrl = this.requestUrl("authorize");
-			authorizeUrl.searchParams.append('redirect_uri', this.redirectURI +  + "/auth/");
+			authorizeUrl.searchParams.append('redirect_uri', `${this.redirectURI}/auth/`);
 			authorizeUrl.searchParams.append('client_id', encodeURIComponent(this.clientId));
 			authorizeUrl.searchParams.append('challenge', encodeURIComponent(user.challstr));
 
