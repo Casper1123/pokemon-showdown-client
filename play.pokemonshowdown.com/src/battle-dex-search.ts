@@ -1915,10 +1915,7 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		console.debug("Getting BattleMoveSearch base results for mod", this.dex.modid, this.species, window.AvailableCustomMods);
 		if (window.AvailableCustomMods && window.AvailableCustomMods.includes(this.dex.modid)) {
 			console.debug("This is a custom mod.");
-			try{
-				const table = window.BattleTeambuilderTable[this.dex.modid];
-			} catch (e) { console.debug("How the fuck did this crash man.", window.BattleTeambuilderTable); return [...usableMoves, ...uselessMoves]; }
-
+			const table = window.BattleTeambuilderTable[this.dex.modid];
 			if (table && table.overrideMoveData) {
 				console.debug("Which also has a moveData table entry.", table.overrideMoveData, table.learnsets[this.species], table.learnsets[this.species]?.includes(id));
 				for (const moveId in table.overrideMoveData) {
@@ -1931,12 +1928,8 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 						console.debug(this.species, "cannot learn", id);
 					}
 				}
-			} else {
-				console.debug(table, "Uh oh.");
-			}
-		} else {
-			console.debug("This is not a custom mod.");
-		}
+			} else { console.debug(table, "Uh oh."); }
+		} else { console.debug("This is not a custom mod."); }
 		return [...usableMoves, ...uselessMoves, ...formatModdedMoves];
 	}
 	filter(row: SearchRow, filters: string[][]) {
