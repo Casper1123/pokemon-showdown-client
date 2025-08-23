@@ -2724,7 +2724,7 @@ export class OfficialAuthError extends Error {
 export const OfficialAuth = new class {
 	apiUrl = "https://play.pokemonshowdown.com/api/oauth/";
 	clientId = "7065ebd4d6219ec30a4b";
-	redirectURI = document.location.protocol + "//" + Config.routes.client + "/auth/";
+	redirectURI = document.location.protocol + "//" + Config.routes.client;
 
 	/**
 	 * Returns a new URL object with the given api endpoint.
@@ -2805,7 +2805,7 @@ export const OfficialAuth = new class {
 			if (window.location.pathname?.startsWith("/auth/")) { return; } // Prevent recursively opening if already at this page.
 
 			const authorizeUrl = this.requestUrl("authorize");
-			authorizeUrl.searchParams.append('redirect_uri', this.redirectURI);
+			authorizeUrl.searchParams.append('redirect_uri', this.redirectURI +  + "/auth/");
 			authorizeUrl.searchParams.append('client_id', encodeURIComponent(this.clientId));
 			authorizeUrl.searchParams.append('challenge', encodeURIComponent(user.challstr));
 
