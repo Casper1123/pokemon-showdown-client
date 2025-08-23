@@ -471,19 +471,6 @@ export class DexSearch {
 		}
 
 		this.results = Array.prototype.concat.apply(topbuf, bufs);
-		if (this.dex.modid && window.AvailableCustomMods?.includes(this.dex.modid)) {
-			const table = window.BattleTeambuilderTable[this.dex.modid];
-			if (table && table.moveData && query) {
-				const queryId = toID(query);
-
-				for (const moveId in table.moveData) {
-					if (moveId.includes(queryId) || table.moveData[moveId].name?.toLowerCase().includes(query.toLowerCase())) {
-						this.results.unshift(['move', moveId]);
-					}
-				}
-			}
-		}
-
 		return this.results;
 	}
 	private instafilter(searchType: SearchType | '', fType: SearchType, fId: ID): SearchRow[] {
