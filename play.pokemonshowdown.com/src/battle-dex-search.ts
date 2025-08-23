@@ -1933,7 +1933,7 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			} else { console.debug("This is not a custom mod."); }
 		} catch (error) { console.debug(e); }
 
-		return [...usableMoves, ...uselessMoves, ...formatModdedMoves];
+		return [...(usableMoves + formatModdedMoves), ...uselessMoves,];
 	}
 	filter(row: SearchRow, filters: string[][]) {
 		if (!filters) return true;
