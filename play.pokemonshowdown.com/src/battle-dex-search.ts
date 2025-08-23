@@ -1921,6 +1921,10 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 					console.debug("Which also has a overrideMoveData table entry.", table.overrideMoveData, usableMoves, table.learnsets?[species]);
 					for (const moveId in table.overrideMoveData) {
 						console.debug("Trying", moveId);
+						if (table.overrideMoveData[moveId] && table.overrideMoveData[moveId].inherit) {
+							console.debug("Move inherits and thus is not fully custom.");
+							continue;
+						}
 						const id = toID(moveId);
 						if (this.species && table.learnsets?[species]?[moveId] && !usableMoves.includes(['move', id])) {
 							console.debug(this.species, "learns", id);

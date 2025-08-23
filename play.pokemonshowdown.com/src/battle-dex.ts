@@ -432,10 +432,9 @@ export const Dex = new class implements ModdedDex {
 				console.debug(`Created new table entry for move ${move}`);
 			}
 			for (const attribute in moveData) {
-				if (attribute !== 'inherit') {
-					window.BattleTeambuilderTable[modId].overrideMoveData[move][attribute] = moveData[attribute];
-					console.debug(`Attaching attribute ${attribute} to table.`);
-				}
+				window.BattleTeambuilderTable[modId].overrideMoveData[move][attribute] = moveData[attribute];
+				console.debug(`Attaching attribute ${attribute} to table.`);
+				if (attribute !== 'inherit') { } // Keeping this here in case it's required.
 			}
 		}
 
