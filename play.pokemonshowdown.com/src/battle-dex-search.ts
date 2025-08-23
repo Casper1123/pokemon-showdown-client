@@ -1425,7 +1425,7 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 	}
 }
 
-class BattleMoveSearch extends BattleTypedSearch<'move'> {
+export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 	override sortRow: SearchRow = ['sortmove', ''];
 	getTable() {
 		return BattleMovedex;

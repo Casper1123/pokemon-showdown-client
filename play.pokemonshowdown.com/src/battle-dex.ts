@@ -35,6 +35,7 @@ import {
 } from "./battle-dex-data";
 import type {Teams} from "./battle-teams";
 import {Config, PS} from "./client-main";
+import { BattleMoveSearch } from "./battle-dex-search";
 
 export declare namespace Dex {
 	/* eslint-disable @typescript-eslint/no-shadow */
@@ -465,6 +466,7 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		// Merge learnset entries
+		// Todo: remove being able to learn a move by passing in an empty learnset array.
 		console.debug(`Merging learnset entries.`);
 		for (const mon in modData.learnsets) {
 			const monLearnsetData = modData.learnsets[mon];
@@ -543,8 +545,6 @@ export const Dex = new class implements ModdedDex {
 			}
 			console.log(`Found ${availableMods.length} available mods`);
 
-
-
 			const formatModsXhr = new XMLHttpRequest();
 			console.log(`Attempting to fetch formatmods from ${serverUrl}`)
 			formatModsXhr.open('GET', `${serverUrl}/data/formatmods`, false); // false = synchronous
@@ -570,6 +570,27 @@ export const Dex = new class implements ModdedDex {
 			for (const modId of availableMods) {
 				this.loadModData(modId as ID);
 			}
+
+			// Some custom interactivity framework monkeypatching.
+			// Custom moves can be found in the learnset list.
+			const originalGetBaseResults = BattleMoveSearch.prototype.getBaseResults;
+			BattleMoveSearch.prototype.getBaseResults = function() {
+				let results = originalGetBaseResults.call(this);
+
+				if (window.AvailableCustomMods && window.AvailableCustomMods.includes(this.dex.modid)) {
+					const table = window.BattleTeambuilderTable[this.dex.modid];
+					if (table && table.moveData) {
+						for (const moveId in table.moveData) {
+							const id = toID(moveId);
+							if (this.species && this.canLearn(this.species, id)) { // Just ignore this for now :) It's hacky but I honestly like it because of that.
+								results.push(['move', id]);
+							}
+						}
+					}
+				}
+
+				return results;
+			};
 
 		} catch (error) {
 			console.warn('Failed to load custom mods:', error);
@@ -1319,20 +1340,17 @@ export class ModdedDex {
 				name = BattleAliases[id];
 				id = toID(name);
 			}
+			if (this.cache.Moves.hasOwnProperty(id)) return this.cache.Moves[id];
 
 			// Allows for the introduction of new Custom moves *per mod* keeping everything isolated.
 			if (window.AvailableCustomMods && window.AvailableCustomMods.includes(this.modid)) {
 				const table = window.BattleTeambuilderTable[this.modid];
 				if (table && table.moveData && table.moveData[id]) {
-					// Create move from custom moveData
-					const customMoveData = table.moveData[id];
-					const move = new Move(id, name, customMoveData);
+					const move = new Move(id, name, table.moveData[id]);
 					this.cache.Moves[id] = move;
 					return move;
 				}
 			}
-
-			if (this.cache.Moves.hasOwnProperty(id)) return this.cache.Moves[id];
 
 			let data = { ...Dex.moves.get(name) };
 
