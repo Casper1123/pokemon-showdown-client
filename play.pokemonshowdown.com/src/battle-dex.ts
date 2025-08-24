@@ -579,7 +579,7 @@ export const Dex = new class implements ModdedDex {
 		}
 
 		if (!window.BattleTeambuilderTable[modid]) {
-			this.loadModData(modid); // Todo: async.run solution? I don't like this. I hate it, even. Doesn't wait here and thus means
+			this.loadModData(modid);
 		}
 
 		this.moddedDexes[modid] = new ModdedDex(modid);
