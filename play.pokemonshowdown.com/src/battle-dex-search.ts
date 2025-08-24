@@ -586,7 +586,7 @@ export class DexSearch {
 				break;
 			}
 		} else if (searchType === 'move') {
-			let moveDex = { ...BattleMoveDex }; // Copy into local entry to prevent global mutate.
+			let moveDex = { ...window.BattleMoveDex }; // Copy into local entry to prevent global mutate.
 			if (this.dex.modid && window.AvailableCustomMods?.includes(this.dex.modid)) {
 				const modTable = window.BattleTeambuilderTable[this.dex.modid];
 				if (modTable?.overrideMoveData) {
