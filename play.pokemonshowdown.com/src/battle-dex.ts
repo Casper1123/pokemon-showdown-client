@@ -35,6 +35,7 @@ import {
 } from "./battle-dex-data";
 import type {Teams} from "./battle-teams";
 import {Config, PS} from "./client-main";
+import {DexSearch, type SearchType} from "./battle-dex-search";
 
 export declare namespace Dex {
 	/* eslint-disable @typescript-eslint/no-shadow */
@@ -336,6 +337,18 @@ export const Dex = new class implements ModdedDex {
 		}
 	}
 
+	private insert(index: number, entry: [ID, SearchType, number?, number?]): void {
+		window.BattleSearchIndex.splice(index, 0, entry);
+	}
+	private attemptInsertObject(id: any, objectType: SearchType): void {
+		let ID = toID(id);
+		const closestIndex = DexSearch.getClosest(ID);
+		const indexEntry = window.BattleSearchIndex[closestIndex][0];
+		if (indexEntry === ID) { return; } // object id is already our custom index. Skipping.
+		console.debug("Registering new Search Index entry for", ID, "of type", objectType)
+		const ordering = (indexEntry < ID) ? 1 : 0 // < because cannot be =
+		this.insert(closestIndex + ordering, [ID, objectType]);
+	}
 	/**
 	 * Integrates fetched mod data to be applied to modId's mod.
 	 * @param modId The ID of the mod to integrade this data into.
@@ -402,6 +415,7 @@ export const Dex = new class implements ModdedDex {
 			if (!monData.inherit) {
 				window.BattleTeambuilderTable[modId].overrideSpeciesData[mon] = monData;
 				console.debug(`Replaced mon data for ${mon} due to inherit = ${monData.inherit}`);
+				this.attemptInsertObject(mon, 'pokemon');
 				continue;
 			}
 			if (!window.BattleTeambuilderTable[modId].overrideSpeciesData[mon]) {
@@ -425,6 +439,7 @@ export const Dex = new class implements ModdedDex {
 			if (!moveData.inherit) {
 				window.BattleTeambuilderTable[modId].overrideMoveData[move] = moveData;
 				console.debug(`Replaced move data for ${move} due to inherit = ${moveData.inherit}`);
+				this.attemptInsertObject(move, 'move');
 				continue;
 			}
 			if (!window.BattleTeambuilderTable[modId].overrideMoveData[move]) {
@@ -446,6 +461,7 @@ export const Dex = new class implements ModdedDex {
 			if (!itemData.inherit) {
 				window.BattleTeambuilderTable[modId].overrideItemData[item] = itemData;
 				console.debug(`Replaced item data for ${item} due to inherit = ${itemData.inherit}`);
+				this.attemptInsertObject(item, 'item');
 				continue;
 			}
 			if (!window.BattleTeambuilderTable[modId].overrideItemData[item]) {
@@ -504,7 +520,7 @@ export const Dex = new class implements ModdedDex {
 			// Inherit is currently discarded, but might be supported in the future.
 			window.BattleTeambuilderTable[modId].overrideTypeChart[typeId] = typeData;
 		}
-
+		// todo: implement custom types and whatnot.
 		console.debug(`Implemented overrides from server on mod ${modId} with ${Object.keys(window.BattleTeambuilderTable[modId].overrideSpeciesData).length} species & ${Object.keys(window.BattleTeambuilderTable[modId].learnsets).length} learnsets.`);
 	}
 
