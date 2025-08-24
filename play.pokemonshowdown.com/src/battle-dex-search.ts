@@ -325,8 +325,10 @@ export class DexSearch {
 		}
 
 		// Re-defining the incoming dex.
-		const battleSearchIndex = DexSearch.getMutatedBattleSearchIndex(this.dex.modid);
-		const battleSearchIndexOffset = DexSearch.getMutatedBattleSearchIndex(this.dex.modid, battleSearchIndex);
+		// const battleSearchIndex = DexSearch.getMutatedBattleSearchIndex(this.dex.modid);
+		// const battleSearchIndexOffset = DexSearch.getMutatedBattleSearchIndex(this.dex.modid, battleSearchIndex);
+		const battleSearchIndex = BattleSearchIndex;
+		const battleSearchIndexOffset = BattleSearchIndexOffset;
 
 		// i represents the location of the search index we're looking at
 		let i = DexSearch.getClosest(query, battleSearchIndex);
@@ -1571,7 +1573,7 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			if (window.AvailableCustomMods && this.dex.modid && window.AvailableCustomMods.includes(this.dex.modid)) {
 				const table = window.BattleTeambuilderTable[this.dex.modid];
 				if (table && table.overrideMoveData) {
-					if (table.overrideMoveData.has(id)) {
+					if (table.overrideMoveData[id]) {
 						return false; // Move is not useless if modified. That's an assumption, but why would you make a useless move, right? RIGHT?
 					}
 				}
