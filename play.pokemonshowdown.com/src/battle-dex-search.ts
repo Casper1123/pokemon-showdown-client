@@ -87,6 +87,85 @@ export class DexSearch {
 		this.setType(searchType, formatid, species);
 	}
 
+	/**
+	 * Mutates the global version of BattleSearchIndex based on the passed-in mod.
+	 * Used for adding mod-specific index changes. Might tank performance slightly with higher quantities of custom moves.
+	 * Not the best way to do it but I'm stingy about global data from the modloader.
+	 * @param modid The modid to base the Index off of.
+	 */
+	static getMutatedBattleSearchIndex(modid: ID): [ID, SearchType, number?, number?][] {
+		/** ID, SearchType, index (if alias), offset (if offset alias) */
+		if (!window.AvailableCustomMods?.includes(modid as string) || !window.BattleTeambuilderTable[modid as string]) { return BattleSearchIndex; } // Either not instantiated properly or not a custom mod. No alterations.
+		const tableData = window.BattleTeambuilderTable[modid as string];
+		if (!tableData) { return BattleSearchIndex; } // Just in case. I'm paranoid with these, sorry. I'd rather not break many things in the crossfire.
+
+		let battleSearchIndex = [...BattleSearchIndex ]; // Assume sorted.
+		function insert(index: number, entry: [ID, SearchType, number?, number?]): void {
+			let deleted = battleSearchIndex.splice(index, 0, entry);
+		}
+		function attemptInsertObject(id, objectType: SearchType): void {
+			let ID = toID(id);
+			const closestIndex = DexSearch.getClosest(ID, battleSearchIndex);
+			const indexEntry = battleSearchIndex[closestIndex][0];
+			if (indexEntry === ID) { return; } // object id is already our custom index. Skipping.
+			const ordering = (indexEntry < ID) ? 1 : 0 // < because cannot be =
+			insert(closestIndex + ordering, [ID, objectType]);
+		}
+
+		// Moves
+		if (tableData.overrideMoveData) {
+			for (const moveId in tableData.overrideMoveData) {
+				attemptInsertObject(moveId, 'move');
+			}
+		}
+		// Pokémon
+		if (tableData.overrideSpeciesData) {
+			for (const speciesId in tableData.overrideSpeciesData) {
+				attemptInsertObject(speciesId, 'pokemon');
+			}
+		}
+		// Abilities
+		if (tableData.overrideAbilityData) {
+			for (const abilityId in tableData.overrideAbilityData) {
+				attemptInsertObject(abilityId, 'ability');
+			}
+		}
+		// Items
+		if (tableData.overrideItemData) {
+			for (const itemId in tableData.overrideItemData) {
+				attemptInsertObject(itemId, 'item');
+			}
+		}
+		return battleSearchIndex;
+	}
+	static getMutatedBattleSearchIndexOffset(modid: ID, modifiedIndex: [ID, SearchType, number?, number?][]): string[] {
+		if (!window.AvailableCustomMods?.includes(modid as string) || !window.BattleTeambuilderTable[modid as string]) { return BattleSearchIndexOffset; } // Saves calc time if true.
+		const dex = Dex.mod(modid);
+		if (!dex) { return BattleSearchIndexOffset; }
+
+		return modifiedIndex.map(entry => {
+			const id = entry[0];
+			let name = '';
+			switch (entry[1]) {
+				case 'pokemon': name = dex.species.get(id).name; break;
+				case 'move': name = dex.moves.get(id).name; break;
+				case 'item': name = dex.items.get(id).name; break;
+				case 'ability': name = dex.abilities.get(id).name; break;
+			}
+
+			let res = '';
+			let nonAlnum = 0;
+			for (let i = 0, j = 0; i < id.length; i++, j++) {
+				while (!/[a-zA-Z0-9]/.test(name[j])) {
+					j++;
+					nonAlnum++;
+				}
+				res += nonAlnum;
+			}
+			return nonAlnum ? res : '';
+		});
+	}
+
 	getTypedSearch(searchType: SearchType | '', format = '' as ID, speciesOrSet: ID | Dex.PokemonSet = '' as ID) {
 		if (!searchType) return null;
 		switch (searchType) {
@@ -245,9 +324,13 @@ export class DexSearch {
 			}
 		}
 
+		// Re-defining the incoming dex.
+		const battleSearchIndex = DexSearch.getMutatedBattleSearchIndex(this.dex.modid);
+		const battleSearchIndexOffset = DexSearch.getMutatedBattleSearchIndex(this.dex.modid, battleSearchIndex);
+
 		// i represents the location of the search index we're looking at
-		let i = DexSearch.getClosest(query);
-		this.exactMatch = (BattleSearchIndex[i][0] === query);
+		let i = DexSearch.getClosest(query, battleSearchIndex);
+		this.exactMatch = (battleSearchIndex[i][0] === query);
 
 		// Even with output buffer buckets, we make multiple passes through
 		// the search index. searchPasses is a queue of which pass we're on:
@@ -289,24 +372,24 @@ export class DexSearch {
 			if (['sub', 'tr'].includes(query) || !toID(BattleAliases[query]).startsWith(query)) {
 				queryAlias = toID(BattleAliases[query]);
 				let aliasPassType: SearchPassType = (queryAlias === 'hiddenpower' ? 'exact' : 'normal');
-				searchPasses.unshift([aliasPassType, DexSearch.getClosest(queryAlias), queryAlias]);
+				searchPasses.unshift([aliasPassType, DexSearch.getClosest(queryAlias, battleSearchIndex), queryAlias]);
 			}
 			this.exactMatch = true;
 		}
 
 		// If there are no matches starting with query: Do a fuzzy match pass
 		// Fuzzy matches will still be shown after alias matches
-		if (!this.exactMatch && BattleSearchIndex[i][0].substr(0, query.length) !== query) {
+		if (!this.exactMatch && battleSearchIndex[i][0].substr(0, query.length) !== query) {
 			// No results start with this. Do a fuzzy match pass.
 			let matchLength = query.length - 1;
 			if (!i) i++;
 			while (matchLength &&
-				BattleSearchIndex[i][0].substr(0, matchLength) !== query.substr(0, matchLength) &&
-				BattleSearchIndex[i - 1][0].substr(0, matchLength) !== query.substr(0, matchLength)) {
+				battleSearchIndex[i][0].substr(0, matchLength) !== query.substr(0, matchLength) &&
+				battleSearchIndex[i - 1][0].substr(0, matchLength) !== query.substr(0, matchLength)) {
 				matchLength--;
 			}
 			let matchQuery = query.substr(0, matchLength);
-			while (i >= 1 && BattleSearchIndex[i - 1][0].substr(0, matchLength) === matchQuery) i--;
+			while (i >= 1 && battleSearchIndex[i - 1][0].substr(0, matchLength) === matchQuery) i--;
 			searchPasses.push(['fuzzy', i, '']);
 		}
 
@@ -332,7 +415,7 @@ export class DexSearch {
 		let illegal = this.typedSearch?.illegalReasons;
 
 		// We aren't actually looping through the entirety of the searchIndex
-		for (i = 0; i < BattleSearchIndex.length; i++) {
+		for (i = 0; i < battleSearchIndex.length; i++) {
 			if (!passType) {
 				let searchPass = searchPasses.shift();
 				if (!searchPass) break;
@@ -341,7 +424,7 @@ export class DexSearch {
 				query = searchPass[2];
 			}
 
-			let entry = BattleSearchIndex[i];
+			let entry = battleSearchIndex[i];
 			let id = entry[0];
 			let type = entry[1];
 
@@ -401,13 +484,13 @@ export class DexSearch {
 				let originalIndex = entry[2]!;
 				if (matchStart) {
 					matchEnd = matchStart + query.length;
-					matchStart += (BattleSearchIndexOffset[originalIndex][matchStart] || '0').charCodeAt(0) - 48;
-					matchEnd += (BattleSearchIndexOffset[originalIndex][matchEnd - 1] || '0').charCodeAt(0) - 48;
+					matchStart += (battleSearchIndexOffset[originalIndex][matchStart] || '0').charCodeAt(0) - 48;
+					matchEnd += (battleSearchIndexOffset[originalIndex][matchEnd - 1] || '0').charCodeAt(0) - 48;
 				}
 				id = BattleSearchIndex[originalIndex][0];
 			} else {
 				matchEnd = query.length;
-				if (matchEnd) matchEnd += (BattleSearchIndexOffset[i][matchEnd - 1] || '0').charCodeAt(0) - 48;
+				if (matchEnd) matchEnd += (battleSearchIndexOffset[i][matchEnd - 1] || '0').charCodeAt(0) - 48;
 			}
 
 			// some aliases are substrings
@@ -501,12 +584,25 @@ export class DexSearch {
 				break;
 			}
 		} else if (searchType === 'move') {
+			let moveDex = { ...BattleMoveDex }; // Copy into local entry to prevent global mutate.
+			if (this.dex.modid && window.AvailableCustomMods?.includes(this.dex.modid)) {
+				const modTable = window.BattleTeambuilderTable[this.dex.modid];
+				if (modTable?.overrideMoveData) {
+					for (const moveId in modTable.overrideMoveData) {
+						const moveData = modTable.overrideMoveData[moveId];
+						if (!moveData || moveData.inherit) continue;
+						// Move data does not contain a True inherit flag.
+						if (moveDex[moveId]) continue; // Not adding duplicate moves. Name your moves better if you're hitting this one, conflicts with dt command, cope.
+						moveDex[moveId] = moveData;
+					}
+				}
+			}
 			switch (fType) {
 			case 'type':
 				let type = fId.charAt(0).toUpperCase() + fId.slice(1);
 				buf.push(['header', `${type}-type moves`]);
-				for (let id in BattleMovedex) {
-					if (BattleMovedex[id].type === type) {
+				for (let id in moveDex) {
+					if (moveDex[id].type === type) {
 						(illegal && id in illegal ? illegalBuf : buf).push(['move', id as ID]);
 					}
 				}
@@ -514,8 +610,8 @@ export class DexSearch {
 			case 'category':
 				let category = fId.charAt(0).toUpperCase() + fId.slice(1);
 				buf.push(['header', `${category} moves`]);
-				for (let id in BattleMovedex) {
-					if (BattleMovedex[id].category === category) {
+				for (let id in moveDex) {
+					if (moveDex[id].category === category) {
 						(illegal && id in illegal ? illegalBuf : buf).push(['move', id as ID]);
 					}
 				}
@@ -525,24 +621,24 @@ export class DexSearch {
 		return [...buf, ...illegalBuf];
 	}
 
-	static getClosest(query: string) {
+	static getClosest(query: string, battleSearchIndex: [ID, SearchType, number?, number?][]) { // Modder's note: Modified to have an injected index intentionally.
 		// binary search through the index!
 		let left = 0;
-		let right = BattleSearchIndex.length - 1;
+		let right = battleSearchIndex.length - 1;
 		while (right > left) {
 			let mid = Math.floor((right - left) / 2 + left);
-			if (BattleSearchIndex[mid][0] === query && (mid === 0 || BattleSearchIndex[mid - 1][0] !== query)) {
+			if (battleSearchIndex[mid][0] === target && (mid === 0 || battleSearchIndex[mid - 1][0] !== target)) {
 				// that's us
 				return mid;
-			} else if (BattleSearchIndex[mid][0] < query) {
+			} else if (battleSearchIndex[mid][0] < target) {
 				left = mid + 1;
 			} else {
 				right = mid - 1;
 			}
 		}
-		if (left >= BattleSearchIndex.length - 1) left = BattleSearchIndex.length - 1;
-		else if (BattleSearchIndex[left + 1][0] && BattleSearchIndex[left][0] < query) left++;
-		if (left && BattleSearchIndex[left - 1][0] === query) left--;
+		if (left >= battleSearchIndex.length - 1) left = battleSearchIndex.length - 1;
+		else if (battleSearchIndex[left + 1][0] && battleSearchIndex[left][0] < target) left++;
+		if (left && battleSearchIndex[left - 1][0] === query) left--;
 		return left;
 	}
 }
@@ -1428,12 +1524,26 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 	override sortRow: SearchRow = ['sortmove', ''];
 	getTable() {
-		return BattleMovedex;
+		let moveDex = { ... BattleMoveDex };
+		if (window.AvailableCustomMods && this.dex.modid && window.AvailableCustomMods.includes(this.dex.modid)) {
+			// Assuming mod is loaded, if not add load check then load if not present.
+			const table = window.BattleTeambuilderTable[this.dex.modid];
+			if (table && table.overrideMoveData) {
+				for (const moveId in table.overrideMoveData) {
+					const moveData = table.overrideMoveData[moveId];
+					if ((!moveData || moveData.inherit)) { continue; } // Ignore if not data.
+					if (moveData[moveId]) { continue; } // Move id already registered.
+					moveDex[moveId] = moveData;
+				}
+			}
+		}
+		return moveDex;
 	}
 	getDefaultResults(): SearchRow[] {
 		let results: SearchRow[] = [];
 		results.push(['header', "Moves"]);
-		for (let id in BattleMovedex) {
+		const moveDex = this.getTable();
+		for (let id in moveDex) {
 			switch (id) {
 			case 'paleowave':
 				results.push(['header', "CAP moves"]);
@@ -1456,6 +1566,17 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 
 		let abilityid: ID = set ? toID(set.ability) : '' as ID;
 		const itemid: ID = set ? toID(set.item) : '' as ID;
+
+		try{
+			if (window.AvailableCustomMods && this.dex.modid && window.AvailableCustomMods.includes(this.dex.modid)) {
+				const table = window.BattleTeambuilderTable[this.dex.modid];
+				if (table && table.overrideMoveData) {
+					if (table.overrideMoveData.has(id)) {
+						return false; // Move is not useless if modified. That's an assumption, but why would you make a useless move, right? RIGHT?
+					}
+				}
+			}
+		} catch (e) { console.debug("Error in BattleMoveSearch.moveIsNotUseless:", e); }
 
 		if (dex.gen === 1) {
 			// Usually not useless for Gen 1
@@ -1741,11 +1862,9 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 
 		let lsetTable = BattleTeambuilderTable;
 
-		// injecting custom mods we know don't pair with default implementation :)
 		if (this.dex.modid !== `gen${Dex.gen}` && window.AvailableCustomMods?.includes(this.dex.modid)) {
 			if (!window.BattleTeambuilderTable[this.dex.modid]) {
-				Dex.loadModData(this.dex.modid); // Ensure that it is loaded. Yeah I do this a lot I'm not about to have
-				// Missing mod data in memory.
+				Dex.loadModData(this.dex.modid);
 			}
 			lsetTable = window.BattleTeambuilderTable[this.dex.modid];
 		}
