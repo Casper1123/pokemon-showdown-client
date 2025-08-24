@@ -341,13 +341,16 @@ export const Dex = new class implements ModdedDex {
 		window.BattleSearchIndex.splice(index, 0, entry);
 	}
 	private attemptInsertObject(id: any, objectType: SearchType): void {
-		let ID = toID(id);
-		const closestIndex = DexSearch.getClosest(ID);
-		const indexEntry = window.BattleSearchIndex[closestIndex][0];
-		if (indexEntry === ID) { return; } // object id is already our custom index. Skipping.
-		console.debug("Registering new Search Index entry for", ID, "of type", objectType)
-		const ordering = (indexEntry < ID) ? 1 : 0 // < because cannot be =
-		this.insert(closestIndex + ordering, [ID, objectType]);
+		try{
+			let ID = toID(id);
+			const closestIndex = DexSearch.getClosest(ID);
+			const indexEntry = window.BattleSearchIndex[closestIndex][0];
+			if (indexEntry === ID) { return; } // object id is already our custom index. Skipping.
+			console.debug("Registering new Search Index entry for", ID, "of type", objectType)
+			const ordering = (indexEntry < ID) ? 1 : 0 // < because cannot be =
+			this.insert(closestIndex + ordering, [ID, objectType]);
+		} catch (e) { console.error("Error when inserting into object:", e); throw e; }
+
 	}
 	/**
 	 * Integrates fetched mod data to be applied to modId's mod.
