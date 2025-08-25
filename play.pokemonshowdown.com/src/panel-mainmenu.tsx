@@ -119,8 +119,6 @@ export class MainMenuRoom extends PSRoom {
 			const [, challstr] = args;
 			PS.user.challstr = challstr;
 			console.debug("Upkeep")
-			if (!OfficialAuth.hasItemsStored()) { console.debug("No auth items stored, backing out. Waiting for nickname submission."); return; }
-
 			OfficialAuth.getAssertion(PS.user).then(ass => {
 				const userid = localStorage.getItem('ps-token-userid');
 				console.debug("Userid", userid)
