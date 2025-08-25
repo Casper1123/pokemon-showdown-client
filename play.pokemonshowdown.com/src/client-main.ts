@@ -2922,6 +2922,15 @@ export const OfficialAuth = new class {
 		localStorage.setItem("ps-token-userid", "");
 	}
 
+	hasItemsStored(): boolean {
+		console.debug("Checking item storage.");
+		const token = localStorage.getItem("ps-token");
+		const tokenExpiry = localStorage.getItem("ps-tokenExpiry");
+		const userid = localStorage.getItem("ps-token-userid");
+		console.debug("Token, expiry, userid", token, tokenExpiry, userid);
+		return token !== null && userid !== "" && userid !== null;
+	}
+
 	/**
 	 * True if a valid token is in storage, false if the user must re-authorize due to lack of valid token credentials.
 	 */
