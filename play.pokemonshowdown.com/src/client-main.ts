@@ -2803,6 +2803,7 @@ export const OfficialAuth = new class {
 	authorize(user: PSUser): void {
 		if (window.location.pathname?.startsWith("/auth/")) { return; } // Prevent recursively opening if already at this page.
 
+		this.clearTokenStorage();
 		const authorizeUrl = this.requestUrl("authorize");
 		authorizeUrl.searchParams.append('redirect_uri', `${this.redirectURI}/auth/`);
 		authorizeUrl.searchParams.append('client_id', encodeURIComponent(this.clientId));
