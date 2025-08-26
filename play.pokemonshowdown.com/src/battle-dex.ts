@@ -344,8 +344,8 @@ export const Dex = new class implements ModdedDex {
 		try{
 			let ID = toID(id);
 			const closestIndex = DexSearch.getClosest(ID);
-			const indexEntry = window.BattleSearchIndex[closestIndex];
-			if (indexEntry[0] === ID && indexEntry[1] === objectType) { return; } // object id is already our custom index. Skipping.
+			const indexEntry = window.BattleSearchIndex[closestIndex][0];
+			if (indexEntry === ID) { return; } // object id is already our custom index. Skipping.
 			console.debug("Registering new Search Index entry for", ID, "of type", objectType)
 			const ordering = (indexEntry < ID) ? 1 : 0 // < because cannot be =
 			this.insert(closestIndex + ordering, [ID, objectType]);
