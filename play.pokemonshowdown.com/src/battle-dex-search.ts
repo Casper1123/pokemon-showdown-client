@@ -1454,6 +1454,14 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		// specific metagames. If it could potentially be useful in some metagame,
 		// it is not useless.
 		const dex = this.dex;
+		
+		// Assuming that the moves you make are not useless.
+		if (window.AvailableCustomMods && window.AvailableCustomMods.includes(dex.modid)) {
+			const table = window.BattleTeambuilderTable[dex.modid];
+			if (table && table.overrideMoveData && table.overrideMoveData[id]) {
+				return true;
+			}
+		}
 
 		let abilityid: ID = set ? toID(set.ability) : '' as ID;
 		const itemid: ID = set ? toID(set.item) : '' as ID;
