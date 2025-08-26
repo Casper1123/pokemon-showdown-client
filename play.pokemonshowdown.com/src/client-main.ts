@@ -726,7 +726,7 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 			this.named = false;
 			this.registered = null;
 			this.update(null);
-		});
+		}).catch(() => {PS.alert("Error logging out: Failed to revoke auth access."); } );
 	}
 
 	updateRegExp() {
@@ -2803,7 +2803,8 @@ export const OfficialAuth = new class {
 	authorize(user: PSUser): void {
 		if (window.location.pathname?.startsWith("/auth/")) { return; } // Prevent recursively opening if already at this page.
 
-		this.clearTokenStorage();
+		this.revoke().then(); // Maybe this might fix the 'I'm not getting a token' issue?
+
 		const authorizeUrl = this.requestUrl("authorize");
 		authorizeUrl.searchParams.append('redirect_uri', `${this.redirectURI}/auth/`);
 		authorizeUrl.searchParams.append('client_id', encodeURIComponent(this.clientId));
@@ -2812,7 +2813,6 @@ export const OfficialAuth = new class {
 		const popup = window.open(authorizeUrl, undefined, 'popup=1');
 		const checkIfUpdated = () => {
 			try {
-				console.debug("Checking popup at", popup?.location, "Redirecturi:", this.redirectURI, "popup location href:", popup?.location);
 				if (popup?.location?.href?.startsWith(this.redirectURI)) {
 					console.debug("Processing.");
 					popup.close();
@@ -2853,11 +2853,9 @@ export const OfficialAuth = new class {
 					PS.leave('login' as RoomID); // Close login popup if it's open.
 					user.handleAssertion(userid, decodeURIComponent(assertion as string));
 				} else {
-					console.debug("Setting timeout.");
 					setTimeout(checkIfUpdated, 500);
 				}
 			} catch (DOMException) {
-				console.error(DOMException);
 				setTimeout(checkIfUpdated, 500);
 			}
 		};
@@ -2869,9 +2867,7 @@ export const OfficialAuth = new class {
 	 * Otherwise returns an empty string.
 	 */
 	async getAssertion(user: PSUser): Promise<string | null> {
-		console.debug("Getting assertion, checking authorization.")
 		if (!await this.authorized()) {
-			console.debug("User not authorized. Backing out.");
 			return null;
 		}
 		const token = localStorage.getItem("ps-token");
@@ -2924,11 +2920,9 @@ export const OfficialAuth = new class {
 	}
 
 	hasItemsStored(): boolean {
-		console.debug("Checking item storage.");
 		const token = localStorage.getItem("ps-token");
 		const tokenExpiry = localStorage.getItem("ps-tokenExpiry");
 		const userid = localStorage.getItem("ps-token-userid");
-		console.debug("Token, expiry, userid", token, tokenExpiry, userid);
 		return token !== null && userid !== "" && userid !== null;
 	}
 
@@ -2940,13 +2934,10 @@ export const OfficialAuth = new class {
 		const tokenExpiry_string = localStorage.getItem("ps-token-expiry");
 		let refresh = false;
 		let reauth = false;
-		console.debug("Authorization check. token & expiry", token, tokenExpiry_string);
 		if (!token) {
 			reauth = true;
-			console.debug("reauth due to missing token.");
 		} else if (!tokenExpiry_string || tokenExpiry_string === "") {
 			refresh = true;
-			console.debug("Refresh due to issues with token expiry:", tokenExpiry_string);
 		}
 
 		if (!refresh) {
@@ -2954,20 +2945,16 @@ export const OfficialAuth = new class {
 				const tokenExpiry = Number(tokenExpiry_string);
 				if (tokenExpiry <= Date.now()) {
 					refresh = true;
-					console.debug("Refreshing because token expiry is out of date.")
 				}
-			} catch (e) { reauth = true; console.debug("Could not turn token expiry into Number, reauth."); } // If it fails, well be damned we should probably just try from scratch.
+			} catch (e) { reauth = true; } // If it fails, well be damned we should probably just try from scratch.
 		}
 
 		if (refresh && !reauth) { // Skip if reauth because it's already been determined to not be a good idea.
-			console.debug("Refreshing");
 			const success = await this.refreshToken();
 			if (!success) {
 				reauth = true;
-				console.debug("Refresh unsuccessful.");
 			}
 		}
-		console.debug("Authorized:", !reauth);
 		return !reauth;
 	}
 }
