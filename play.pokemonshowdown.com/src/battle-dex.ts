@@ -371,7 +371,6 @@ export const Dex = new class implements ModdedDex {
 		// Create a copy of the base gen.
 		} else if (modData.parentMod === `gen${Dex.gen}`) {
 			console.debug(`Loading base gen (gen${Dex.gen}) into ${modId} as it's parent.`)
-			// Todo: create a copy of the base gen.
 			const baseProps = [
 				'tiers', 'items', 'overrideTier', 'ubersUUBans', 'monotypeBans',
 				'formatSlices', 'learnsets', 'overrideSpeciesData', 'overrideMoveData',
@@ -483,6 +482,7 @@ export const Dex = new class implements ModdedDex {
 		// Todo: remove being able to learn a move by passing in an empty learnset array.
 		console.debug(`Merging learnset entries.`);
 		for (const mon in modData.learnsets) {
+			console.debug(`Processing learnset for ${mon}`);
 			const monLearnsetData = modData.learnsets[mon];
 			if (!window.BattleTeambuilderTable[modId].learnsets[mon]) {
 				window.BattleTeambuilderTable[modId].learnsets[mon] = {};
@@ -490,6 +490,7 @@ export const Dex = new class implements ModdedDex {
 			for (const move in monLearnsetData) {
 				// Set availability of moves here. Inherit is not applied as changes to base are assumed.
 				// Have to have their type converted first.
+				console.debug(`Setting learnability for ${move}`);
 				window.BattleTeambuilderTable[modId].learnsets[mon][move] = this.convertLearnsetArrayToString(monLearnsetData[move]);
 			}
 		}
