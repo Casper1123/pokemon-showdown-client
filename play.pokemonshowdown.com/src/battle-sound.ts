@@ -117,7 +117,7 @@ export const BattleSound = new class {
 		if (this.soundCache[url]) return this.soundCache[url];
 		try {
 			const sound = document.createElement('audio');
-			sound.src = `https://${Config.routes.client}/${url}`;
+			sound.src = `https://play.pokemonshowdown.com/${url}`;
 			sound.volume = this.effectVolume / 100;
 			this.soundCache[url] = sound;
 			return sound;
