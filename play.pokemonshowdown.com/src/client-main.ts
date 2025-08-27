@@ -2803,8 +2803,6 @@ export const OfficialAuth = new class {
 	authorize(user: PSUser): void {
 		if (window.location.pathname?.startsWith("/auth/")) { return; } // Prevent recursively opening if already at this page.
 
-		this.revoke().then(); // Maybe this might fix the 'I'm not getting a token' issue?
-
 		const authorizeUrl = this.requestUrl("authorize");
 		authorizeUrl.searchParams.append('redirect_uri', `${this.redirectURI}/auth/`);
 		authorizeUrl.searchParams.append('client_id', encodeURIComponent(this.clientId));
