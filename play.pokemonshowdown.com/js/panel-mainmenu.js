@@ -118,12 +118,16 @@ switch(cmd){
 case'challstr':{
 var challstr=args[1];
 PS.user.challstr=challstr;
+console.debug("Upkeep");
 OfficialAuth.getAssertion(PS.user).then(function(ass){
-var username=localStorage.getItem('ps-token-userid');
-if(ass===null||username===null){
+var userid=localStorage.getItem('ps-token-userid');
+console.debug("Userid",userid);
+if(ass===null||userid===null){
+console.debug(ass===null,userid===null,"assertion, userid, null. Authorize request.");
 OfficialAuth.authorize(PS.user);
 }else{
-PS.user.handleAssertion(username,ass);
+console.debug("Assertion obtained, handling.");
+PS.user.handleAssertion(userid,ass);
 }
 });
 return;

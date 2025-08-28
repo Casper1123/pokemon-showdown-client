@@ -844,6 +844,7 @@ return'';
 };_proto2.
 canLearn=function canLearn(speciesid,moveid){
 var move=this.dex.moves.get(moveid);
+
 if(this.formatType==='natdex'&&move.isNonstandard&&move.isNonstandard!=='Past'){
 return false;
 }
@@ -1453,6 +1454,14 @@ moveIsNotUseless=function moveIsNotUseless(id,species,moves,set){var _this$forma
 
 
 var dex=this.dex;
+
+
+if(window.AvailableCustomMods&&window.AvailableCustomMods.includes(dex.modid)){
+var table=window.BattleTeambuilderTable[dex.modid];
+if(table&&table.overrideMoveData&&table.overrideMoveData[id]){
+return true;
+}
+}
 
 var abilityid=set?toID(set.ability):'';
 var itemid=set?toID(set.item):'';
