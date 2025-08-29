@@ -530,20 +530,24 @@ export const Dex = new class implements ModdedDex {
 			2: 0.5,
 			3: 0,
 		}
-		try {
-			for (const typeId in modData.typechart) {
-				const typeData = modData.typechart[typeId];
-				window.BattleTeambuilderTable[modId].overrideTypeChart[typeId] = {};
-				for (const resistKey in typeData) {
-					if (resistKey === 'inherit') {
-						window.BattleTeambuilderTable[modId].overrideTypeChart[typeId]['inherit'] = typeData[resistKey];
-						continue;
-					}
+		for (const typeId in modData.typechart) {
+			const typeData = modData.typechart[typeId];
+			window.BattleTeambuilderTable[modId].overrideTypeChart[typeId] = {};
+			for (const resistKey in typeData) {
+				if (resistKey === 'inherit') {
+					window.BattleTeambuilderTable[modId].overrideTypeChart[typeId]['inherit'] = typeData[resistKey];
+					continue;
+				}
+				try {
 					// @ts-ignore If it crashes, it crashes. This should be the incoming from the server.
 					window.BattleTeambuilderTable[modId].overrideTypeChart[typeId][resistKey] = transform[typeData[resistKey] as number];
+				} catch (e) {
+					console.error("Error integrating type chart overrides. Setting value to 1 for", resistKey);
+					window.BattleTeambuilderTable[modId].overrideTypeChart[typeId][resistKey] = 1;
 				}
 			}
-		} catch (e) { console.error("Error integrating type chart overrides."); }
+		}
+
 
 		// todo: implement custom types and whatnot.
 		console.debug(`Implemented overrides from server on mod ${modId} with ${Object.keys(window.BattleTeambuilderTable[modId].overrideSpeciesData).length} species & ${Object.keys(window.BattleTeambuilderTable[modId].learnsets).length} learnsets.`);
