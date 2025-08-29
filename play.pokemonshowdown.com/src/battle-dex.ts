@@ -528,7 +528,7 @@ export const Dex = new class implements ModdedDex {
 			1: 2,
 			0: 1,
 			2: 0.5,
-			3: 0
+			3: 0,
 		}
 		try {
 			for (const typeId in modData.typechart) {
