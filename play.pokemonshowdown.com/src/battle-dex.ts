@@ -519,11 +519,32 @@ export const Dex = new class implements ModdedDex {
 		}
 		// if (!window.BattleTeambuilderTable[modId].removeType) {window.BattleTeambuilderTable[modId].removeType = {};} // Not currently supported, but might be in the future.
 
-		for (const typeId in modData.typechart) {
-			const typeData = modData.typechart[typeId];
-			// Inherit is currently discarded, but might be supported in the future.
-			window.BattleTeambuilderTable[modId].overrideTypeChart[typeId] = typeData;
+		// From server:
+		// 1 = super effective
+		// 0 = neutral
+		// 2 = not effective
+		// 3 = immune
+		const transform = {
+			1: 2,
+			0: 1,
+			2: 0.5,
+			3: 0
 		}
+		try {
+			for (const typeId in modData.typechart) {
+				const typeData = modData.typechart[typeId];
+				window.BattleTeambuilderTable[modId].overrideTypeChart[typeId] = {};
+				for (const resistKey in typeData) {
+					if (resistKey === 'inherit') {
+						window.BattleTeambuilderTable[modId].overrideTypeChart[typeId]['inherit'] = typeData[resistKey];
+						continue;
+					}
+					// @ts-ignore If it crashes, it crashes. This should be the incoming from the server.
+					window.BattleTeambuilderTable[modId].overrideTypeChart[typeId][resistKey] = transform[typeData[resistKey] as number];
+				}
+			}
+		} catch (e) { console.error("Error integrating type chart overrides."); }
+
 		// todo: implement custom types and whatnot.
 		console.debug(`Implemented overrides from server on mod ${modId} with ${Object.keys(window.BattleTeambuilderTable[modId].overrideSpeciesData).length} species & ${Object.keys(window.BattleTeambuilderTable[modId].learnsets).length} learnsets.`);
 	}
