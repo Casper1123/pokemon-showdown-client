@@ -625,7 +625,7 @@ class TeamEditorState extends PSModel {
 		return Math.trunc(val);
 	}
 	export(compat?: boolean) {
-		return Teams.export(this.sets, this.dex, !compat);
+		return Teams.export(this.sets, this.dex, compat);
 	}
 	import(value: string) {
 		this.sets = PSTeambuilder.importTeam(value);
