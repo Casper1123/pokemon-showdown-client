@@ -116,12 +116,13 @@ export const BattleSound = new class {
 		if (!window.HTMLAudioElement) return;
 		if (this.soundCache[url]) return this.soundCache[url];
 		try {
+			console.debug("Creating sound element with url", url);
 			const sound = document.createElement('audio');
 			sound.src = `https://play.pokemonshowdown.com/${url}`;
 			sound.volume = this.effectVolume / 100;
 			this.soundCache[url] = sound;
 			return sound;
-		} catch {}
+		} catch (e) { console.error("Creating sound element failed:", e); }
 	}
 
 	playEffect(url: string) {
