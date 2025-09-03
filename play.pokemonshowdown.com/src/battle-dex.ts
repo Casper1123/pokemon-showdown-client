@@ -446,7 +446,7 @@ export const Dex = new class implements ModdedDex {
 				window.BattleTeambuilderTable[modId].overrideAbilityData[ability] = {};
 			}
 			for (const attribute in abilityData) {
-				window.BattleTeambuilderTable[modId].overrideMoveData[ability][attribute] = abilityData[attribute];
+				window.BattleTeambuilderTable[modId].overrideAbilityData[ability][attribute] = abilityData[attribute];
 				if (attribute !== 'inherit') { } // Keeping this here in case it's required.
 			}
 		}
