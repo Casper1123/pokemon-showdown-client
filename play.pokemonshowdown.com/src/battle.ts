@@ -3100,6 +3100,19 @@ export class Battle {
 			this.activateAbility(poke, fromeffect);
 			let minTimeLeft = 5;
 			let maxTimeLeft = 0;
+
+			try {
+				if (this.dex.modid && window.AvailableCustomMods?.includes(this.dex.modid)) {
+					const modTable = window.BattleTeambuilderTable[this.dex.modid];
+					if (modTable?.overrideFieldConditions?.[effect.id]) {
+						const override = modTable.overrideFieldConditions[effect.id];
+						minTimeLeft = override.duration;
+						console.debug(`Set custom duration of ${effect.id} to ${minTimeLeft}`);
+					}
+				}
+			} catch (e) { console.debug("Error when checking for modded duration data:", e); }
+
+
 			if (effect.id.endsWith('terrain')) {
 				for (let i = this.pseudoWeather.length - 1; i >= 0; i--) {
 					let pwID = toID(this.pseudoWeather[i][0]);

@@ -405,8 +405,7 @@ export const Dex = new class implements ModdedDex {
 				learnsets: {},
 				overrideTier: {},
 				overrideTypeChart: {},
-				overrideFieldConditions: {}, // todo: integrate
-				overrideSideConditions: {}, // todo: integrate
+				conditionsData: {}
 			};
 		}
 
@@ -431,7 +430,6 @@ export const Dex = new class implements ModdedDex {
 			}
 		}
 
-		// todo: add Abilities here. This is for Abilities functionality. I'm not sure this is even needed.
 		// Merge ability entries
 		console.debug(`Merging ability entries.`);
 		for (const ability in modData.abilities) {
@@ -563,6 +561,12 @@ export const Dex = new class implements ModdedDex {
 				}
 			}
 		}
+
+		// Add custom duration information.
+		// Note: Should contain duration data on field effects only (so far). Might be changed later.
+		try {
+			window.BattleTeambuilderTable[modId].conditionsData = modData.conditionsData;
+		} catch (e) { console.error("Error integrating conditionsData:", e); }
 
 
 		// todo: implement custom types and whatnot.
