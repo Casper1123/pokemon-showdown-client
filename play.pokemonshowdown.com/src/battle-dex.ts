@@ -405,6 +405,8 @@ export const Dex = new class implements ModdedDex {
 				learnsets: {},
 				overrideTier: {},
 				overrideTypeChart: {},
+				overrideFieldConditions: {}, // todo: integrate
+				overrideSideConditions: {}, // todo: integrate
 			};
 		}
 
@@ -416,23 +418,39 @@ export const Dex = new class implements ModdedDex {
 			console.debug(`Applying modification for mon ${mon}. inherit = ${monData.inherit}`);
 			if (!monData.inherit) {
 				window.BattleTeambuilderTable[modId].overrideSpeciesData[mon] = monData;
-				console.debug(`Replaced mon data for ${mon} due to inherit = ${monData.inherit}`);
 				this.attemptInsertObject(mon, 'pokemon');
 				continue;
 			}
 			if (!window.BattleTeambuilderTable[modId].overrideSpeciesData[mon]) {
 				window.BattleTeambuilderTable[modId].overrideSpeciesData[mon] = {};
-				console.debug(`Created new table entry for mon ${mon}`);
 			}
 			for (const attribute in monData) {
 				if (attribute !== 'inherit') {
 					window.BattleTeambuilderTable[modId].overrideSpeciesData[mon][attribute] = monData[attribute];
-					console.debug(`Attaching attribute ${attribute} to table.`);
 				}
 			}
 		}
 
 		// todo: add Abilities here. This is for Abilities functionality. I'm not sure this is even needed.
+		// Merge ability entries
+		console.debug(`Merging ability entries.`);
+		for (const ability in modData.abilities) {
+			const abilityData = modData.abilities[ability];
+			console.debug(`Applying modification for ability ${ability}. inherit = ${abilityData.inherit}`);
+			if (!abilityData.inherit) {
+				window.BattleTeambuilderTable[modId].overrideAbilityData[ability] = abilityData;
+				this.attemptInsertObject(ability, 'ability');
+				continue;
+			}
+			if (!window.BattleTeambuilderTable[modId].overrideAbilityData[ability]) {
+				window.BattleTeambuilderTable[modId].overrideAbilityData[ability] = {};
+			}
+			for (const attribute in abilityData) {
+				window.BattleTeambuilderTable[modId].overrideMoveData[ability][attribute] = abilityData[attribute];
+				if (attribute !== 'inherit') { } // Keeping this here in case it's required.
+			}
+		}
+
 		// Merge move entries
 		console.debug(`Merging move entries.`);
 		for (const move in modData.moves) {
@@ -440,18 +458,21 @@ export const Dex = new class implements ModdedDex {
 			console.debug(`Applying modification for move ${move}. inherit = ${moveData.inherit}`);
 			if (!moveData.inherit) {
 				window.BattleTeambuilderTable[modId].overrideMoveData[move] = moveData;
-				console.debug(`Replaced move data for ${move} due to inherit = ${moveData.inherit}`);
 				this.attemptInsertObject(move, 'move');
 				continue;
 			}
 			if (!window.BattleTeambuilderTable[modId].overrideMoveData[move]) {
 				window.BattleTeambuilderTable[modId].overrideMoveData[move] = {};
-				console.debug(`Created new table entry for move ${move}`);
 			}
 			for (const attribute in moveData) {
+				if (['condition'].includes(attribute) && window.BattleTeambuilderTable[modId].overrideMoveData[move][attribute]) {
+					const deeperData = moveData[attribute];
+					for (const deepAttribute in deeperData) {
+						window.BattleTeambuilderTable[modId].overrideMoveData[move][attribute][deepAttribute] = deeperData[deepAttribute];
+					}
+					continue;
+				}
 				window.BattleTeambuilderTable[modId].overrideMoveData[move][attribute] = moveData[attribute];
-				console.debug(`Attaching attribute ${attribute} to table.`);
-				if (attribute !== 'inherit') { } // Keeping this here in case it's required.
 			}
 		}
 
@@ -462,18 +483,15 @@ export const Dex = new class implements ModdedDex {
 			console.debug(`Applying modification for item ${item}. inherit = ${itemData.inherit}`);
 			if (!itemData.inherit) {
 				window.BattleTeambuilderTable[modId].overrideItemData[item] = itemData;
-				console.debug(`Replaced item data for ${item} due to inherit = ${itemData.inherit}`);
 				this.attemptInsertObject(item, 'item');
 				continue;
 			}
 			if (!window.BattleTeambuilderTable[modId].overrideItemData[item]) {
 				window.BattleTeambuilderTable[modId].overrideItemData[item] = {};
-				console.debug(`Created new table entry for item ${item}`);
 			}
 			for (const attribute in itemData) {
 				if (attribute !== 'inherit') {
 					window.BattleTeambuilderTable[modId].overrideItemData[item][attribute] = itemData[attribute];
-					console.debug(`Attaching attribute ${attribute} to table.`);
 				}
 			}
 		}
@@ -490,7 +508,6 @@ export const Dex = new class implements ModdedDex {
 			for (const move in monLearnsetData) {
 				// Set availability of moves here. Inherit is not applied as changes to base are assumed.
 				// Have to have their type converted first.
-				console.debug(`Setting learnability for ${move}`);
 				window.BattleTeambuilderTable[modId].learnsets[mon][move] = this.convertLearnsetArrayToString(monLearnsetData[move]);
 			}
 		}
@@ -506,7 +523,6 @@ export const Dex = new class implements ModdedDex {
 				const formatData = modData.formatsData[speciesId];
 				if (formatData.tier) {
 					window.BattleTeambuilderTable[modId].overrideTier[speciesId] = formatData.tier;
-					console.debug(`Modifying formatdata for ${speciesId} to ${formatData.tier}`);
 					// todo: implement other overrides too.. this just does default tier not ND Ubers or something. In case that might be relevant.
 				}
 			}
