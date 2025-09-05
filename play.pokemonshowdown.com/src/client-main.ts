@@ -2897,7 +2897,7 @@ export const OfficialAuth = new class {
 				'Content-Type': 'application/x-www-form-urlencoded',
 			},
 			body: new URLSearchParams({
-				uri: encodeURIComponent(this.redirectURI)
+				uri: encodeURIComponent(Config.routes.client)
 			})
 		})
 
