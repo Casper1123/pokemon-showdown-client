@@ -568,6 +568,7 @@ export const Dex = new class implements ModdedDex {
 			window.BattleTeambuilderTable[modId].conditionsData = modData.conditionsData;
 		} catch (e) { console.error("Error integrating conditionsData:", e); }
 
+		console.log("Current conditionsData for", modId, window.BattleTeambuilderTable[modId].conditionsData)
 
 		// todo: implement custom types and whatnot.
 		console.debug(`Implemented overrides from server on mod ${modId} with ${Object.keys(window.BattleTeambuilderTable[modId].overrideSpeciesData).length} species & ${Object.keys(window.BattleTeambuilderTable[modId].learnsets).length} learnsets.`);
