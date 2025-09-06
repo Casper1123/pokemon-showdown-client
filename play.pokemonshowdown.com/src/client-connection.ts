@@ -390,7 +390,7 @@ export class PSStorage {
 		}
 		return false;
 	};
-}
+};
 
 PSConnection.connect();
 
