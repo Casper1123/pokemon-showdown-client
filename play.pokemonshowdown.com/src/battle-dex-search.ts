@@ -1005,10 +1005,15 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			format.startsWith('battlestadium') || format.startsWith('vgc');
 		const isHackmons = format.includes('hackmons') || format.endsWith('bh');
 		let isDoublesOrBS = isVGCOrBS || this.formatType?.includes('doubles');
-		const dex = this.dex;
+		let dex = this.dex;
 
 		let table = BattleTeambuilderTable;
-		if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 9) {
+		if (window.AvailableCustomMods?.includes(this.dex.modid)) {
+			if (!window.BattleTeambuilderTable[this.dex.modid]) {
+				Dex.loadModData(this.dex.modid);
+			}
+			table = window.BattleTeambuilderTable[this.dex.modid];
+		} else if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 9) {
 			table = table[`gen${dex.gen}`];
 		} else if (isVGCOrBS) {
 			table = table[`gen${dex.gen}vgc`];
@@ -1455,7 +1460,7 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		// specific metagames. If it could potentially be useful in some metagame,
 		// it is not useless.
 		const dex = this.dex;
-		
+
 		// Assuming that the moves you make are not useless.
 		if (window.AvailableCustomMods && window.AvailableCustomMods.includes(dex.modid)) {
 			const table = window.BattleTeambuilderTable[dex.modid];
