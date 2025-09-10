@@ -419,7 +419,6 @@ export const Dex = new class implements ModdedDex {
 		}
 		for (const mon in modData.pokedex) {
 			const monData = modData.pokedex[mon];
-			console.debug(`Applying modification for mon ${mon}. inherit = ${monData.inherit}`);
 			if (!monData.inherit) {
 				window.BattleTeambuilderTable[modId].overrideSpeciesData[mon] = monData;
 				this.attemptInsertObject(mon, 'pokemon');
@@ -443,7 +442,6 @@ export const Dex = new class implements ModdedDex {
 		}
 		for (const ability in modData.abilities) {
 			const abilityData = modData.abilities[ability];
-			console.debug(`Applying modification for ability ${ability}. inherit = ${abilityData.inherit}`);
 			if (!abilityData.inherit) {
 				table.overrideAbilityData[ability] = abilityData;
 				this.attemptInsertObject(ability, 'ability');
@@ -466,7 +464,6 @@ export const Dex = new class implements ModdedDex {
 		}
 		for (const move in modData.moves) {
 			const moveData = modData.moves[move];
-			console.debug(`Applying modification for move ${move}. inherit = ${moveData.inherit}`);
 			if (!moveData.inherit) {
 				table.overrideMoveData[move] = moveData;
 				this.attemptInsertObject(move, 'move');
@@ -495,7 +492,6 @@ export const Dex = new class implements ModdedDex {
 		}
 		for (const item in modData.items) {
 			const itemData = modData.items[item];
-			console.debug(`Applying modification for item ${item}. inherit = ${itemData.inherit}`);
 			if (!itemData.inherit) {
 				table.overrideItemData[item] = itemData;
 				this.attemptInsertObject(item, 'item');
@@ -519,7 +515,6 @@ export const Dex = new class implements ModdedDex {
 			table.learnsets = {};
 		}
 		for (const mon in modData.learnsets) {
-			console.debug(`Processing learnset for ${mon}`);
 			const monLearnsetData = modData.learnsets[mon];
 			if (!table.learnsets[mon]) {
 				table.learnsets[mon] = {};
