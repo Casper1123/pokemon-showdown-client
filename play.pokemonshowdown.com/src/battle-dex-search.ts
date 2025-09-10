@@ -1015,11 +1015,8 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 
 		let table = BattleTeambuilderTable;
 		console.debug("Getting search rows for Pokemon Search. Checking modid for", this.dex.modid);
-		if (window.AvailableCustomMods?.includes(this.dex.modid)) {
+		if (window.AvailableCustomMods?.includes(this.dex.modid) && window.BattleTeambuilderTable[this.dex.modid]) {
 			console.debug(this.dex.modid, "Is a custom mod.");
-			if (!window.BattleTeambuilderTable[this.dex.modid]) {
-				Dex.loadModData(this.dex.modid);
-			}
 			table = table[this.dex.modid];
 		} else if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 9) {
 			table = table[`gen${dex.gen}`];
