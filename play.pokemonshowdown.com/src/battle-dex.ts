@@ -408,10 +408,15 @@ export const Dex = new class implements ModdedDex {
 				conditionsData: {}
 			};
 		}
+		const table = window.BattleTeambuilderTable[modId];
 
 		// Note: This repeated code segment is here by intention as it allows us to easily modify specific behaviour for each response format output we expect.
 		// Merge pokedex entries
 		console.debug(`Merging pokedex entries.`);
+		if (!table.overrideSpeciesData) {
+			console.warn("No preset override data table for", "Species");
+			table.overrideSpeciesData = {};
+		}
 		for (const mon in modData.pokedex) {
 			const monData = modData.pokedex[mon];
 			console.debug(`Applying modification for mon ${mon}. inherit = ${monData.inherit}`);
@@ -432,64 +437,76 @@ export const Dex = new class implements ModdedDex {
 
 		// Merge ability entries
 		console.debug(`Merging ability entries.`);
+		if (!table.overrideAbilityData) {
+			console.warn("No preset override data table for", "Ability");
+			table.overrideAbilityData = {};
+		}
 		for (const ability in modData.abilities) {
 			const abilityData = modData.abilities[ability];
 			console.debug(`Applying modification for ability ${ability}. inherit = ${abilityData.inherit}`);
 			if (!abilityData.inherit) {
-				window.BattleTeambuilderTable[modId].overrideAbilityData[ability] = abilityData;
+				table.overrideAbilityData[ability] = abilityData;
 				this.attemptInsertObject(ability, 'ability');
 				continue;
 			}
-			if (!window.BattleTeambuilderTable[modId].overrideAbilityData[ability]) {
-				window.BattleTeambuilderTable[modId].overrideAbilityData[ability] = {};
+			if (!table.overrideAbilityData[ability]) {
+				table.overrideAbilityData[ability] = {};
 			}
 			for (const attribute in abilityData) {
-				window.BattleTeambuilderTable[modId].overrideAbilityData[ability][attribute] = abilityData[attribute];
+				table.overrideAbilityData[ability][attribute] = abilityData[attribute];
 				if (attribute !== 'inherit') { } // Keeping this here in case it's required.
 			}
 		}
 
 		// Merge move entries
 		console.debug(`Merging move entries.`);
+		if (!table.overrideMoveData) {
+			console.warn("No preset override data table for", "Move");
+			table.overrideMoveData = {};
+		}
 		for (const move in modData.moves) {
 			const moveData = modData.moves[move];
 			console.debug(`Applying modification for move ${move}. inherit = ${moveData.inherit}`);
 			if (!moveData.inherit) {
-				window.BattleTeambuilderTable[modId].overrideMoveData[move] = moveData;
+				table.overrideMoveData[move] = moveData;
 				this.attemptInsertObject(move, 'move');
 				continue;
 			}
-			if (!window.BattleTeambuilderTable[modId].overrideMoveData[move]) {
-				window.BattleTeambuilderTable[modId].overrideMoveData[move] = {};
+			if (!table.overrideMoveData[move]) {
+				table.overrideMoveData[move] = {};
 			}
 			for (const attribute in moveData) {
-				if (['condition'].includes(attribute) && window.BattleTeambuilderTable[modId].overrideMoveData[move][attribute]) {
+				if (['condition'].includes(attribute) && table.overrideMoveData[move][attribute]) {
 					const deeperData = moveData[attribute];
 					for (const deepAttribute in deeperData) {
-						window.BattleTeambuilderTable[modId].overrideMoveData[move][attribute][deepAttribute] = deeperData[deepAttribute];
+						table.overrideMoveData[move][attribute][deepAttribute] = deeperData[deepAttribute];
 					}
 					continue;
 				}
-				window.BattleTeambuilderTable[modId].overrideMoveData[move][attribute] = moveData[attribute];
+				table.overrideMoveData[move][attribute] = moveData[attribute];
 			}
 		}
 
 		// Merge items entries
 		console.debug(`Merging item entries.`);
+		if (!table.overrideItemData) {
+			console.warn("No preset override data table for", "Item");
+			table.overrideItemData = {};
+		}
 		for (const item in modData.items) {
 			const itemData = modData.items[item];
 			console.debug(`Applying modification for item ${item}. inherit = ${itemData.inherit}`);
 			if (!itemData.inherit) {
-				window.BattleTeambuilderTable[modId].overrideItemData[item] = itemData;
+				table.overrideItemData[item] = itemData;
 				this.attemptInsertObject(item, 'item');
 				continue;
 			}
-			if (!window.BattleTeambuilderTable[modId].overrideItemData[item]) {
-				window.BattleTeambuilderTable[modId].overrideItemData[item] = {};
+			if (!table.overrideItemData[item]) {
+				table.overrideItemData[item] = {};
 			}
 			for (const attribute in itemData) {
 				if (attribute !== 'inherit') {
-					window.BattleTeambuilderTable[modId].overrideItemData[item][attribute] = itemData[attribute];
+					table.overrideItemData[item][attribute] = itemData[attribute];
 				}
 			}
 		}
@@ -497,41 +514,29 @@ export const Dex = new class implements ModdedDex {
 		// Merge learnset entries
 		// Todo: remove being able to learn a move by passing in an empty learnset array.
 		console.debug(`Merging learnset entries.`);
+		if (!table.learnsets) {
+			console.warn("No preset override data table for", "Learnsets");
+			table.learnsets = {};
+		}
 		for (const mon in modData.learnsets) {
 			console.debug(`Processing learnset for ${mon}`);
 			const monLearnsetData = modData.learnsets[mon];
-			if (!window.BattleTeambuilderTable[modId].learnsets[mon]) {
-				window.BattleTeambuilderTable[modId].learnsets[mon] = {};
+			if (!table.learnsets[mon]) {
+				table.learnsets[mon] = {};
 			}
 			for (const move in monLearnsetData) {
 				// Set availability of moves here. Inherit is not applied as changes to base are assumed.
 				// Have to have their type converted first.
-				window.BattleTeambuilderTable[modId].learnsets[mon][move] = this.convertLearnsetArrayToString(monLearnsetData[move]);
-			}
-		}
-
-		// Merge formats data
-		console.debug(`Merging formatdata entries.`);
-		if (modData.formatsData) {
-			if (!window.BattleTeambuilderTable[modId].overrideTier) {
-				window.BattleTeambuilderTable[modId].overrideTier = {};
-			}
-
-			for (const speciesId in modData.formatsData) {
-				const formatData = modData.formatsData[speciesId];
-				if (formatData.tier) {
-					window.BattleTeambuilderTable[modId].overrideTier[speciesId] = formatData.tier;
-					// todo: implement other overrides too.. this just does default tier not ND Ubers or something. In case that might be relevant.
-				}
+				table.learnsets[mon][move] = this.convertLearnsetArrayToString(monLearnsetData[move]);
 			}
 		}
 
 		// Merge type chart changes.
 		console.debug("Merging typechart entries.");
-		if (!window.BattleTeambuilderTable[modId].overrideTypeChart) {
-			window.BattleTeambuilderTable[modId].overrideTypeChart = {};
+		if (!table.overrideTypeChart) {
+			table.overrideTypeChart = {};
 		}
-		// if (!window.BattleTeambuilderTable[modId].removeType) {window.BattleTeambuilderTable[modId].removeType = {};} // Not currently supported, but might be in the future.
+		// if (!table.removeType) {table.removeType = {};} // Not currently supported, but might be in the future.
 
 		// From server:
 		// 1 = super effective
@@ -546,18 +551,18 @@ export const Dex = new class implements ModdedDex {
 		}
 		for (const typeId in modData.typechart) {
 			const typeData = modData.typechart[typeId];
-			window.BattleTeambuilderTable[modId].overrideTypeChart[typeId] = {};
+			table.overrideTypeChart[typeId] = {};
 			for (const resistKey in typeData) {
 				if (resistKey === 'inherit') {
-					window.BattleTeambuilderTable[modId].overrideTypeChart[typeId]['inherit'] = typeData[resistKey];
+					table.overrideTypeChart[typeId]['inherit'] = typeData[resistKey];
 					continue;
 				}
 				try {
 					// @ts-ignore If it crashes, it crashes. This should be the incoming from the server.
-					window.BattleTeambuilderTable[modId].overrideTypeChart[typeId][resistKey] = transform[typeData[resistKey] as number];
+					table.overrideTypeChart[typeId][resistKey] = transform[typeData[resistKey] as number];
 				} catch (e) {
 					console.error("Error integrating type chart overrides. Setting value to 1 for", resistKey);
-					window.BattleTeambuilderTable[modId].overrideTypeChart[typeId][resistKey] = 1;
+					table.overrideTypeChart[typeId][resistKey] = 1;
 				}
 			}
 		}
@@ -565,10 +570,53 @@ export const Dex = new class implements ModdedDex {
 		// Add custom duration information.
 		// Note: Should contain duration data on field effects only (so far). Might be changed later.
 		try {
-			window.BattleTeambuilderTable[modId].conditionsData = modData.conditionsData;
+			table.conditionsData = modData.conditionsData;
 		} catch (e) { console.error("Error integrating conditionsData:", e); }
 
-		console.log("Current conditionsData for", modId, window.BattleTeambuilderTable[modId].conditionsData)
+
+		// Merge formats data
+		console.debug(`Merging formatdata entries.`);
+		if (modData.formatsData) {
+			if (!table.overrideTier) {
+				table.overrideTier = {};
+			}
+
+			// I do not like hardcoding this in here, but it's for testing for now.
+			// It will have to do.
+			const defaultTierOrder = ["CAP", "CAP NFE", "CAP LC", "AG", "Uber", "(Uber)", "OU", "(OU)", "UUBL",
+				"UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased",]
+			const customTiers: string[] = []; // NOTE: WILL APPEAR IN ORDER ENCOUNTERED IN.
+			const tierGroups: { [ tier: string] : string[] } = {};
+
+			for (const speciesId in modData.formatsData) {
+				const formatData = modData.formatsData[speciesId];
+				if (!formatData.tier) {
+					continue;
+				}
+				const tier = formatData.tier;
+				table.overrideTier[speciesId] = tier;
+				if (!defaultTierOrder.includes(tier)) {
+					customTiers.push(tier);
+				}
+				if (!tierGroups[tier]) {
+					tierGroups[tier] = [];
+				}
+				tierGroups[tier].push(speciesId);
+			}
+			console.debug("Prepared tiering information with custom tiers:", customTiers, "and tierGroups:", tierGroups);
+
+			const newTiers = [];
+			for (const tier of [...customTiers, ...defaultTierOrder]) {
+				console.debug(">\t checking", tier);
+				if (tierGroups[tier] && tierGroups[tier].length > 0) {
+					console.debug(">\tpushing", tier);
+					newTiers.push(['header', tier]);
+					newTiers.push(...tierGroups[tier]);
+				}
+			}
+			table.tiers = newTiers;
+			table.tierSet = null;
+		}
 
 		// todo: implement custom types and whatnot.
 		console.debug(`Implemented overrides from server on mod ${modId} with ${Object.keys(window.BattleTeambuilderTable[modId].overrideSpeciesData).length} species & ${Object.keys(window.BattleTeambuilderTable[modId].learnsets).length} learnsets.`);

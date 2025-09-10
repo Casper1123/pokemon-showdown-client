@@ -1012,7 +1012,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			if (!window.BattleTeambuilderTable[this.dex.modid]) {
 				Dex.loadModData(this.dex.modid);
 			}
-			table = window.BattleTeambuilderTable[this.dex.modid];
+			table = table[this.dex.modid];
 		} else if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 9) {
 			table = table[`gen${dex.gen}`];
 		} else if (isVGCOrBS) {
@@ -1077,6 +1077,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		}
 
 		if (!table.tierSet) {
+			console.debug("Constructing Tierset");
 			table.tierSet = table.tiers.map((r: any) => {
 				if (typeof r === 'string') return ['pokemon', r];
 				return [r[0], r[1]];
