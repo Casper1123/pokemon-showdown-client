@@ -575,8 +575,14 @@ export const Dex = new class implements ModdedDex {
 			if (!table.overrideTier) {
 				table.overrideTier = {};
 			}
-			const tier = formatData.tier;
-			table.overrideTier[speciesId] = tier;
+			for (const speciesId in modData.formatsData) {
+				const formatData = modData.formatsData[speciesId];
+				if (!formatData.tier) {
+					continue;
+				}
+				const tier = formatData.tier;
+				table.overrideTier[speciesId] = tier;
+			}
 		}
 
 		/**
