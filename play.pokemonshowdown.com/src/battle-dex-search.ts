@@ -1008,7 +1008,9 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		let dex = this.dex;
 
 		let table = BattleTeambuilderTable;
+		console.debug("Getting search rows for Pokemon Search. Checking modid for", this.dex.modid);
 		if (window.AvailableCustomMods?.includes(this.dex.modid)) {
+			console.debug(this.dex.modid, "Is a custom mod.");
 			if (!window.BattleTeambuilderTable[this.dex.modid]) {
 				Dex.loadModData(this.dex.modid);
 			}
