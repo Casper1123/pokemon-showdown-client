@@ -575,41 +575,44 @@ export const Dex = new class implements ModdedDex {
 			if (!table.overrideTier) {
 				table.overrideTier = {};
 			}
-
-			// I do not like hardcoding this in here, but it's for testing for now.
-			// It will have to do.
-			const defaultTierOrder = ["CAP", "CAP NFE", "CAP LC", "AG", "Uber", "(Uber)", "OU", "(OU)", "UUBL",
-				"UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased", "Illegal"]
-			const customTiers: string[] = []; // NOTE: WILL APPEAR IN ORDER ENCOUNTERED IN.
-			const tierGroups: { [ tier: string] : string[] } = {};
-
-			for (const speciesId in modData.formatsData) {
-				const formatData = modData.formatsData[speciesId];
-				if (!formatData.tier) {
-					continue;
-				}
-				const tier = formatData.tier;
-				table.overrideTier[speciesId] = tier;
-				if (!defaultTierOrder.includes(tier)) {
-					customTiers.push(tier);
-				}
-				if (!tierGroups[tier]) {
-					tierGroups[tier] = [];
-				}
-				tierGroups[tier].push(speciesId);
-			}
-			console.debug("Prepared tiering information with custom tiers:", customTiers, "and tierGroups:", tierGroups);
-
-			const newTiers = [];
-			for (const tier of [...customTiers, ...defaultTierOrder]) {
-				if (tierGroups[tier] && tierGroups[tier].length > 0) {
-					newTiers.push(['header', tier]);
-					newTiers.push(...tierGroups[tier].sort());
-				}
-			}
-			table.tiers = newTiers;
-			table.tierSet = null;
+			const tier = formatData.tier;
+			table.overrideTier[speciesId] = tier;
 		}
+
+		/**
+		 * // I do not like hardcoding this in here, but it's for testing for now.
+		 * 			// It will have to do.
+		 * 			const defaultTierOrder = ["CAP", "CAP NFE", "CAP LC", "AG", "Uber", "(Uber)", "OU", "(OU)", "UUBL",
+		 * 				"UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased", "Illegal"]
+		 * 			const customTiers: string[] = []; // NOTE: WILL APPEAR IN ORDER ENCOUNTERED IN.
+		 * 			const tierGroups: { [ tier: string] : string[] } = {};
+		 *
+		 * 			for (const speciesId in modData.formatsData) {
+		 * 				const formatData = modData.formatsData[speciesId];
+		 * 				if (!formatData.tier) {
+		 * 					continue;
+		 * 				}
+		 *
+		 * 				if (!defaultTierOrder.includes(tier)) {
+		 * 					customTiers.push(tier);
+		 * 				}
+		 * 				if (!tierGroups[tier]) {
+		 * 					tierGroups[tier] = [];
+		 * 				}
+		 * 				tierGroups[tier].push(speciesId);
+		 * 			}
+		 * 			console.debug("Prepared tiering information with custom tiers:", customTiers, "and tierGroups:", tierGroups);
+		 *
+		 * 			const newTiers = [];
+		 * 			for (const tier of [...customTiers, ...defaultTierOrder]) {
+		 * 				if (tierGroups[tier] && tierGroups[tier].length > 0) {
+		 * 					newTiers.push(['header', tier]);
+		 * 					newTiers.push(...tierGroups[tier].sort());
+		 * 				}
+		 * 			}
+		 * 			table.tiers = newTiers;
+		 * 			table.tierSet = null;
+		 */
 
 		// todo: implement custom types and whatnot.
 		console.debug(`Implemented overrides from server on mod ${modId} with ${Object.keys(window.BattleTeambuilderTable[modId].overrideSpeciesData).length} species & ${Object.keys(window.BattleTeambuilderTable[modId].learnsets).length} learnsets.`);
