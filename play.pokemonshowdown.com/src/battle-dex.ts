@@ -584,7 +584,7 @@ export const Dex = new class implements ModdedDex {
 			// I do not like hardcoding this in here, but it's for testing for now.
 			// It will have to do.
 			const defaultTierOrder = ["CAP", "CAP NFE", "CAP LC", "AG", "Uber", "(Uber)", "OU", "(OU)", "UUBL",
-				"UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased",]
+				"UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased", "Illegal"]
 			const customTiers: string[] = []; // NOTE: WILL APPEAR IN ORDER ENCOUNTERED IN.
 			const tierGroups: { [ tier: string] : string[] } = {};
 
