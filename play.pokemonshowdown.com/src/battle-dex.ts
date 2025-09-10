@@ -602,9 +602,7 @@ export const Dex = new class implements ModdedDex {
 
 			const newTiers = [];
 			for (const tier of [...customTiers, ...defaultTierOrder]) {
-				console.debug(">\t checking", tier);
 				if (tierGroups[tier] && tierGroups[tier].length > 0) {
-					console.debug(">\tpushing", tier);
 					newTiers.push(['header', tier]);
 					newTiers.push(...tierGroups[tier].sort());
 				}
