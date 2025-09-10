@@ -611,7 +611,7 @@ export const Dex = new class implements ModdedDex {
 				if (tierGroups[tier] && tierGroups[tier].length > 0) {
 					console.debug(">\tpushing", tier);
 					newTiers.push(['header', tier]);
-					newTiers.push(...tierGroups[tier]);
+					newTiers.push(...tierGroups[tier].sort());
 				}
 			}
 			table.tiers = newTiers;

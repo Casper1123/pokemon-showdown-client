@@ -1005,7 +1005,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			format.startsWith('battlestadium') || format.startsWith('vgc');
 		const isHackmons = format.includes('hackmons') || format.endsWith('bh');
 		let isDoublesOrBS = isVGCOrBS || this.formatType?.includes('doubles');
-		let dex = this.dex;
+		const dex = this.dex;
 
 		let table = BattleTeambuilderTable;
 		console.debug("Getting search rows for Pokemon Search. Checking modid for", this.dex.modid);
