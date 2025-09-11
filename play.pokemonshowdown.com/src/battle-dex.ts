@@ -589,7 +589,8 @@ export const Dex = new class implements ModdedDex {
 						customTiers.push(entry[0]);
 					}
 				} else if (currentTier !== 'header' && currentTier === '') {
-					console.error('Error backing up tiering data; no format header found.', entry);
+					console.error('Error backing up tiering data; no format header found.', entry, table.tiers);
+					throw new Error('Error backing up tiering data');
 				} else {
 					monTiers[entry[0]] = currentTier; // In this case, entry[0] is a species id.
 				}
