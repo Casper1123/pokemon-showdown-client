@@ -627,7 +627,7 @@ export const Dex = new class implements ModdedDex {
 			for (const species in monTiers) {
 				const speciesTier = monTiers[species];
 				try{
-					tierGroups[speciesTier].push(speciesTier);
+					tierGroups[speciesTier].push(species);
 				} catch (e) {
 					console.error(e, species, speciesTier, tierGroups);
 					break;
