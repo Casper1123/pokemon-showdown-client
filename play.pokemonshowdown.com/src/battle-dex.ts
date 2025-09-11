@@ -582,7 +582,7 @@ export const Dex = new class implements ModdedDex {
 			const customTiers: string[] = []; // NOTE: WILL APPEAR IN ORDER ENCOUNTERED IN.
 			// Back up existing data before altering. flipping structure here;
 			let currentTier = ""
-			for (const entry in table.tiers) {
+			for (const entry of table.tiers) {
 				if (entry[0] === 'header') {
 					currentTier = entry[1];
 					if (!defaultTierOrder.includes(entry[0]) && !customTiers.includes(entry[0])) {
@@ -610,14 +610,20 @@ export const Dex = new class implements ModdedDex {
 			}
 			const tierGroups: { [ tier: string] : string[] } = {};
 
-			for (const tierGroup in [...customTiers, ...defaultTierOrder]) {
+			for (const tierGroup of [...customTiers, ...defaultTierOrder]) {
 				if (!tierGroups[tierGroup]) {
 					tierGroups[tierGroup] = [];
 				}
 			}
 			for (const species in monTiers) {
 				const speciesTier = monTiers[species];
-				tierGroups[speciesTier].push(speciesTier);
+				try{
+					tierGroups[speciesTier].push(speciesTier);
+				} catch (e) {
+					console.error(e, species, speciesTier, tierGroups);
+					break;
+				}
+
 			}
 			for (const tierGroup in tierGroups) {
 				tierGroups[tierGroup].sort();
