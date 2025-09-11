@@ -582,20 +582,25 @@ export const Dex = new class implements ModdedDex {
 			const customTiers: string[] = []; // NOTE: WILL APPEAR IN ORDER ENCOUNTERED IN.
 			// Back up existing data before altering. flipping structure here;
 			let currentTier = ""
+			console.debug("backing up exising tiering data");
 			for (const entry of table.tiers) {
 				if (entry[0] === 'header') {
 					currentTier = entry[1];
-					if (!defaultTierOrder.includes(entry[0]) && !customTiers.includes(entry[0])) {
-						customTiers.push(entry[0]);
+					if (currentTier.endsWith('s not in a higher tier')) { currentTier = currentTier.replace('s not in a higher tier', ''); }
+					console.debug("\tset current tier", currentTier);
+					if (!defaultTierOrder.includes(currentTier) && !customTiers.includes(currentTier)) {
+						customTiers.push(currentTier);
+						console.debug("\tpushed", currentTier, "to custom tiers");
 					}
 				} else if (currentTier !== 'header' && currentTier === '') {
 					console.error('Error backing up tiering data; no format header found.', entry, table.tiers);
 					throw new Error('Error backing up tiering data');
 				} else {
-					monTiers[entry[0]] = currentTier; // In this case, entry[0] is a species id.
+					monTiers[entry] = currentTier; // In this case, entry is a species id.
 				}
 			}
 
+			console.debug("merging modData into table.")
 			for (const speciesId in modData.formatsData) {
 				const formatData = modData.formatsData[speciesId];
 				if (!formatData.tier) {
@@ -606,15 +611,19 @@ export const Dex = new class implements ModdedDex {
 				monTiers[speciesId] = tier;
 				if (!defaultTierOrder.includes(tier) && !customTiers.includes(tier)) {
 					customTiers.push(tier);
+					console.debug("\tpushed", tier, "to custom tiers");
 				}
 			}
 			const tierGroups: { [ tier: string] : string[] } = {};
 
+			console.debug("Pre-creating tierGroups");
 			for (const tierGroup of [...customTiers, ...defaultTierOrder]) {
 				if (!tierGroups[tierGroup]) {
 					tierGroups[tierGroup] = [];
+					console.debug("\tcreated tierGroup for", tierGroup);
 				}
 			}
+			console.debug("going through known data.");
 			for (const species in monTiers) {
 				const speciesTier = monTiers[species];
 				try{
@@ -625,6 +634,7 @@ export const Dex = new class implements ModdedDex {
 				}
 
 			}
+			console.debug("Sorting tierGroups");
 			for (const tierGroup in tierGroups) {
 				tierGroups[tierGroup].sort();
 			}
@@ -632,10 +642,23 @@ export const Dex = new class implements ModdedDex {
 
 			const newTiers = [];
 			for (const tier of [...customTiers, ...defaultTierOrder]) {
-				if (tierGroups[tier] && tierGroups[tier].length > 0) {
-					newTiers.push(['header', tier]);
-					newTiers.push(...tierGroups[tier].sort());
-				}
+				if (tierGroups[tier] && tierGroups[tier].length > 0 && tier.toLowerCase() !== 'illegal') {
+					let baseTier = tier;
+					const byTechnicality = baseTier.startsWith('(') && baseTier.endsWith(')');
+					if (byTechnicality) {
+						baseTier = baseTier.substring(1, -1);
+					}
+					const NFE = baseTier.endsWith('NFE');
+					if (NFE) {
+						baseTier = baseTier + " not in a higher tier";
+					}
+					if (byTechnicality) {
+						baseTier = baseTier + " by technicality";
+					}
+					console.debug("\tpushing basetier, tier", baseTier, tier);
+					newTiers.push(['header', baseTier]);
+					newTiers.push(...tierGroups[tier]);
+				} else { console.debug("Skipping push for", tier, "(it is empty or Illegal)"); }
 			}
 			console.debug("Created new table tiers", table.tiers);
 
