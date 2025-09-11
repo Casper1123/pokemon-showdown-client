@@ -575,6 +575,26 @@ export const Dex = new class implements ModdedDex {
 			if (!table.overrideTier) {
 				table.overrideTier = {};
 			}
+
+			const monTiers: { [ tier: string ]: string } = {};
+			const defaultTierOrder = ["CAP", "CAP NFE", "CAP LC", "AG", "Uber", "(Uber)", "OU", "(OU)", "UUBL",
+				"UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased", "Illegal"]
+			const customTiers: string[] = []; // NOTE: WILL APPEAR IN ORDER ENCOUNTERED IN.
+			// Back up existing data before altering. flipping structure here;
+			let currentTier = ""
+			for (const entry in table.tiers) {
+				if (entry[0] === 'header') {
+					currentTier = entry[1];
+					if (!defaultTierOrder.includes(entry[0]) && !customTiers.includes(entry[0])) {
+						customTiers.push(entry[0]);
+					}
+				} else if (currentTier !== 'header' && currentTier === '') {
+					console.error('Error backing up tiering data; no format header found.', entry);
+				} else {
+					monTiers[entry[0]] = currentTier; // In this case, entry[0] is a species id.
+				}
+			}
+
 			for (const speciesId in modData.formatsData) {
 				const formatData = modData.formatsData[speciesId];
 				if (!formatData.tier) {
@@ -582,43 +602,40 @@ export const Dex = new class implements ModdedDex {
 				}
 				const tier = formatData.tier;
 				table.overrideTier[speciesId] = tier;
+				monTiers[speciesId] = tier;
+				if (!defaultTierOrder.includes(tier) && !customTiers.includes(tier)) {
+					customTiers.push(tier);
+				}
 			}
+			const tierGroups: { [ tier: string] : string[] } = {};
+
+			for (const tierGroup in [...customTiers, ...defaultTierOrder]) {
+				if (!tierGroups[tierGroup]) {
+					tierGroups[tierGroup] = [];
+				}
+			}
+			for (const species in monTiers) {
+				const speciesTier = monTiers[species];
+				tierGroups[speciesTier].push(speciesTier);
+			}
+			for (const tierGroup in tierGroups) {
+				tierGroups[tierGroup].sort();
+			}
+			console.debug("Prepared tiering information with custom tiers:", customTiers, "and tierGroups:", tierGroups);
+
+			const newTiers = [];
+			for (const tier of [...customTiers, ...defaultTierOrder]) {
+				if (tierGroups[tier] && tierGroups[tier].length > 0) {
+					newTiers.push(['header', tier]);
+					newTiers.push(...tierGroups[tier].sort());
+				}
+			}
+			console.debug("Created new table tiers", table.tiers);
+
+			table.tiers = newTiers;
+			table.tierSet = null;
 		}
 
-		/**
-		 * // I do not like hardcoding this in here, but it's for testing for now.
-		 * 			// It will have to do.
-		 * 			const defaultTierOrder = ["CAP", "CAP NFE", "CAP LC", "AG", "Uber", "(Uber)", "OU", "(OU)", "UUBL",
-		 * 				"UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased", "Illegal"]
-		 * 			const customTiers: string[] = []; // NOTE: WILL APPEAR IN ORDER ENCOUNTERED IN.
-		 * 			const tierGroups: { [ tier: string] : string[] } = {};
-		 *
-		 * 			for (const speciesId in modData.formatsData) {
-		 * 				const formatData = modData.formatsData[speciesId];
-		 * 				if (!formatData.tier) {
-		 * 					continue;
-		 * 				}
-		 *
-		 * 				if (!defaultTierOrder.includes(tier)) {
-		 * 					customTiers.push(tier);
-		 * 				}
-		 * 				if (!tierGroups[tier]) {
-		 * 					tierGroups[tier] = [];
-		 * 				}
-		 * 				tierGroups[tier].push(speciesId);
-		 * 			}
-		 * 			console.debug("Prepared tiering information with custom tiers:", customTiers, "and tierGroups:", tierGroups);
-		 *
-		 * 			const newTiers = [];
-		 * 			for (const tier of [...customTiers, ...defaultTierOrder]) {
-		 * 				if (tierGroups[tier] && tierGroups[tier].length > 0) {
-		 * 					newTiers.push(['header', tier]);
-		 * 					newTiers.push(...tierGroups[tier].sort());
-		 * 				}
-		 * 			}
-		 * 			table.tiers = newTiers;
-		 * 			table.tierSet = null;
-		 */
 
 		// todo: implement custom types and whatnot.
 		console.debug(`Implemented overrides from server on mod ${modId} with ${Object.keys(window.BattleTeambuilderTable[modId].overrideSpeciesData).length} species & ${Object.keys(window.BattleTeambuilderTable[modId].learnsets).length} learnsets.`);
