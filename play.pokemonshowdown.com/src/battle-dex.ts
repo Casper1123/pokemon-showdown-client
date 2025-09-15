@@ -564,9 +564,14 @@ export const Dex = new class implements ModdedDex {
 
 		// Add custom duration information.
 		// Note: Should contain duration data on field effects only (so far). Might be changed later.
-		try {
-			table.conditionsData = modData.conditionsData;
-		} catch (e) { console.error("Error integrating conditionsData:", e); }
+		console.debug(`Merging conditionsdata.`);
+		if (!table.conditionsData) {
+			table.conditionsData = {}
+		}
+		for (const conditionId in modData.conditionsData) {
+			table.conditionsData[conditionId] = modData.conditionsData[conditionId];
+		}
+		console.debug(`Conditionsdata integrated:`, table.conditionsData);
 
 
 		// Merge formats data
