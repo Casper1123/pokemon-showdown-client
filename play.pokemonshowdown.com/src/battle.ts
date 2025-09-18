@@ -3111,7 +3111,7 @@ export class Battle {
 			let maxTimeLeft = 0;
 
 			try {
-				console.debug("Checking field condition (effect, fromEffect)", effect, fromEffect);
+				console.debug("Checking field condition (effect, fromEffect)", effect, fromeffect);
 				if (this.dex.modid && window.AvailableCustomMods?.includes(this.dex.modid)) {
 					const modTable = window.BattleTeambuilderTable[this.dex.modid];
 					console.debug("Is a modded dex with overrideFieldConditions", modTable?.overrideFieldConditions);
