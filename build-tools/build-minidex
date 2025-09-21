@@ -10,22 +10,36 @@ process.chdir(rootDir);
 
 const assetsCache = 'caches/pokemon-showdown-assets';
 if (!fs.existsSync(assetsCache)) {
-	process.stdout.write("Cloning assets repository... ");
-	child_process.execSync('git clone git@github.com:Casper1123/pokemon-showdown-assets.git pokemon-showdown-assets', {
-		cwd: 'caches'
-	});
-	process.stdout.write("Creating asset symlinks... ");
-	const assetDirs = ['sprites', 'audio', 'fx'];
-	assetDirs.forEach(dir => {
-		const sourcePath = path.resolve(assetsCache, dir);
-		const targetPath = path.resolve('play.pokemonshowdown.com', dir);
+	try {
+		// You can choose to either exit or continue without assets
+		process.exit(1); // Exit with error code
+		// OR: return; // Continue build without assets
+		process.stdout.write("Cloning assets repository... ");
+		child_process.execSync('git clone git@github.com:Casper1123/pokemon-showdown-assets.git pokemon-showdown-assets', {
+			cwd: 'caches'
+		});
+		process.stdout.write("Creating asset symlinks... ");
+		const assetDirs = ['sprites', 'audio', 'fx'];
+		assetDirs.forEach(dir => {
+			const sourcePath = path.resolve(assetsCache, dir);
+			const targetPath = path.resolve('play.pokemonshowdown.com', dir);
 
-		// Create symlink if source exists and target doesn't exist
-		if (fs.existsSync(sourcePath) && !fs.existsSync(targetPath)) {
-			fs.symlinkSync(sourcePath, targetPath);
-		}
-	});
-	console.log("DONE");
+			// Create symlink if source exists and target doesn't exist
+			if (fs.existsSync(sourcePath) && !fs.existsSync(targetPath)) {
+				fs.symlinkSync(sourcePath, targetPath);
+			}
+		});
+		console.log("DONE");
+	} catch (error) {
+	console.log("FAILED");
+	console.error("Failed to clone assets repository:");
+	console.error("This is likely due to:");
+	console.error("- SSH key not configured or not accessible");
+	console.error("- No access to the private repository");
+	console.error(`Error details: ${error.message}`);
+	console.error("You could consider removing this if you do not have an assets repository. This is handled in build-tools/build-minidex.js");
+	console.error("You could also replace the assets repo address.");
+	}
 } else {
 	process.stdout.write("Updating assets repository... ");
 	child_process.execSync('git pull', { cwd: assetsCache });
