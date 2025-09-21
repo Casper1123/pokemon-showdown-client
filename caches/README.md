@@ -7,3 +7,4 @@ Things cached here:
 
 - `pokemon-showdown` a checkout of the server repo, used in the build process (mostly for stuff in `play.pokemonshowdown.com/data/`)
 - `eslintcache.json` eslint cache files
+- `pokemon-showdown-assets` a repository to hold the asset files for organizational purposes.
