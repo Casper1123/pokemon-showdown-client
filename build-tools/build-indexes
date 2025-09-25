@@ -1137,6 +1137,16 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			}
 		}
 	}
+	const G9NATDEXCUSTOMLearnsets = Dex.mod('gen8bdsp').data.Learnsets;
+	for (const id in G9NATDEXCUSTOMLearnsets) {
+		const species = Dex.mod('gen9natdexcustom').species.get(id);
+		if (species.isNonstandard && !['Unobtainable', 'CAP'].includes(species.isNonstandard)) continue;
+		const learnset = G9NATDEXCUSTOMLearnsets[id].learnset;
+		BattleTeambuilderTable['gen9natdexcustom'].learnsets[id] = {};
+		for (const moveid in learnset) {
+			BattleTeambuilderTable['gen9natdexcustom'].learnsets[id][moveid] = '9';
+		}
+	}
 
 	// Client relevant data that should be overriden by past gens and mods
 	const overrideSpeciesKeys = [
