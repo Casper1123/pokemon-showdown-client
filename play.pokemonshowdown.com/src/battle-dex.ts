@@ -783,6 +783,11 @@ export const Dex = new class implements ModdedDex {
 			dex = Dex.mod('gen8bdsp' as ID);
 		}
 		return dex;
+		// FIXME: required? at all?
+		if (formatid.includes('natdexcustom')) {
+			dex = Dex.mod(`gen${dex.gen}natdexcustom` as ID);
+		}
+		return dex;
 	}
 
 	resolveAvatar(avatar: string): string {
