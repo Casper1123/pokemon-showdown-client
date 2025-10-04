@@ -690,6 +690,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.formatType = 'natdexcustom';
 			if (!format) format = 'ou' as ID;
 			this.isDoubles = format.includes('doubles');
+			this.dex = Dex.mod(`gen${this.dex.gen}natdexcustom` as ID);
 		}
 		if (format.includes('doubles') && this.dex.gen > 4 && !this.formatType) {
 			this.formatType = 'doubles';
