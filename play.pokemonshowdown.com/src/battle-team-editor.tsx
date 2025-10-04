@@ -92,6 +92,10 @@ class TeamEditorState extends PSModel {
 		team.format = formatid;
 		this.dex = Dex.forFormat(formatid);
 		console.debug(`Team editor set to format ${format}`);
+		this.search.dex = this.dex;
+		if (this.search.typedSearch) {
+			this.search.typedSearch.dex = this.dex;
+		}
 
 		// Injecting custom mods
 		// if (window.FormatModMapping && window.FormatModMapping[formatid]) {
