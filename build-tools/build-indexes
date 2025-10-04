@@ -257,12 +257,12 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	const LC = GENS.map(num => num + 0.7);
 	const STADIUM = [2.04, 1.04];
 	const NATDEX = [9.1, 8.1];
-	const CUSTOMNATDEX = [9.3]
+	const CUSTOMNATDEX = [9.8]
 	const OTHER = [9.9, 9.6, 9.411, 9.41, 9.401, 9.4, 9.2, -9.4, -9.401, 8.6, 8.4, 8.2, 8.1, -8.4, -8.6, 7.1, 5.1, 3.1];
 
 	// process.stdout.write("\n  ");
 	for (const genIdent of [...GENS, ...DOUBLES, ...VGC, ...NFE, ...STADIUM, ...OTHER, ...NATDEX, ...CUSTOMNATDEX, ...LC]) {
-		const isCustomNatdex = ('' + genIdent).endsWith('.3');
+		const isCustomNatdex = ('' + genIdent).endsWith('.8');
 		const isLetsGo = (genIdent === 7.1);
 		const isBDSP = (genIdent === 8.6 || genIdent === -8.6);
 		const isMetBattle = ('' + genIdent).endsWith('.2');
