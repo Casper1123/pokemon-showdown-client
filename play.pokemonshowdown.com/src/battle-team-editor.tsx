@@ -144,13 +144,13 @@ class TeamEditorState extends PSModel {
 
 		// Basically begging to inject our custom mod into here.
 		// Please just work this search bar is so bloody annoying I swear dude.
-		if (window.FormatModMapping && window.FormatModMapping[this.format]) {
-			const modId = window.FormatModMapping[this.format];
-			this.search.dex = Dex.mod(modId);
-			if (this.search.typedSearch) {
-				this.search.typedSearch.dex = Dex.mod(modId);
-			}
-		}
+		// if (window.FormatModMapping && window.FormatModMapping[this.format]) {
+		// 	const modId = window.FormatModMapping[this.format];
+		// 	this.search.dex = Dex.mod(modId);
+		// 	if (this.search.typedSearch) {
+		// 		this.search.typedSearch.dex = Dex.mod(modId);
+		// 	}
+		// }
 
 		this.originalSpecies = null;
 		this.search.prependResults = null;
