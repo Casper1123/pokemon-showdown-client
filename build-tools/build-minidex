@@ -11,9 +11,6 @@ process.chdir(rootDir);
 const assetsCache = 'caches/pokemon-showdown-assets';
 if (!fs.existsSync(assetsCache)) {
 	try {
-		// You can choose to either exit or continue without assets
-		process.exit(1); // Exit with error code
-		// OR: return; // Continue build without assets
 		process.stdout.write("Cloning assets repository... ");
 		child_process.execSync('git clone git@github.com:Casper1123/pokemon-showdown-assets.git pokemon-showdown-assets', {
 			cwd: 'caches'
