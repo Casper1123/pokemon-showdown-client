@@ -242,12 +242,13 @@ pokeballs=null;this.
 resourcePrefix=function(_window$document){
 var prefix='';
 if(((_window$document=window.document)==null||(_window$document=_window$document.location)==null?void 0:_window$document.protocol)!=='http:')prefix='https:';
-return prefix+"//play.pokemonshowdown.com/";
+
+return prefix+"//"+Config.routes.client+"/";
 }();this.
 
 fxPrefix=function(_window$document2){
 var protocol=((_window$document2=window.document)==null||(_window$document2=_window$document2.location)==null?void 0:_window$document2.protocol)!=='http:'?'https:':'';
-return protocol+"//play.pokemonshowdown.com/fx/";
+return protocol+"//"+Config.routes.client+"/fx/";
 }();this.
 
 loadedSpriteData={xy:1,bw:0};this.
@@ -260,6 +261,159 @@ moddedDexes={};this.
 
 
 afdMode=void 0;this.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -894,7 +1048,7 @@ var id=toID(name);
 if(name!==id.substr(0,1).toUpperCase()+id.substr(1))return false;
 return(_window$BattleTypeCha2=window.BattleTypeChart)==null?void 0:_window$BattleTypeCha2.hasOwnProperty(id);
 }
-};}var _proto2=_class2.prototype;_proto2.convertLearnsetArrayToString=function convertLearnsetArrayToString(learnsetArray){if(!Array.isArray(learnsetArray)){return learnsetArray;}var generations=new Set();var versionChars=new Set();for(var _i6=0;_i6<learnsetArray.length;_i6++){var moveSource=learnsetArray[_i6];var gen=parseInt(moveSource.charAt(0));if(gen>=1&&gen<=9){generations.add(gen);if(gen===6)versionChars.add('p');else if(gen===7&&!moveSource.includes('V'))versionChars.add('q');else if(gen===8&&!moveSource.includes('V'))versionChars.add('g');else if(gen===9&&!moveSource.includes('V'))versionChars.add('a');if(gen===9&&moveSource.includes('E'))versionChars.add('e');}}var genString=Array.from(generations).sort().join('');var versionString=Array.from(versionChars).join('');return genString+versionString;};_proto2.loadModData=function loadModData(modId){var depth=arguments.length>1&&arguments[1]!==undefined?arguments[1]:0;if(depth>10)throw new Error('Max mod inheritance depth exceeded. Potential cyclicality may be in effect.');if(window.BattleTeambuilderTable[modId])return;if(!window.AvailableCustomMods.includes(modId)){throw new Error("Attempt at loading mod that is not available from server: ("+modId+" not in ["+window.AvailableCustomMods+"])");}try{var xhr=new XMLHttpRequest();var serverUrl="https://"+PS.server.host;console.log("Attempting to fetch moddata for "+modId+" from "+serverUrl);xhr.open('GET',serverUrl+"/data/moddata?mod="+modId,false);xhr.send();if(xhr.status!==200){throw new Error("HTTP "+xhr.status+": "+xhr.statusText);}var modData;try{modData=JSON.parse(xhr.responseText);}catch(e){throw new Error("Invalid JSON for mod "+modId+": "+e);}if(!modData||typeof modData!=='object'){throw new Error("Invalid mod data structure for "+modId);}console.log("Integrating data for mod "+modId);this.integrateModData(modId,modData,depth);}catch(error){console.error("Failed to load mod data for "+modId+":",error);throw error;}};_proto2.insert=function insert(index,entry){window.BattleSearchIndex.splice(index,0,entry);};_proto2.attemptInsertObject=function attemptInsertObject(id,objectType){try{var _ID=toID(id);var closestIndex=DexSearch.getClosest(_ID);var indexEntry=window.BattleSearchIndex[closestIndex][0];if(indexEntry===_ID){return;}console.debug("Registering new Search Index entry for",_ID,"of type",objectType);var ordering=indexEntry<_ID?1:0;this.insert(closestIndex+ordering,[_ID,objectType]);}catch(e){console.error("Error when inserting into object:",e);throw e;}};_proto2.integrateModData=function integrateModData(modId,modData,depth){console.debug("Mod: "+modId+" has parent "+modData.parentMod+".");if(modData.parentMod&&modData.parentMod!=="gen"+Dex.gen){console.debug("Preparing parent data of mod "+modData.parentMod+" for "+modId);this.loadModData(modData.parentMod,depth+1);var parentData=window.BattleTeambuilderTable[modData.parentMod];window.BattleTeambuilderTable[modId]=JSON.parse(JSON.stringify(parentData));}else if(modData.parentMod==="gen"+Dex.gen){console.debug("Loading base gen (gen"+Dex.gen+") into "+modId+" as it's parent.");var baseProps=['tiers','items','overrideTier','ubersUUBans','monotypeBans','formatSlices','learnsets','overrideSpeciesData','overrideMoveData','overrideAbilityData','overrideItemData','overrideTypeChart','removeType'];var _parentData={};for(var _i8=0;_i8<baseProps.length;_i8++){var prop=baseProps[_i8];if(window.BattleTeambuilderTable[prop]!==undefined){_parentData[prop]=window.BattleTeambuilderTable[prop];}else{if(prop==='learnsets'){_parentData[prop]=window.BattleTeambuilderTable.learnsets||{};}else if(['tiers','items'].includes(prop)){_parentData[prop]=[];}else{_parentData[prop]={};}}}window.BattleTeambuilderTable[modId]=JSON.parse(JSON.stringify(_parentData));}else{console.debug("Mod "+modId+" has no parent, initializing empty table.");window.BattleTeambuilderTable[modId]={overrideSpeciesData:{},overrideMoveData:{},overrideAbilityData:{},overrideItemData:{},learnsets:{},overrideTier:{},overrideTypeChart:{}};}console.debug("Merging pokedex entries.");for(var mon in modData.pokedex){var monData=modData.pokedex[mon];console.debug("Applying modification for mon "+mon+". inherit = "+monData.inherit);if(!monData.inherit){window.BattleTeambuilderTable[modId].overrideSpeciesData[mon]=monData;console.debug("Replaced mon data for "+mon+" due to inherit = "+monData.inherit);this.attemptInsertObject(mon,'pokemon');continue;}if(!window.BattleTeambuilderTable[modId].overrideSpeciesData[mon]){window.BattleTeambuilderTable[modId].overrideSpeciesData[mon]={};console.debug("Created new table entry for mon "+mon);}for(var attribute in monData){if(attribute!=='inherit'){window.BattleTeambuilderTable[modId].overrideSpeciesData[mon][attribute]=monData[attribute];console.debug("Attaching attribute "+attribute+" to table.");}}}console.debug("Merging move entries.");for(var move in modData.moves){var moveData=modData.moves[move];console.debug("Applying modification for move "+move+". inherit = "+moveData.inherit);if(!moveData.inherit){window.BattleTeambuilderTable[modId].overrideMoveData[move]=moveData;console.debug("Replaced move data for "+move+" due to inherit = "+moveData.inherit);this.attemptInsertObject(move,'move');continue;}if(!window.BattleTeambuilderTable[modId].overrideMoveData[move]){window.BattleTeambuilderTable[modId].overrideMoveData[move]={};console.debug("Created new table entry for move "+move);}for(var _attribute in moveData){window.BattleTeambuilderTable[modId].overrideMoveData[move][_attribute]=moveData[_attribute];console.debug("Attaching attribute "+_attribute+" to table.");if(_attribute!=='inherit'){}}}console.debug("Merging item entries.");for(var item in modData.items){var itemData=modData.items[item];console.debug("Applying modification for item "+item+". inherit = "+itemData.inherit);if(!itemData.inherit){window.BattleTeambuilderTable[modId].overrideItemData[item]=itemData;console.debug("Replaced item data for "+item+" due to inherit = "+itemData.inherit);this.attemptInsertObject(item,'item');continue;}if(!window.BattleTeambuilderTable[modId].overrideItemData[item]){window.BattleTeambuilderTable[modId].overrideItemData[item]={};console.debug("Created new table entry for item "+item);}for(var _attribute2 in itemData){if(_attribute2!=='inherit'){window.BattleTeambuilderTable[modId].overrideItemData[item][_attribute2]=itemData[_attribute2];console.debug("Attaching attribute "+_attribute2+" to table.");}}}console.debug("Merging learnset entries.");for(var _mon in modData.learnsets){console.debug("Processing learnset for "+_mon);var monLearnsetData=modData.learnsets[_mon];if(!window.BattleTeambuilderTable[modId].learnsets[_mon]){window.BattleTeambuilderTable[modId].learnsets[_mon]={};}for(var _move in monLearnsetData){console.debug("Setting learnability for "+_move);window.BattleTeambuilderTable[modId].learnsets[_mon][_move]=this.convertLearnsetArrayToString(monLearnsetData[_move]);}}console.debug("Merging formatdata entries.");if(modData.formatsData){if(!window.BattleTeambuilderTable[modId].overrideTier){window.BattleTeambuilderTable[modId].overrideTier={};}for(var speciesId in modData.formatsData){var formatData=modData.formatsData[speciesId];if(formatData.tier){window.BattleTeambuilderTable[modId].overrideTier[speciesId]=formatData.tier;console.debug("Modifying formatdata for "+speciesId+" to "+formatData.tier);}}}console.debug("Merging typechart entries.");if(!window.BattleTeambuilderTable[modId].overrideTypeChart){window.BattleTeambuilderTable[modId].overrideTypeChart={};}for(var typeId in modData.typechart){var typeData=modData.typechart[typeId];window.BattleTeambuilderTable[modId].overrideTypeChart[typeId]=typeData;}console.debug("Implemented overrides from server on mod "+modId+" with "+Object.keys(window.BattleTeambuilderTable[modId].overrideSpeciesData).length+" species & "+Object.keys(window.BattleTeambuilderTable[modId].learnsets).length+" learnsets.");};_proto2.initializeCustomMods=function initializeCustomMods(){try{console.log('Initializing custom-mods. Requires connection to server with the right endpoint infrastructure.');var serverUrl="https://"+PS.server.host;var availableModsXhr=new XMLHttpRequest();console.log("Attempting to fetch availablemods from "+serverUrl);availableModsXhr.open('GET',serverUrl+"/data/availablemods",false);availableModsXhr.send();if(availableModsXhr.status!==200){throw new Error("HTTP "+availableModsXhr.status+": "+availableModsXhr.statusText);}var availableMods=[];try{var availableModsData=JSON.parse(availableModsXhr.responseText);if(Array.isArray(availableModsData)){availableMods=availableModsData.map(String);}else{console.warn('Unexpected availableMods structure');}}catch(e){throw new Error("Invalid JSON for availableMods: "+e);}console.log("Found "+availableMods.length+" available mods");var formatModsXhr=new XMLHttpRequest();console.log("Attempting to fetch formatmods from "+serverUrl);formatModsXhr.open('GET',serverUrl+"/data/formatmods",false);formatModsXhr.send();if(formatModsXhr.status!==200){throw new Error("HTTP "+formatModsXhr.status+": "+formatModsXhr.statusText);}var formatMods={};try{formatMods=JSON.parse(formatModsXhr.responseText);}catch(e){throw new Error("Invalid JSON for formatMods: "+e);}console.log("Found "+Object.keys(formatMods).length+" format mappings");window.FormatModMapping=formatMods;window.AvailableCustomMods=availableMods;for(var _i0=0,_availableMods2=availableMods;_i0<_availableMods2.length;_i0++){var modId=_availableMods2[_i0];this.loadModData(modId);}}catch(error){console.warn('Failed to load custom mods:',error);}};_proto2.mod=function mod(modid){if(modid==='gen9')return this;if(!window.BattleTeambuilderTable)return this;if(modid in this.moddedDexes){return this.moddedDexes[modid];}if(!window.BattleTeambuilderTable[modid]){this.loadModData(modid);}this.moddedDexes[modid]=new ModdedDex(modid);return this.moddedDexes[modid];};_proto2.forGen=function forGen(gen){if(!gen)return this;return this.mod("gen"+gen);};_proto2.formatGen=function formatGen(format){var formatid=toID(format);if(!formatid)return Dex.gen;if(!formatid.startsWith('gen'))return 6;return parseInt(formatid.charAt(3))||Dex.gen;};_proto2.forFormat=function forFormat(format){var formatId=toID(format).slice(4);if(window.FormatModMapping&&window.FormatModMapping[formatId]){var modId=window.FormatModMapping[formatId];return Dex.mod(modId);}var dex=Dex.forGen(Dex.formatGen(format));var formatid=toID(format).slice(4);if(dex.gen===7&&formatid.includes('letsgo')){dex=Dex.mod('gen7letsgo');}if(dex.gen===8&&formatid.includes('bdsp')){dex=Dex.mod('gen8bdsp');}return dex;};_proto2.resolveAvatar=function resolveAvatar(avatar){var _window$Config;if(window.BattleAvatarNumbers&&avatar in BattleAvatarNumbers){avatar=BattleAvatarNumbers[avatar];}if(avatar.startsWith('#')){return Dex.resourcePrefix+'sprites/trainers-custom/'+toID(avatar.substr(1))+'.png';}if(avatar.includes('.')&&(_window$Config=window.Config)!=null&&(_window$Config=_window$Config.server)!=null&&_window$Config.registered){var protocol=Config.server.port===443?'https':'http';var server=protocol+"://"+Config.server.host+":"+Config.server.port;return server+"/avatars/"+encodeURIComponent(avatar).replace(/%3F/g,'?');}return Dex.resourcePrefix+'sprites/trainers/'+Dex.sanitizeName(avatar||'unknown')+'.png';};_proto2.sanitizeName=function sanitizeName(name){if(!name)return'';return(''+name).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').slice(0,50);};_proto2.prefs=function prefs(prop){var _window$Storage,_window$PS;return(_window$Storage=window.Storage)!=null&&_window$Storage.prefs?window.Storage.prefs(prop):(_window$PS=window.PS)==null||(_window$PS=_window$PS.prefs)==null?void 0:_window$PS[prop];};_proto2.getShortName=function getShortName(name){var shortName=name.replace(/[^A-Za-z0-9]+$/,'');if(shortName.includes('(')){shortName+=name.slice(shortName.length).replace(/[^()]+/g,'').replace(/\(\)/g,'');}return shortName;};_proto2.getEffect=function getEffect(name){name=(name||'').trim();if(name.substr(0,5)==='item:'){return Dex.items.get(name.substr(5).trim());}else if(name.substr(0,8)==='ability:'){return Dex.abilities.get(name.substr(8).trim());}else if(name.substr(0,5)==='move:'){return Dex.moves.get(name.substr(5).trim());}var id=toID(name);return new PureEffect(id,name);};_proto2.getGen3Category=function getGen3Category(type){return['Fire','Water','Grass','Electric','Ice','Psychic','Dark','Dragon'].includes(type)?'Special':'Physical';};_proto2.
+};}var _proto2=_class2.prototype;_proto2.convertLearnsetArrayToString=function convertLearnsetArrayToString(learnsetArray){if(!Array.isArray(learnsetArray)){return learnsetArray;}var generations=new Set();var versionChars=new Set();for(var _i6=0;_i6<learnsetArray.length;_i6++){var moveSource=learnsetArray[_i6];var gen=parseInt(moveSource.charAt(0));if(gen>=1&&gen<=9){generations.add(gen);if(gen===6)versionChars.add('p');else if(gen===7&&!moveSource.includes('V'))versionChars.add('q');else if(gen===8&&!moveSource.includes('V'))versionChars.add('g');else if(gen===9&&!moveSource.includes('V'))versionChars.add('a');if(gen===9&&moveSource.includes('E'))versionChars.add('e');}}var genString=Array.from(generations).sort().join('');var versionString=Array.from(versionChars).join('');return genString+versionString;};_proto2.loadModData=function loadModData(modId){var depth=arguments.length>1&&arguments[1]!==undefined?arguments[1]:0;if(depth>10)throw new Error('Max mod inheritance depth exceeded. Potential cyclicality may be in effect.');if(window.BattleTeambuilderTable[modId])return;if(!window.AvailableCustomMods.includes(modId)){throw new Error("Attempt at loading mod that is not available from server: ("+modId+" not in ["+window.AvailableCustomMods+"])");}try{var xhr=new XMLHttpRequest();var serverUrl="https://"+PS.server.host;console.log("Attempting to fetch moddata for "+modId+" from "+serverUrl);xhr.open('GET',serverUrl+"/data/moddata?mod="+modId,false);xhr.send();if(xhr.status!==200){throw new Error("HTTP "+xhr.status+": "+xhr.statusText);}var modData;try{modData=JSON.parse(xhr.responseText);}catch(e){throw new Error("Invalid JSON for mod "+modId+": "+e);}if(!modData||typeof modData!=='object'){throw new Error("Invalid mod data structure for "+modId);}console.log("Integrating data for mod "+modId);this.integrateModData(modId,modData,depth);}catch(error){console.error("Failed to load mod data for "+modId+":",error);throw error;}};_proto2.insert=function insert(index,entry){window.BattleSearchIndex.splice(index,0,entry);};_proto2.attemptInsertObject=function attemptInsertObject(id,objectType){try{var _ID=toID(id);var closestIndex=DexSearch.getClosest(_ID);var indexEntry=window.BattleSearchIndex[closestIndex][0];if(indexEntry===_ID){return;}console.debug("Registering new Search Index entry for",_ID,"of type",objectType);var ordering=indexEntry<_ID?1:0;this.insert(closestIndex+ordering,[_ID,objectType]);}catch(e){console.error("Error when inserting into object:",e);throw e;}};_proto2.integrateModData=function integrateModData(modId,modData,depth){console.debug("Mod: "+modId+" has parent "+modData.parentMod+".");if(modData.parentMod&&modData.parentMod!=="gen"+Dex.gen){console.debug("Preparing parent data of mod "+modData.parentMod+" for "+modId);this.loadModData(modData.parentMod,depth+1);var parentData=window.BattleTeambuilderTable[modData.parentMod];window.BattleTeambuilderTable[modId]=JSON.parse(JSON.stringify(parentData));}else if(modData.parentMod==="gen"+Dex.gen){console.debug("Loading base gen (gen"+Dex.gen+") into "+modId+" as it's parent.");var baseProps=['tiers','items','overrideTier','ubersUUBans','monotypeBans','formatSlices','learnsets','overrideSpeciesData','overrideMoveData','overrideAbilityData','overrideItemData','overrideTypeChart','removeType'];var _parentData={};for(var _i8=0;_i8<baseProps.length;_i8++){var prop=baseProps[_i8];if(window.BattleTeambuilderTable[prop]!==undefined){_parentData[prop]=window.BattleTeambuilderTable[prop];}else{if(prop==='learnsets'){_parentData[prop]=window.BattleTeambuilderTable.learnsets||{};}else if(['tiers','items'].includes(prop)){_parentData[prop]=[];}else{_parentData[prop]={};}}}window.BattleTeambuilderTable[modId]=JSON.parse(JSON.stringify(_parentData));}else{console.debug("Mod "+modId+" has no parent, initializing empty table.");window.BattleTeambuilderTable[modId]={overrideSpeciesData:{},overrideMoveData:{},overrideAbilityData:{},overrideItemData:{},learnsets:{},overrideTier:{},overrideTypeChart:{},conditionsData:{}};}var table=window.BattleTeambuilderTable[modId];console.debug("Merging pokedex entries.");if(!table.overrideSpeciesData){console.warn("No preset override data table for","Species");table.overrideSpeciesData={};}for(var mon in modData.pokedex){var monData=modData.pokedex[mon];if(!monData.inherit){window.BattleTeambuilderTable[modId].overrideSpeciesData[mon]=monData;this.attemptInsertObject(mon,'pokemon');continue;}if(!window.BattleTeambuilderTable[modId].overrideSpeciesData[mon]){window.BattleTeambuilderTable[modId].overrideSpeciesData[mon]={};}for(var attribute in monData){if(attribute!=='inherit'){window.BattleTeambuilderTable[modId].overrideSpeciesData[mon][attribute]=monData[attribute];}}}console.debug("Merging ability entries.");if(!table.overrideAbilityData){console.warn("No preset override data table for","Ability");table.overrideAbilityData={};}for(var ability in modData.abilities){var abilityData=modData.abilities[ability];if(!abilityData.inherit){table.overrideAbilityData[ability]=abilityData;this.attemptInsertObject(ability,'ability');continue;}if(!table.overrideAbilityData[ability]){table.overrideAbilityData[ability]={};}for(var _attribute in abilityData){table.overrideAbilityData[ability][_attribute]=abilityData[_attribute];if(_attribute!=='inherit'){}}}console.debug("Merging move entries.");if(!table.overrideMoveData){console.warn("No preset override data table for","Move");table.overrideMoveData={};}for(var move in modData.moves){var moveData=modData.moves[move];if(!moveData.inherit){table.overrideMoveData[move]=moveData;this.attemptInsertObject(move,'move');continue;}if(!table.overrideMoveData[move]){table.overrideMoveData[move]={};}for(var _attribute2 in moveData){if(['condition'].includes(_attribute2)&&table.overrideMoveData[move][_attribute2]){var deeperData=moveData[_attribute2];for(var deepAttribute in deeperData){table.overrideMoveData[move][_attribute2][deepAttribute]=deeperData[deepAttribute];}continue;}table.overrideMoveData[move][_attribute2]=moveData[_attribute2];}}console.debug("Merging item entries.");if(!table.overrideItemData){console.warn("No preset override data table for","Item");table.overrideItemData={};}for(var item in modData.items){var itemData=modData.items[item];if(!itemData.inherit){table.overrideItemData[item]=itemData;this.attemptInsertObject(item,'item');continue;}if(!table.overrideItemData[item]){table.overrideItemData[item]={};}for(var _attribute3 in itemData){if(_attribute3!=='inherit'){table.overrideItemData[item][_attribute3]=itemData[_attribute3];}}}console.debug("Merging learnset entries.");if(!table.learnsets){console.warn("No preset override data table for","Learnsets");table.learnsets={};}for(var _mon in modData.learnsets){var monLearnsetData=modData.learnsets[_mon];if(!table.learnsets[_mon]){table.learnsets[_mon]={};}for(var _move in monLearnsetData){table.learnsets[_mon][_move]=this.convertLearnsetArrayToString(monLearnsetData[_move]);}}console.debug("Merging typechart entries.");if(!table.overrideTypeChart){table.overrideTypeChart={};}var transform={1:2,0:1,2:0.5,3:0};for(var typeId in modData.typechart){var typeData=modData.typechart[typeId];table.overrideTypeChart[typeId]={};for(var resistKey in typeData){if(resistKey==='inherit'){table.overrideTypeChart[typeId]['inherit']=typeData[resistKey];continue;}try{table.overrideTypeChart[typeId][resistKey]=transform[typeData[resistKey]];}catch(e){console.error("Error integrating type chart overrides. Setting value to 1 for",resistKey);table.overrideTypeChart[typeId][resistKey]=1;}}}console.debug("Merging conditionsdata.");if(!table.conditionsData){table.conditionsData={};}for(var conditionId in modData.conditionsData){table.conditionsData[conditionId]=modData.conditionsData[conditionId];}console.debug("Conditionsdata integrated:",table.conditionsData);console.debug("Merging formatdata entries.");if(modData.formatsData){if(!table.overrideTier){table.overrideTier={};}var monTiers={};var defaultTierOrder=["CAP","CAP NFE","CAP LC","AG","Uber","(Uber)","OU","(OU)","UUBL","UU","RUBL","RU","NUBL","NU","PUBL","PU","ZUBL","ZU","New","NFE","LC","Unreleased","Illegal"];var customTiers=[];var currentTier="";console.debug("backing up exising tiering data");for(var _i0=0,_table$tiers2=table.tiers;_i0<_table$tiers2.length;_i0++){var entry=_table$tiers2[_i0];if(entry[0]==='header'){currentTier=entry[1];if(currentTier.endsWith('s not in a higher tier')){currentTier=currentTier.replace('s not in a higher tier','');}console.debug("\tset current tier",currentTier);if(!defaultTierOrder.includes(currentTier)&&!customTiers.includes(currentTier)){customTiers.push(currentTier);console.debug("\tpushed",currentTier,"to custom tiers");}}else if(currentTier!=='header'&&currentTier===''){console.error('Error backing up tiering data; no format header found.',entry,table.tiers);throw new Error('Error backing up tiering data');}else{monTiers[entry]=currentTier;}}console.debug("merging modData into table.");for(var speciesId in modData.formatsData){var formatData=modData.formatsData[speciesId];if(!formatData.tier){continue;}var tier=formatData.tier;table.overrideTier[speciesId]=tier;monTiers[speciesId]=tier;if(!defaultTierOrder.includes(tier)&&!customTiers.includes(tier)){customTiers.push(tier);console.debug("\tpushed",tier,"to custom tiers");}}var tierGroups={};console.debug("Pre-creating tierGroups");for(var _i10=0,_ref3=[].concat(customTiers,defaultTierOrder);_i10<_ref3.length;_i10++){var tierGroup=_ref3[_i10];if(!tierGroups[tierGroup]){tierGroups[tierGroup]=[];console.debug("\tcreated tierGroup for",tierGroup);}}console.debug("going through known data.");for(var species in monTiers){var speciesTier=monTiers[species];try{tierGroups[speciesTier].push(species);}catch(e){console.error(e,species,speciesTier,tierGroups);break;}}console.debug("Sorting tierGroups");for(var _tierGroup in tierGroups){tierGroups[_tierGroup].sort();}console.debug("Prepared tiering information with custom tiers:",customTiers,"and tierGroups:",tierGroups);var newTiers=[];for(var _i12=0,_ref5=[].concat(customTiers,defaultTierOrder);_i12<_ref5.length;_i12++){var _tier=_ref5[_i12];if(tierGroups[_tier]&&tierGroups[_tier].length>0&&_tier.toLowerCase()!=='illegal'){var baseTier=_tier;var byTechnicality=baseTier.startsWith('(')&&baseTier.endsWith(')');if(byTechnicality){baseTier=baseTier.substring(1,-1);}var NFE=baseTier.endsWith('NFE');if(NFE){baseTier=baseTier+" not in a higher tier";}if(byTechnicality){baseTier=baseTier+" by technicality";}console.debug("\tpushing basetier, tier",baseTier,_tier);newTiers.push(['header',baseTier]);newTiers.push.apply(newTiers,tierGroups[_tier]);}else{console.debug("Skipping push for",_tier,"(it is empty or Illegal)");}}console.debug("Created new table tiers",table.tiers);table.tiers=newTiers;table.tierSet=null;}console.debug("Implemented overrides from server on mod "+modId+" with "+Object.keys(window.BattleTeambuilderTable[modId].overrideSpeciesData).length+" species & "+Object.keys(window.BattleTeambuilderTable[modId].learnsets).length+" learnsets.");};_proto2.initializeCustomMods=function initializeCustomMods(){try{console.log('Initializing custom-mods. Requires connection to server with the right endpoint infrastructure.');var serverUrl="https://"+PS.server.host;var availableModsXhr=new XMLHttpRequest();console.log("Attempting to fetch availablemods from "+serverUrl);availableModsXhr.open('GET',serverUrl+"/data/availablemods",false);availableModsXhr.send();if(availableModsXhr.status!==200){throw new Error("HTTP "+availableModsXhr.status+": "+availableModsXhr.statusText);}var availableMods=[];try{var availableModsData=JSON.parse(availableModsXhr.responseText);if(Array.isArray(availableModsData)){availableMods=availableModsData.map(String);}else{console.warn('Unexpected availableMods structure');}}catch(e){throw new Error("Invalid JSON for availableMods: "+e);}console.log("Found "+availableMods.length+" available mods");var formatModsXhr=new XMLHttpRequest();console.log("Attempting to fetch formatmods from "+serverUrl);formatModsXhr.open('GET',serverUrl+"/data/formatmods",false);formatModsXhr.send();if(formatModsXhr.status!==200){throw new Error("HTTP "+formatModsXhr.status+": "+formatModsXhr.statusText);}var formatMods={};try{formatMods=JSON.parse(formatModsXhr.responseText);}catch(e){throw new Error("Invalid JSON for formatMods: "+e);}console.log("Found "+Object.keys(formatMods).length+" format mappings");window.FormatModMapping=formatMods;window.AvailableCustomMods=availableMods;for(var _i14=0,_availableMods2=availableMods;_i14<_availableMods2.length;_i14++){var modId=_availableMods2[_i14];this.loadModData(modId);}}catch(error){console.warn('Failed to load custom mods:',error);}};_proto2.mod=function mod(modid){if(modid==='gen9')return this;if(!window.BattleTeambuilderTable)return this;if(modid in this.moddedDexes){return this.moddedDexes[modid];}if(!window.BattleTeambuilderTable[modid]){this.loadModData(modid);}this.moddedDexes[modid]=new ModdedDex(modid);return this.moddedDexes[modid];};_proto2.forGen=function forGen(gen){if(!gen)return this;return this.mod("gen"+gen);};_proto2.formatGen=function formatGen(format){var formatid=toID(format);if(!formatid)return Dex.gen;if(!formatid.startsWith('gen'))return 6;return parseInt(formatid.charAt(3))||Dex.gen;};_proto2.forFormat=function forFormat(format){var formatId=toID(format).slice(4);if(window.FormatModMapping&&window.FormatModMapping[formatId]){var modId=window.FormatModMapping[formatId];return Dex.mod(modId);}var dex=Dex.forGen(Dex.formatGen(format));var formatid=toID(format).slice(4);if(dex.gen===7&&formatid.includes('letsgo')){dex=Dex.mod('gen7letsgo');}if(dex.gen===8&&formatid.includes('bdsp')){dex=Dex.mod('gen8bdsp');}return dex;if(formatid.includes('natdexcustom')){dex=Dex.mod("gen"+dex.gen+"natdexcustom");}return dex;};_proto2.resolveAvatar=function resolveAvatar(avatar){var _window$Config;if(window.BattleAvatarNumbers&&avatar in BattleAvatarNumbers){avatar=BattleAvatarNumbers[avatar];}if(avatar.startsWith('#')){return Dex.resourcePrefix+'sprites/trainers-custom/'+toID(avatar.substr(1))+'.png';}if(avatar.includes('.')&&(_window$Config=window.Config)!=null&&(_window$Config=_window$Config.server)!=null&&_window$Config.registered){var protocol=Config.server.port===443?'https':'http';var server=protocol+"://"+Config.server.host+":"+Config.server.port;return server+"/avatars/"+encodeURIComponent(avatar).replace(/%3F/g,'?');}return Dex.resourcePrefix+'sprites/trainers/'+Dex.sanitizeName(avatar||'unknown')+'.png';};_proto2.sanitizeName=function sanitizeName(name){if(!name)return'';return(''+name).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').slice(0,50);};_proto2.prefs=function prefs(prop){var _window$Storage,_window$PS;return(_window$Storage=window.Storage)!=null&&_window$Storage.prefs?window.Storage.prefs(prop):(_window$PS=window.PS)==null||(_window$PS=_window$PS.prefs)==null?void 0:_window$PS[prop];};_proto2.getShortName=function getShortName(name){var shortName=name.replace(/[^A-Za-z0-9]+$/,'');if(shortName.includes('(')){shortName+=name.slice(shortName.length).replace(/[^()]+/g,'').replace(/\(\)/g,'');}return shortName;};_proto2.getEffect=function getEffect(name){name=(name||'').trim();if(name.substr(0,5)==='item:'){return Dex.items.get(name.substr(5).trim());}else if(name.substr(0,8)==='ability:'){return Dex.abilities.get(name.substr(8).trim());}else if(name.substr(0,5)==='move:'){return Dex.moves.get(name.substr(5).trim());}var id=toID(name);return new PureEffect(id,name);};_proto2.getGen3Category=function getGen3Category(type){return['Fire','Water','Grass','Electric','Ice','Psychic','Dark','Dragon'].includes(type)?'Special':'Physical';};_proto2.
 
 hasAbility=function hasAbility(species,ability){
 for(var i in species.abilities){
@@ -1068,8 +1222,8 @@ animationArray.push([BattlePokemonSprites[speciesid],'']);
 }
 if(window.BattlePokemonSpritesBW){
 animationArray.push([BattlePokemonSpritesBW[speciesid],'gen5']);
-}for(var _i10=0;_i10<
-animationArray.length;_i10++){var _ref2=animationArray[_i10];var animationData=_ref2[0];var animDir=_ref2[1];
+}for(var _i16=0;_i16<
+animationArray.length;_i16++){var _ref6=animationArray[_i16];var animationData=_ref6[0];var animDir=_ref6[1];
 if(!animationData)continue;
 if(animationData[facing+'f']&&options.gender==='F')facing+='f';
 if(!animationData[facing])continue;
@@ -1301,8 +1455,8 @@ return"<img src=\""+Dex.resourcePrefix+"sprites/categories/"+sanitizedCategory+"
 getPokeballs=function getPokeballs(){var _window;
 if(this.pokeballs)return this.pokeballs;
 this.pokeballs=[];
-(_window=window).BattleItems||(_window.BattleItems={});for(var _i12=0,_Object$values2=
-Object.values(BattleItems);_i12<_Object$values2.length;_i12++){var data=_Object$values2[_i12];
+(_window=window).BattleItems||(_window.BattleItems={});for(var _i18=0,_Object$values2=
+Object.values(BattleItems);_i18<_Object$values2.length;_i18++){var data=_Object$values2[_i18];
 if(!data.isPokeball)continue;
 this.pokeballs.push(data.name);
 }
@@ -1521,8 +1675,8 @@ return data;
 getPokeballs=function getPokeballs(){var _window2;
 if(this.pokeballs)return this.pokeballs;
 this.pokeballs=[];
-(_window2=window).BattleItems||(_window2.BattleItems={});for(var _i14=0,_Object$values4=
-Object.values(BattleItems);_i14<_Object$values4.length;_i14++){var data=_Object$values4[_i14];
+(_window2=window).BattleItems||(_window2.BattleItems={});for(var _i20=0,_Object$values4=
+Object.values(BattleItems);_i20<_Object$values4.length;_i20++){var data=_Object$values4[_i20];
 if(data.gen&&data.gen>this.gen)continue;
 if(!data.isPokeball)continue;
 this.pokeballs.push(data.name);

@@ -26,12 +26,12 @@ function ThemeHeaderTemplate() {
 <?php } ?>
 
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=IE8" />
-	<link rel="stylesheet" href="//showdown.casper1123.nl/style/font-awesome.css?0.04191676113423237" />
-	<link rel="stylesheet" href="//pokemonshowdown.com/theme/panels.css?0.15458652490390068" />
-	<link rel="stylesheet" href="//pokemonshowdown.com/theme/main.css?0.001649281602949637" />
-	<link rel="stylesheet" href="//showdown.casper1123.nl/style/battle.css?0.24364711047626075" />
-	<link rel="stylesheet" href="//showdown.casper1123.nl/style/replay.css?0.1114487809614475" />
-	<link rel="stylesheet" href="//showdown.casper1123.nl/style/utilichart.css?0.09468772769677547" />
+	<link rel="stylesheet" href="//showdown.casper1123.nl/style/font-awesome.css?0.632591248546541" />
+	<link rel="stylesheet" href="//pokemonshowdown.com/theme/panels.css?0.2744534089301127" />
+	<link rel="stylesheet" href="//pokemonshowdown.com/theme/main.css?0.29813893692643845" />
+	<link rel="stylesheet" href="//showdown.casper1123.nl/style/battle.css?0.7088058886075228" />
+	<link rel="stylesheet" href="//showdown.casper1123.nl/style/replay.css?0.3327095117612642" />
+	<link rel="stylesheet" href="//showdown.casper1123.nl/style/utilichart.css?0.36502989994704205" />
 
 	<!-- Workarounds for IE bugs to display trees correctly. -->
 	<!--[if lte IE 6]><style> li.tree { height: 1px; } </style><![endif]-->
@@ -55,7 +55,7 @@ function ThemeHeaderTemplate() {
 	<div class="pfx-topbar">
 		<div class="header">
 			<ul class="nav">
-				<li><a class="button nav-first<?php if ($panels->tab === 'home') echo ' cur'; ?>" href="//pokemonshowdown.com/"><img src="//pokemonshowdown.com/images/pokemonshowdownbeta.png?0.13779487087612186" alt="Pok&eacute;mon Showdown! (beta)" /> Home</a></li>
+				<li><a class="button nav-first<?php if ($panels->tab === 'home') echo ' cur'; ?>" href="//pokemonshowdown.com/"><img src="//pokemonshowdown.com/images/pokemonshowdownbeta.png?0.542018593578782" alt="Pok&eacute;mon Showdown! (beta)" /> Home</a></li>
 				<li><a class="button<?php if ($panels->tab === 'pokedex') echo ' cur'; ?>" href="//dex.pokemonshowdown.com/">Pok&eacute;dex</a></li>
 				<li><a class="button<?php if ($panels->tab === 'replay') echo ' cur'; ?>" href="/">Replay</a></li>
 				<li><a class="button purplebutton" href="//smogon.com/dex/" target="_blank">Strategy</a></li>
@@ -76,10 +76,10 @@ function ThemeHeaderTemplate() {
 
 function ThemeScriptsTemplate() {
 ?>
-	<script src="//showdown.casper1123.nl/js/lib/jquery-1.11.0.min.js?0.8631001597092212"></script>
-	<script src="//showdown.casper1123.nl/js/lib/lodash.core.js?0.1904688847431113"></script>
-	<script src="//showdown.casper1123.nl/js/lib/backbone.js?0.8562203901956604"></script>
-	<script src="//dex.pokemonshowdown.com/js/panels.js?0.7521255218760701"></script>
+	<script src="//showdown.casper1123.nl/js/lib/jquery-1.11.0.min.js?0.09159645473405931"></script>
+	<script src="//showdown.casper1123.nl/js/lib/lodash.core.js?0.9771445279858182"></script>
+	<script src="//showdown.casper1123.nl/js/lib/backbone.js?0.28684838313059347"></script>
+	<script src="//dex.pokemonshowdown.com/js/panels.js?0.8305768258436996"></script>
 <?php
 }
 
@@ -88,22 +88,22 @@ function ThemeFooterTemplate() {
 ?>
 <?php $panels->scripts(); ?>
 
-	<script src="//showdown.casper1123.nl/js/lib/jquery-cookie.js?0.6849089511309978"></script>
-	<script src="//showdown.casper1123.nl/js/lib/html-sanitizer-minified.js?0.14755502813818855"></script>
-	<script src="//showdown.casper1123.nl/js/battle-sound.js?0.5105003156358567"></script>
-	<script src="//showdown.casper1123.nl/config/config.js?0.8376734783080051"></script>
-	<script src="//showdown.casper1123.nl/js/battledata.js?0.027396837137885655"></script>
-	<script src="//showdown.casper1123.nl/data/pokedex-mini.js?0.3710965581467027"></script>
-	<script src="//showdown.casper1123.nl/data/pokedex-mini-bw.js?0.17360096631890976"></script>
-	<script src="//showdown.casper1123.nl/data/graphics.js?0.24668339469587042"></script>
-	<script src="//showdown.casper1123.nl/data/pokedex.js?0.9640710230940648"></script>
-	<script src="//showdown.casper1123.nl/data/items.js?0.6406947886262717"></script>
-	<script src="//showdown.casper1123.nl/data/moves.js?0.3634380175565628"></script>
-	<script src="//showdown.casper1123.nl/data/abilities.js?0.7284905032446631"></script>
-	<script src="//showdown.casper1123.nl/data/teambuilder-tables.js?0.2195427265389518"></script>
-	<script src="//showdown.casper1123.nl/js/battle-tooltips.js?0.5775907121443722"></script>
-	<script src="//showdown.casper1123.nl/js/battle.js?0.8134326319309702"></script>
-	<script src="/js/replay.js?0.4250748377243616"></script>
+	<script src="//showdown.casper1123.nl/js/lib/jquery-cookie.js?0.3611808725260972"></script>
+	<script src="//showdown.casper1123.nl/js/lib/html-sanitizer-minified.js?0.500905875549372"></script>
+	<script src="//showdown.casper1123.nl/js/battle-sound.js?0.5569967417291024"></script>
+	<script src="//showdown.casper1123.nl/config/config.js?0.7106709160189602"></script>
+	<script src="//showdown.casper1123.nl/js/battledata.js?0.9831082526747519"></script>
+	<script src="//showdown.casper1123.nl/data/pokedex-mini.js?0.6454697751903085"></script>
+	<script src="//showdown.casper1123.nl/data/pokedex-mini-bw.js?0.938152633017242"></script>
+	<script src="//showdown.casper1123.nl/data/graphics.js?0.6975929623042556"></script>
+	<script src="//showdown.casper1123.nl/data/pokedex.js?0.3791015314406794"></script>
+	<script src="//showdown.casper1123.nl/data/items.js?0.5409831227226001"></script>
+	<script src="//showdown.casper1123.nl/data/moves.js?0.7655766199126448"></script>
+	<script src="//showdown.casper1123.nl/data/abilities.js?0.7301261366385883"></script>
+	<script src="//showdown.casper1123.nl/data/teambuilder-tables.js?0.3255882460155366"></script>
+	<script src="//showdown.casper1123.nl/js/battle-tooltips.js?0.8519343378291147"></script>
+	<script src="//showdown.casper1123.nl/js/battle.js?0.6522442324651434"></script>
+	<script src="/js/replay.js?0.2275951237583549"></script>
 
 </body></html>
 <?php

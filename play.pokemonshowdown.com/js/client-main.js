@@ -167,7 +167,7 @@ PSPrefs=function(_PSStreamModel){
 
 
 function PSPrefs(){var _this;
-_this=_PSStreamModel.call(this)||this;_this.theme='light';_this.nogif=null;_this.noanim=null;_this.bwgfx=null;_this.nopastgens=null;_this.blockPMs=null;_this.blockChallenges=null;_this.inchatpm=null;_this.noselfhighlight=null;_this.temporarynotifications=null;_this.leavePopupRoom=null;_this.refreshprompt=null;_this.language='english';_this.chatformatting={hidegreentext:false,hideme:false,hidespoiler:false,hidelinks:false,hideinterstice:true};_this.nounlink=null;_this.ignorenicks=null;_this.ignorespects=null;_this.ignoreopp=null;_this.autotimer=null;_this.rightpanelbattles=null;_this.disallowspectators=null;_this.starredformats=null;_this.showjoins=null;_this.showdebug=null;_this.showbattles=true;_this.autojoin=null;_this.ignore=null;_this.tournaments=null;_this.onepanel=false;_this.timestamps={};_this.mute=false;_this.effectvolume=50;_this.musicvolume=50;_this.notifvolume=50;_this.uploadprivacy=false;_this.afd=false;_this.highlights=null;_this.logtimes=null;_this.storageEngine='';_this.storage={};_this.origin="https://"+Config.routes.client;
+_this=_PSStreamModel.call(this)||this;_this.theme='dark';_this.nogif=null;_this.noanim=null;_this.bwgfx=true;_this.nopastgens=null;_this.blockPMs=null;_this.blockChallenges=null;_this.inchatpm=null;_this.noselfhighlight=null;_this.temporarynotifications=null;_this.leavePopupRoom=null;_this.refreshprompt=null;_this.language='english';_this.chatformatting={hidegreentext:false,hideme:false,hidespoiler:false,hidelinks:false,hideinterstice:true};_this.nounlink=null;_this.ignorenicks=null;_this.ignorespects=null;_this.ignoreopp=null;_this.autotimer=null;_this.rightpanelbattles=null;_this.disallowspectators=null;_this.starredformats=null;_this.showjoins=null;_this.showdebug=null;_this.showbattles=true;_this.autojoin=null;_this.ignore=null;_this.tournaments=null;_this.onepanel=false;_this.timestamps={};_this.mute=false;_this.effectvolume=50;_this.musicvolume=50;_this.notifvolume=50;_this.uploadprivacy=false;_this.afd=false;_this.highlights=null;_this.logtimes=null;_this.storageEngine='';_this.storage={};_this.origin="https://"+Config.routes.client;
 
 for(var key in _this){
 var value=_this[key];
@@ -716,17 +716,16 @@ PS.send("/trn "+name+",0,"+assertion);
 this.update({success:true});
 }
 };_proto3.
-logOut=function logOut(){var _this6=this;
-OfficialAuth.revoke().then(function(){
-PS.send("/logout");
+logOut=function logOut(){
+OfficialAuth.clearTokenStorage();
+window.open("https://play.pokemonshowdown.com/api/oauth/authorized",undefined);
+this.name="";
+this.group='';
+this.userid="";
+this.named=false;
+this.registered=null;
+this.update(null);
 PS.alert("You have been logged out.\n\nIf you wanted to change your name while staying connected, use the 'Change Name' button or the '/nick' command.");
-_this6.name="";
-_this6.group='';
-_this6.userid="";
-_this6.named=false;
-_this6.registered=null;
-_this6.update(null);
-})["catch"](function(){PS.alert("Error logging out: Failed to revoke auth access.");});
 };_proto3.
 
 updateRegExp=function updateRegExp(){
@@ -966,8 +965,8 @@ PSRoom=function(_PSStreamModel4){
 
 
 
-function PSRoom(options){var _this7;
-_this7=_PSStreamModel4.call(this)||this;_this7.id=void 0;_this7.title="";_this7.type='';_this7.isPlaceholder=false;_this7.classType='';_this7.location='left';_this7.closable=true;_this7.connected=false;_this7.canConnect=false;_this7.connectWhenLoggedIn=false;_this7.onParentEvent=null;_this7.width=0;_this7.height=0;_this7.focusNextUpdate=false;_this7.parentElem=null;_this7.parentRoomid=null;_this7.rightPopup=false;_this7.notifications=[];_this7.isSubtleNotifying=false;_this7.minimized=false;_this7.caughtError=void 0;_this7.noURL=void 0;_this7.args=void 0;_this7.
+function PSRoom(options){var _this6;
+_this6=_PSStreamModel4.call(this)||this;_this6.id=void 0;_this6.title="";_this6.type='';_this6.isPlaceholder=false;_this6.classType='';_this6.location='left';_this6.closable=true;_this6.connected=false;_this6.canConnect=false;_this6.connectWhenLoggedIn=false;_this6.onParentEvent=null;_this6.width=0;_this6.height=0;_this6.focusNextUpdate=false;_this6.parentElem=null;_this6.parentRoomid=null;_this6.rightPopup=false;_this6.notifications=[];_this6.isSubtleNotifying=false;_this6.minimized=false;_this6.caughtError=void 0;_this6.noURL=void 0;_this6.args=void 0;_this6.
 
 
 
@@ -1129,7 +1128,7 @@ _this7=_PSStreamModel4.call(this)||this;_this7.id=void 0;_this7.title="";_this7.
 
 
 
-globalClientCommands=_this7.parseClientCommands({
+globalClientCommands=_this6.parseClientCommands({
 'j,join':function(target,cmd,elem){
 target=PS.router.extractRoomID(target)||target;
 var roomid=/[^a-z0-9-]/.test(target)?toID(target):target;
@@ -1183,7 +1182,7 @@ this.errorReply("'"+roomid+"' is a popup and can't be maximized.");
 'logout':function(){
 PS.user.logOut();
 },
-'reconnect,connect':function(){var _this8=this;
+'reconnect,connect':function(){var _this7=this;
 if(this.connected&&this.connected!=='autoreconnect'){
 return this.errorReply("You are already connected.");
 }
@@ -1204,7 +1203,7 @@ if(uptime>24*60*60*1000){
 PS.confirm("It's been over a day since you first connected. Please refresh.",{
 okButton:'Refresh'
 }).then(function(confirmed){
-if(confirmed)_this8.send("/refresh");
+if(confirmed)_this7.send("/refresh");
 });
 return;
 }
@@ -1649,9 +1648,9 @@ return true;
 'autojoin,cmd,crq,query':function(){
 this.errorReply("This is a PS system command; do not use it.");
 }
-});_this7.
-clientCommands=null;_this7.
-currentElement=null;_this7.id=options.id;_this7.title=options.title||_this7.title||_this7.id;if(options.type)_this7.type=options.type;if(options.location)_this7.location=options.location;if(options.parentElem)_this7.parentElem=options.parentElem;if(options.parentRoomid)_this7.parentRoomid=options.parentRoomid;if(_this7.location!=='popup'&&_this7.location!=='semimodal-popup')_this7.parentElem=null;if(options.rightPopup)_this7.rightPopup=true;if(options.connected)_this7.connected=options.connected;if(options.backlog)_this7.backlog=options.backlog;_this7.noURL=options.noURL||false;_this7.args=options.args||null;return _this7;}_inheritsLoose(PSRoom,_PSStreamModel4);var _proto5=PSRoom.prototype;_proto5.getParent=function getParent(){if(this.parentRoomid)return PS.rooms[this.parentRoomid]||null;return null;};_proto5.notify=function notify(options){var _this9=this;var desktopNotification=null;var roomIsFocused=(document.hasFocus==null?void 0:document.hasFocus())&&PS.isVisible(this);if(roomIsFocused&&!options.noAutoDismiss)return;if(!roomIsFocused){PS.playNotificationSound();try{desktopNotification=new Notification(options.title,{body:options.body});if(desktopNotification){desktopNotification.onclick=function(){window.focus();PS.focusRoom(_this9.id);};if(PS.prefs.temporarynotifications){setTimeout(function(){var _desktopNotification;(_desktopNotification=desktopNotification)==null||_desktopNotification.close();},5000);}}}catch(_unused4){}}if(options.noAutoDismiss&&!options.id){throw new Error("Must specify id for manual dismissing");}if(options.id){this.notifications=this.notifications.filter(function(notification){return notification.id!==options.id;});}this.notifications.push({title:options.title,body:options.body,id:options.id||'',noAutoDismiss:options.noAutoDismiss||false,notification:desktopNotification});PS.update();};_proto5.subtleNotify=function subtleNotify(){var _PS$prefs$logtimes,_room$lastMessage;if(PS.isVisible(this))return;var room=PS.rooms[this.id];var lastSeenTimestamp=((_PS$prefs$logtimes=PS.prefs.logtimes)==null||(_PS$prefs$logtimes=_PS$prefs$logtimes[PS.server.id])==null?void 0:_PS$prefs$logtimes[this.id])||0;var lastMessageTime=+(((_room$lastMessage=room.lastMessage)==null?void 0:_room$lastMessage[1])||0);if(lastMessageTime-room.timeOffset<=lastSeenTimestamp)return;this.isSubtleNotifying=true;PS.update();};_proto5.dismissNotificationAt=function dismissNotificationAt(i){try{var _this$notifications$i;(_this$notifications$i=this.notifications[i].notification)==null||_this$notifications$i.close();}catch(_unused5){}this.notifications.splice(i,1);};_proto5.dismissNotification=function dismissNotification(id){var index=this.notifications.findIndex(function(n){return n.id===id;});if(index!==-1){this.dismissNotificationAt(index);}PS.update();};_proto5.autoDismissNotifications=function autoDismissNotifications(){var room=PS.rooms[this.id];if(room.lastMessageTime){var lastMessageDates=PS.prefs.logtimes||{};if(!lastMessageDates[PS.server.id])lastMessageDates[PS.server.id]={};lastMessageDates[PS.server.id][room.id]=room.lastMessageTime||0;PS.prefs.set('logtimes',lastMessageDates);}for(var i=this.notifications.length-1;i>=0;i--){if(!this.notifications[i].noAutoDismiss){this.dismissNotificationAt(i);}}this.isSubtleNotifying=false;};_proto5.connect=function connect(){throw new Error("This room is not designed to connect to a server room");};_proto5.handleReconnect=function handleReconnect(msg){};_proto5.receiveLine=function receiveLine(args){switch(args[0]){case'title':{this.title=args[1];PS.update();break;}case'notify':{var title=args[1],body=args[2],toHighlight=args[3];if(toHighlight&&!ChatRoom.getHighlight(toHighlight,this.id))break;this.notify({title:title,body:body});break;}case'tempnotify':{var id=args[1],_title=args[2],_body=args[3],_toHighlight=args[4];if(_toHighlight&&!ChatRoom.getHighlight(_toHighlight,this.id))break;this.notify({title:_title,body:_body,id:id});break;}case'tempnotifyoff':{var _id=args[1];this.dismissNotification(_id);break;}default:{if(this.canConnect){this.update(args);}else{throw new Error("This room is not designed to receive messages");}}}};_proto5.add=function add(line,ifChat){if(this.type!=='chat'&&this.type!=='battle'){if(!ifChat){var _PS$rooms;PS.mainmenu.handlePM(PS.user.userid,PS.user.userid);(_PS$rooms=PS.rooms['dm-'])==null||_PS$rooms.receiveLine(BattleTextParser.parseLine(line));}}else{this.receiveLine(BattleTextParser.parseLine(line));}};_proto5.errorReply=function errorReply(message){var element=arguments.length>1&&arguments[1]!==undefined?arguments[1]:this.currentElement;if((element==null?void 0:element.tagName)==='BUTTON'){PS.alert(message,{parentElem:element});}else{this.add("|error|"+message);}};_proto5.parseClientCommands=function parseClientCommands(commands){var parsedCommands={};for(var cmd in commands){var names=cmd.split(',').map(function(name){return name.trim();});for(var _i21=0;_i21<names.length;_i21++){var name=names[_i21];if(name.includes(' '))throw new Error("Client command names cannot contain spaces: "+name);parsedCommands[name]=commands[cmd];}}return parsedCommands;};_proto5.
+});_this6.
+clientCommands=null;_this6.
+currentElement=null;_this6.id=options.id;_this6.title=options.title||_this6.title||_this6.id;if(options.type)_this6.type=options.type;if(options.location)_this6.location=options.location;if(options.parentElem)_this6.parentElem=options.parentElem;if(options.parentRoomid)_this6.parentRoomid=options.parentRoomid;if(_this6.location!=='popup'&&_this6.location!=='semimodal-popup')_this6.parentElem=null;if(options.rightPopup)_this6.rightPopup=true;if(options.connected)_this6.connected=options.connected;if(options.backlog)_this6.backlog=options.backlog;_this6.noURL=options.noURL||false;_this6.args=options.args||null;return _this6;}_inheritsLoose(PSRoom,_PSStreamModel4);var _proto5=PSRoom.prototype;_proto5.getParent=function getParent(){if(this.parentRoomid)return PS.rooms[this.parentRoomid]||null;return null;};_proto5.notify=function notify(options){var _this8=this;var desktopNotification=null;var roomIsFocused=(document.hasFocus==null?void 0:document.hasFocus())&&PS.isVisible(this);if(roomIsFocused&&!options.noAutoDismiss)return;if(!roomIsFocused){PS.playNotificationSound();try{desktopNotification=new Notification(options.title,{body:options.body});if(desktopNotification){desktopNotification.onclick=function(){window.focus();PS.focusRoom(_this8.id);};if(PS.prefs.temporarynotifications){setTimeout(function(){var _desktopNotification;(_desktopNotification=desktopNotification)==null||_desktopNotification.close();},5000);}}}catch(_unused4){}}if(options.noAutoDismiss&&!options.id){throw new Error("Must specify id for manual dismissing");}if(options.id){this.notifications=this.notifications.filter(function(notification){return notification.id!==options.id;});}this.notifications.push({title:options.title,body:options.body,id:options.id||'',noAutoDismiss:options.noAutoDismiss||false,notification:desktopNotification});PS.update();};_proto5.subtleNotify=function subtleNotify(){var _PS$prefs$logtimes,_room$lastMessage;if(PS.isVisible(this))return;var room=PS.rooms[this.id];var lastSeenTimestamp=((_PS$prefs$logtimes=PS.prefs.logtimes)==null||(_PS$prefs$logtimes=_PS$prefs$logtimes[PS.server.id])==null?void 0:_PS$prefs$logtimes[this.id])||0;var lastMessageTime=+(((_room$lastMessage=room.lastMessage)==null?void 0:_room$lastMessage[1])||0);if(lastMessageTime-room.timeOffset<=lastSeenTimestamp)return;this.isSubtleNotifying=true;PS.update();};_proto5.dismissNotificationAt=function dismissNotificationAt(i){try{var _this$notifications$i;(_this$notifications$i=this.notifications[i].notification)==null||_this$notifications$i.close();}catch(_unused5){}this.notifications.splice(i,1);};_proto5.dismissNotification=function dismissNotification(id){var index=this.notifications.findIndex(function(n){return n.id===id;});if(index!==-1){this.dismissNotificationAt(index);}PS.update();};_proto5.autoDismissNotifications=function autoDismissNotifications(){var room=PS.rooms[this.id];if(room.lastMessageTime){var lastMessageDates=PS.prefs.logtimes||{};if(!lastMessageDates[PS.server.id])lastMessageDates[PS.server.id]={};lastMessageDates[PS.server.id][room.id]=room.lastMessageTime||0;PS.prefs.set('logtimes',lastMessageDates);}for(var i=this.notifications.length-1;i>=0;i--){if(!this.notifications[i].noAutoDismiss){this.dismissNotificationAt(i);}}this.isSubtleNotifying=false;};_proto5.connect=function connect(){throw new Error("This room is not designed to connect to a server room");};_proto5.handleReconnect=function handleReconnect(msg){};_proto5.receiveLine=function receiveLine(args){switch(args[0]){case'title':{this.title=args[1];PS.update();break;}case'notify':{var title=args[1],body=args[2],toHighlight=args[3];if(toHighlight&&!ChatRoom.getHighlight(toHighlight,this.id))break;this.notify({title:title,body:body});break;}case'tempnotify':{var id=args[1],_title=args[2],_body=args[3],_toHighlight=args[4];if(_toHighlight&&!ChatRoom.getHighlight(_toHighlight,this.id))break;this.notify({title:_title,body:_body,id:id});break;}case'tempnotifyoff':{var _id=args[1];this.dismissNotification(_id);break;}default:{if(this.canConnect){this.update(args);}else{throw new Error("This room is not designed to receive messages");}}}};_proto5.add=function add(line,ifChat){if(this.type!=='chat'&&this.type!=='battle'){if(!ifChat){var _PS$rooms;PS.mainmenu.handlePM(PS.user.userid,PS.user.userid);(_PS$rooms=PS.rooms['dm-'])==null||_PS$rooms.receiveLine(BattleTextParser.parseLine(line));}}else{this.receiveLine(BattleTextParser.parseLine(line));}};_proto5.errorReply=function errorReply(message){var element=arguments.length>1&&arguments[1]!==undefined?arguments[1]:this.currentElement;if((element==null?void 0:element.tagName)==='BUTTON'){PS.alert(message,{parentElem:element});}else{this.add("|error|"+message);}};_proto5.parseClientCommands=function parseClientCommands(commands){var parsedCommands={};for(var cmd in commands){var names=cmd.split(',').map(function(name){return name.trim();});for(var _i21=0;_i21<names.length;_i21++){var name=names[_i21];if(name.includes(' '))throw new Error("Client command names cannot contain spaces: "+name);parsedCommands[name]=commands[cmd];}}return parsedCommands;};_proto5.
 
 
 
@@ -1692,9 +1691,9 @@ this.connected=false;
 
 PlaceholderRoom=function(_PSRoom2){
 
-function PlaceholderRoom(options){var _this0;
-_this0=_PSRoom2.call(this,options)||this;_this0.classType='placeholder';
-_this0.isPlaceholder=true;return _this0;
+function PlaceholderRoom(options){var _this9;
+_this9=_PSRoom2.call(this,options)||this;_this9.classType='placeholder';
+_this9.isPlaceholder=true;return _this9;
 }_inheritsLoose(PlaceholderRoom,_PSRoom2);var _proto6=PlaceholderRoom.prototype;_proto6.
 receiveLine=function receiveLine(args){
 (this.backlog||(this.backlog=[])).push(args);
@@ -1861,23 +1860,23 @@ var PS=new(function(_PSModel){
 
 
 
-function _class(){var _document$querySelect3;var _this1;
-_this1=_PSModel.call(this)||this;_this1.down=false;_this1.prefs=new PSPrefs();_this1.teams=new PSTeams();_this1.user=new PSUser();_this1.server=new PSServer();_this1.connection=null;_this1.isOffline=false;_this1.startTime=Date.now();_this1.router=null;_this1.rooms={};_this1.roomTypes={};_this1.routes=Object.assign(Object.create(null),{"teambuilder":"*","news":"*mini-window","":"*","rooms":"*right","user-*":"*popup","viewuser-*":"*popup","volume":"*popup","options":"*popup","*":"*right","battle-*":"*","battles":"*right","teamdropdown":"*semimodal-popup","formatdropdown":"*semimodal-popup","team-*":"*","ladder":"*","ladder-*":"*","view-*":"*","login":"*semimodal-popup","help-*":"chat"});_this1.leftRoomList=[];_this1.rightRoomList=[];_this1.miniRoomList=[];_this1.popups=[];_this1.room=null;_this1.panel=null;_this1.leftPanel=null;_this1.rightPanel=null;_this1.leftPanelWidth=0;_this1.mainmenu=null;_this1.dragging=null;_this1.lastMessageTime='';_this1.arrowKeysUsed=false;_this1.newsHTML=((_document$querySelect3=document.querySelector('#room-news .readable-bg'))==null?void 0:_document$querySelect3.innerHTML)||'';_this1.libsLoaded=makeLoadTracker();
+function _class(){var _document$querySelect3;var _this0;
+_this0=_PSModel.call(this)||this;_this0.down=false;_this0.prefs=new PSPrefs();_this0.teams=new PSTeams();_this0.user=new PSUser();_this0.server=new PSServer();_this0.connection=null;_this0.isOffline=false;_this0.startTime=Date.now();_this0.router=null;_this0.rooms={};_this0.roomTypes={};_this0.routes=Object.assign(Object.create(null),{"teambuilder":"*","news":"*mini-window","":"*","rooms":"*right","user-*":"*popup","viewuser-*":"*popup","volume":"*popup","options":"*popup","*":"*right","battle-*":"*","battles":"*right","teamdropdown":"*semimodal-popup","formatdropdown":"*semimodal-popup","team-*":"*","ladder":"*","ladder-*":"*","view-*":"*","login":"*semimodal-popup","help-*":"chat"});_this0.leftRoomList=[];_this0.rightRoomList=[];_this0.miniRoomList=[];_this0.popups=[];_this0.room=null;_this0.panel=null;_this0.leftPanel=null;_this0.rightPanel=null;_this0.leftPanelWidth=0;_this0.mainmenu=null;_this0.dragging=null;_this0.lastMessageTime='';_this0.arrowKeysUsed=false;_this0.newsHTML=((_document$querySelect3=document.querySelector('#room-news .readable-bg'))==null?void 0:_document$querySelect3.innerHTML)||'';_this0.libsLoaded=makeLoadTracker();
 
-_this1.mainmenu=_this1.addRoom({
+_this0.mainmenu=_this0.addRoom({
 id:'',
 title:"Modded Home"
 });
 
-_this1.addRoom({
+_this0.addRoom({
 id:'rooms',
 title:"Rooms",
 autofocus:false
 });
-_this1.rightPanel=_this1.rooms['rooms'];
+_this0.rightPanel=_this0.rooms['rooms'];
 
-if(_this1.newsHTML){
-_this1.addRoom({
+if(_this0.newsHTML){
+_this0.addRoom({
 id:'news',
 title:"News",
 autofocus:false
@@ -1885,14 +1884,14 @@ autofocus:false
 }
 
 
-var autojoin=_this1.prefs.autojoin;
+var autojoin=_this0.prefs.autojoin;
 if(autojoin){
 if(typeof autojoin==='string'){
 autojoin={showdown:autojoin};
 }
-var rooms=autojoin[_this1.server.id]||'';for(var _i23=0,_rooms$split4=
+var rooms=autojoin[_this0.server.id]||'';for(var _i23=0,_rooms$split4=
 rooms.split(",");_i23<_rooms$split4.length;_i23++){var title=_rooms$split4[_i23];
-_this1.addRoom({id:toID(title),title:title,connected:true,autofocus:false});
+_this0.addRoom({id:toID(title),title:title,connected:true,autofocus:false});
 }
 }
 
@@ -1901,11 +1900,11 @@ if(window.webkitNotification){var _window;
 (_window=window).Notification||(_window.Notification=window.webkitNotification);
 }
 
-_this1.updateLayout();
+_this0.updateLayout();
 window.addEventListener('resize',function(){
 
-if(_this1.updateLayout())_PSModel.prototype.update.call(_this1);
-});return _this1;
+if(_this0.updateLayout())_PSModel.prototype.update.call(_this0);
+});return _this0;
 }_inheritsLoose(_class,_PSModel);var _proto7=_class.prototype;_proto7.
 
 
@@ -2025,7 +2024,70 @@ this.updateLayout();
 _PSModel.prototype.update.call(this);
 };_proto7.
 
+handleCustomGroupsMessage=function handleCustomGroupsMessage(data){
+if(!data.startsWith('|customgroups|'))return false;
+console.debug("pre parsing:",data);
+try{
+var nlIndex=data.indexOf('\n');
+if(nlIndex>0){
+
+this.receive(data.substr(nlIndex+1));
+}
+
+var groupsData=data.slice(14,nlIndex>0?nlIndex:undefined);
+this.parseGroups(groupsData);
+return true;
+}catch(e){return false;}
+
+};_proto7.
+
+parseGroups=function parseGroups(groupsList){
+var data=null;
+try{
+data=JSON.parse(groupsList);
+}catch(e){
+return;
+}
+if(!data)return;
+console.debug("post-parsing:",data);
+console.debug(this.server.groups);
+
+var groups={};
+
+for(var i=0;i<data.length;i++){
+var entry=data[i];
+console.debug("entry: ",entry);
+if(!entry)continue;
+
+var symbol=entry.symbol||' ';
+var groupName=entry.name;
+var groupType=entry.type||'normal';
+
+
+if(groupType==='normal'&&!this.server.defaultGroup.order){
+this.server.defaultGroup.order=i+0.5;
+}
+if(!groupName){
+this.server.defaultGroup={order:i+1};
+}
+
+groups[symbol]={
+name:groupName?BattleLog.escapeHTML(groupName+' ('+symbol+')'):undefined,
+type:groupType,
+order:i+1
+};
+}
+
+this.server.groups=groups;
+console.debug("Done!",this.server.groups);
+};_proto7.
+
 receive=function receive(msg){var _room2;
+
+if(this.handleCustomGroupsMessage(msg)){
+return;
+}
+
 msg=msg.endsWith('\n')?msg.slice(0,-1):msg;
 var roomid='';
 if(msg.startsWith('>')){
@@ -2339,20 +2401,20 @@ args:Object.assign({message:message},opts,{parentElem:null}),
 parentElem:opts.parentElem
 });
 };_proto7.
-confirm=function confirm(message){var _opts$cancelButton,_this10=this;var opts=arguments.length>1&&arguments[1]!==undefined?arguments[1]:{};
+confirm=function confirm(message){var _opts$cancelButton,_this1=this;var opts=arguments.length>1&&arguments[1]!==undefined?arguments[1]:{};
 (_opts$cancelButton=opts.cancelButton)!=null?_opts$cancelButton:opts.cancelButton='Cancel';
 return new Promise(function(resolve){
-_this10.join("popup-"+_this10.popups.length,{
+_this1.join("popup-"+_this1.popups.length,{
 args:Object.assign({message:message,okValue:true,cancelValue:false,callback:resolve},opts)
 });
 });
 };_proto7.
 prompt=function prompt(message)
 
-{var _opts$cancelButton2,_this11=this;var defaultValue=arguments.length>1&&arguments[1]!==undefined?arguments[1]:'';var opts=arguments.length>2&&arguments[2]!==undefined?arguments[2]:{};
+{var _opts$cancelButton2,_this10=this;var defaultValue=arguments.length>1&&arguments[1]!==undefined?arguments[1]:'';var opts=arguments.length>2&&arguments[2]!==undefined?arguments[2]:{};
 (_opts$cancelButton2=opts.cancelButton)!=null?_opts$cancelButton2:opts.cancelButton='Cancel';
 return new Promise(function(resolve){
-_this11.join("popup-"+_this11.popups.length,{
+_this10.join("popup-"+_this10.popups.length,{
 args:Object.assign({message:message,value:defaultValue,okValue:true,cancelValue:false,callback:resolve},opts,{parentElem:null}),
 parentElem:opts.parentElem
 });
@@ -2710,10 +2772,10 @@ window.BattleSound.playSound('audio/notification.wav',this.prefs.notifvolume);
 
 
 OfficialAuthError=function(_Error){
-function OfficialAuthError(operation){var _this12;var statusCode=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;
-_this12=_Error.call(this,"Official auth error in operation '"+operation+"'."+(statusCode!==null?"":"Status code: "+statusCode.toString()))||this;
-_this12.name='OfficialAuthError';
-Object.setPrototypeOf(_this12,OfficialAuthError.prototype);return _this12;
+function OfficialAuthError(operation){var _this11;var statusCode=arguments.length>1&&arguments[1]!==undefined?arguments[1]:null;
+_this11=_Error.call(this,"Official auth error in operation '"+operation+"'."+(statusCode!==null?"":"Status code: "+statusCode.toString()))||this;
+_this11.name='OfficialAuthError';
+Object.setPrototypeOf(_this11,OfficialAuthError.prototype);return _this11;
 }_inheritsLoose(OfficialAuthError,_Error);return OfficialAuthError;}(_wrapNativeSuper(Error));
 
 
@@ -2800,7 +2862,7 @@ return true;
 
 
 
-authorize=function authorize(user){var _window$location$path,_this13=this;
+authorize=function authorize(user){var _window$location$path,_this12=this;
 if((_window$location$path=window.location.pathname)!=null&&_window$location$path.startsWith("/auth/")){return;}
 
 var authorizeUrl=this.requestUrl("authorize");
@@ -2811,7 +2873,7 @@ authorizeUrl.searchParams.append('challenge',encodeURIComponent(user.challstr));
 var popup=window.open(authorizeUrl,undefined,'popup=1');
 var checkIfUpdated=function(){
 try{var _popup$location;
-if(popup!=null&&(_popup$location=popup.location)!=null&&(_popup$location=_popup$location.href)!=null&&_popup$location.startsWith(_this13.redirectURI)){
+if(popup!=null&&(_popup$location=popup.location)!=null&&(_popup$location=_popup$location.href)!=null&&_popup$location.startsWith(_this12.redirectURI)){
 console.debug("Processing.");
 popup.close();
 
@@ -2897,7 +2959,7 @@ headers:{
 'Content-Type':'application/x-www-form-urlencoded'
 },
 body:new URLSearchParams({
-uri:encodeURIComponent(this.redirectURI)
+uri:encodeURIComponent(Config.routes.client)
 })
 });
 

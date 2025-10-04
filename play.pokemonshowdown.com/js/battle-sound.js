@@ -116,12 +116,14 @@ getSound=function getSound(url){
 if(!window.HTMLAudioElement)return;
 if(this.soundCache[url])return this.soundCache[url];
 try{
+console.debug("Creating sound element with url",url);
 var sound=document.createElement('audio');
-sound.src="https://play.pokemonshowdown.com/"+url;
+
+sound.src="https://"+Config.routes.client+"/"+url;
 sound.volume=this.effectVolume/100;
 this.soundCache[url]=sound;
 return sound;
-}catch(_unused){}
+}catch(e){console.error("Creating sound element failed:",e);}
 };_proto2.
 
 playEffect=function playEffect(url){
