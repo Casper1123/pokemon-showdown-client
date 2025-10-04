@@ -742,14 +742,17 @@ export const Dex = new class implements ModdedDex {
 
 	mod(modid: ID): ModdedDex {
 		if (modid === 'gen9') return this;
-		if (!window.BattleTeambuilderTable) return this;
+		if (!window.BattleTeambuilderTable) {
+			console.error(`Loading mod ${modid} isn't in the battleteambuildertable`);
+			return this;
+		}
 		if (modid in this.moddedDexes) {
 			return this.moddedDexes[modid];
 		}
 
-		if (!window.BattleTeambuilderTable[modid]) {
-			this.loadModData(modid);
-		}
+		// if (!window.BattleTeambuilderTable[modid]) {
+		// 	this.loadModData(modid);
+		// }
 
 		this.moddedDexes[modid] = new ModdedDex(modid);
 		return this.moddedDexes[modid];
