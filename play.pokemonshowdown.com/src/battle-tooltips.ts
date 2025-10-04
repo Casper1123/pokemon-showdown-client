@@ -1156,6 +1156,13 @@ export class BattleTooltips {
 			}
 			if (this.pokemonHasType(pokemon, 'Ice') && weather === 'snowscape') {
 				stats.def = Math.floor(stats.def * 1.5);
+				if (this.battle.formatId.includes('natdexcustom')) {
+					if (this.battle.hasPseudoWeather('Trick Room')) {
+						speedModifiers.push(0.8);
+					} else {
+						speedModifiers.push(1.2);
+					}
+				}
 			}
 			if (ability === 'sandrush' && weather === 'sandstorm') {
 				speedModifiers.push(2);
@@ -2002,6 +2009,14 @@ export class BattleTooltips {
 			if (this.battle.weather !== 'deltastream') {
 				value.weatherModify(2);
 			}
+		}
+		if (this.battle.formatId.includes('natdexcustom')) {
+			if (this.battle.weather === 'snowscape' && moveType === 'Ice' && this.pokemonHasType(pokemon, 'Ice')) {
+				value.modify(1.2, 'Snowscape Ice boost');
+			}
+		}
+		if (move.id === 'desertsong') {
+			value.weatherModify(1.5, 'The Song reverberates along the Sand');
 		}
 		if (move.id === 'hydrosteam') {
 			value.weatherModify(1.5, 'Sunny Day');
