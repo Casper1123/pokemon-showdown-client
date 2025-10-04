@@ -90,20 +90,21 @@ class TeamEditorState extends PSModel {
 		const formatid = toID(format);
 		this.format = formatid;
 		team.format = formatid;
+		this.dex = Dex.forFormat(formatid);
 
 		// Injecting custom mods
-		if (window.FormatModMapping && window.FormatModMapping[formatid]) {
-			const modId = window.FormatModMapping[formatid];
-			console.debug(`Set team editor to custom mod ${modId} for format ${formatid}`);
-			this.dex = Dex.mod(modId);
-		} else {
-			console.debug(`Set team editor to default mod for format ${formatid}`);
-			this.dex = Dex.forFormat(formatid);
-		}
-		this.search.dex = this.dex;  // Reset search dex to ensure override is loaded into the search options too.
-		if (this.search.typedSearch) {
-			this.search.typedSearch.dex = this.dex;
-		} // Force changes into typed search. Beta client moment.
+		// if (window.FormatModMapping && window.FormatModMapping[formatid]) {
+		// 	const modId = window.FormatModMapping[formatid];
+		// 	console.debug(`Set team editor to custom mod ${modId} for format ${formatid}`);
+		// 	this.dex = Dex.mod(modId);
+		// } else {
+		// 	console.debug(`Set team editor to default mod for format ${formatid}`);
+		// 	this.dex = Dex.forFormat(formatid);
+		// }
+		// this.search.dex = this.dex;  // Reset search dex to ensure override is loaded into the search options too.
+		// if (this.search.typedSearch) {
+		// 	this.search.typedSearch.dex = this.dex;
+		// } // Force changes into typed search. Beta client moment.
 
 		this.gen = this.dex.gen;
 
