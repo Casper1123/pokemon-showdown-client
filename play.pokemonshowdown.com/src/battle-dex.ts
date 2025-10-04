@@ -782,7 +782,7 @@ export const Dex = new class implements ModdedDex {
 		if (dex.gen === 8 && formatid.includes('bdsp')) {
 			dex = Dex.mod('gen8bdsp' as ID);
 		}
-		if (formatid.includes('natdexcustom')) {
+		if (formatid.includes('natdexcustom') || formatid.includes('nationaldexcustom')) {
 			dex = Dex.mod(`gen${dex.gen}natdexcustom` as ID);
 		}
 
