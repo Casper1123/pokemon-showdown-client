@@ -60,6 +60,26 @@ function requireNoCache(pathSpec) {
 		'mod', 'ou', 'uu', 'ru', 'nu', 'pu', 'zu', 'lc', 'nfe', 'moduber', 'uber', 'uubl', 'rubl', 'nubl', 'publ', 'zubl', 'cap', 'caplc', 'capnfe',
 	].map(x => toID(x) + ' tier'));
 
+	if (Dex.mod('gen9natdexcustom').data) {
+		const modData = Dex.mod('gen9natdexcustom').data;
+
+		for (const id in modData.Moves) {
+			if (!Dex.data.Moves[id]) {
+				index.push(id + ' move');
+			}
+		}
+		for (const id in modData.Abilities) {
+			if (!Dex.data.Abilities[id]) {
+				index.push(id + ' ability');
+			}
+		}
+		for (const id in modData.Items) {
+			if (!Dex.data.Items[id]) {
+				index.push(id + ' item');
+			}
+		}
+	}
+
 	const BattleArticleTitles = {};
 
 	try {
@@ -138,6 +158,22 @@ function requireNoCache(pathSpec) {
 	for (const id in Dex.data.Abilities) {
 		const name = Dex.data.Abilities[id].name;
 		generateAlias(id, name, 'ability');
+	}
+	if (Dex.mod('gen9natdexcustom').data) {
+		const modData = Dex.mod('gen9natdexcustom').data;
+
+		for (const id in modData.Moves) {
+			if (!Dex.data.Moves[id]) {
+				const name = modData.Moves[id].name;
+				generateAlias(id, name, 'move');
+			}
+		}
+		for (const id in modData.Abilities) {
+			if (!Dex.data.Abilities[id]) {
+				const name = modData.Abilities[id].name;
+				generateAlias(id, name, 'ability');
+			}
+		}
 	}
 
 	// hardcode ultra beasts
