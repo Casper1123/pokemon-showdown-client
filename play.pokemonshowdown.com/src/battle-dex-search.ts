@@ -677,17 +677,17 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.formatType = 'letsgo';
 			this.dex = Dex.mod('gen7letsgo' as ID);
 		}
+		if ((format.includes('nationaldex') || format.startsWith('nd') || format.includes('natdex')) && !(format.includes('nationaldexcustom') || format.startsWith('ndc') || format.includes('natdexcustom'))) {
+			format = (format.startsWith('nd') ? format.slice(2) :
+				format.includes('natdex') ? format.slice(6) : format.slice(11)) as ID;
+			this.formatType = 'natdex';
+			if (!format) format = 'ou' as ID;
+			this.isDoubles = format.includes('doubles');
+		}
 		if (format.includes('nationaldexcustom') || format.startsWith('ndc') || format.includes('natdexcustom')) {
 			format = (format.startsWith('ndc') ? format.slice(3) :
 				format.includes('natdexcustom') ? format.slice(12) : format.slice(17)) as ID;
 			this.formatType = 'natdexcustom';
-			if (!format) format = 'ou' as ID;
-			this.isDoubles = format.includes('doubles');
-		}
-		if (format.includes('nationaldex') || format.startsWith('nd') || format.includes('natdex')) {
-			format = (format.startsWith('nd') ? format.slice(2) :
-				format.includes('natdex') ? format.slice(6) : format.slice(11)) as ID;
-			this.formatType = 'natdex';
 			if (!format) format = 'ou' as ID;
 			this.isDoubles = format.includes('doubles');
 		}
