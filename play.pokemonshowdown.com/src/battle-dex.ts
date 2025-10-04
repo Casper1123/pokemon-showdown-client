@@ -767,11 +767,11 @@ export const Dex = new class implements ModdedDex {
 	forFormat(format: string) {
 
 		// Inject custom format. I really hope this works ;-;
-		const formatId = toID(format).slice(4);
-		if (window.FormatModMapping && window.FormatModMapping[formatId]) {
-			const modId = window.FormatModMapping[formatId];
-			return Dex.mod(modId);
-		}
+		// const formatId = toID(format).slice(4);
+		// if (window.FormatModMapping && window.FormatModMapping[formatId]) {
+		// 	const modId = window.FormatModMapping[formatId];
+		// 	return Dex.mod(modId);
+		// }
 
 		let dex = Dex.forGen(Dex.formatGen(format));
 
@@ -782,11 +782,10 @@ export const Dex = new class implements ModdedDex {
 		if (dex.gen === 8 && formatid.includes('bdsp')) {
 			dex = Dex.mod('gen8bdsp' as ID);
 		}
-		return dex;
-		// FIXME: required? at all?
 		if (formatid.includes('natdexcustom')) {
 			dex = Dex.mod(`gen${dex.gen}natdexcustom` as ID);
 		}
+
 		return dex;
 	}
 
