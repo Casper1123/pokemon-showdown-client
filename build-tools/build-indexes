@@ -59,7 +59,7 @@ function requireNoCache(pathSpec) {
 	index = index.concat([
 		'mod', 'ou', 'uu', 'ru', 'nu', 'pu', 'zu', 'lc', 'nfe', 'moduber', 'uber', 'uubl', 'rubl', 'nubl', 'publ', 'zubl', 'cap', 'caplc', 'capnfe',
 	].map(x => toID(x) + ' tier'));
-	
+
 	const BattleArticleTitles = {};
 
 	try {
@@ -1158,7 +1158,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		'abilities', 'baseStats', 'cosmeticFormes', 'isNonstandard', 'requiredItems', 'types', 'unreleasedHidden',
 	];
 	const overrideMoveKeys = [
-		'accuracy', 'basePower', 'category', 'desc', 'flags', 'isNonstandard', 'pp', 'priority', 'shortDesc', 'target', 'type',
+		'accuracy', 'basePower', 'category', 'desc', 'flags', 'isNonstandard', 'pp', 'priority', 'shortDesc', 'desc', 'name', 'target', 'type',
 	];
 	const overrideAbilityKeys = ['desc', 'flags', 'isNonstandard', 'rating', 'shortDesc'];
 	const overrideItemKeys = ['desc', 'fling', 'isNonstandard', 'naturalGift', 'shortDesc'];
