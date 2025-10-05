@@ -117,8 +117,8 @@
 			if (rooms.userCount) {
 				var userCount = Number(rooms.userCount);
 				var battleCount = Number(rooms.battleCount);
-				var leftSide = '<button class="button" name="finduser" title="Find an online user"><span class="pixelated usercount" title="Meloetta is PS\'s mascot! The Aria forme is about using its voice, and represents our chatrooms." ></span><strong>' + userCount + '</strong> ' + (userCount === 1 ? 'user' : 'users') + ' online</button> ';
-				var rightSide = '<button class="button" name="roomlist" title="Watch an active battle"><span class="pixelated battlecount" title="Meloetta is PS\'s mascot! The Pirouette forme is Fighting-type, and represents our battles." ></span><strong>' + battleCount + '</strong> active ' + (battleCount === 1 ? 'battle' : 'battles') + '</button>';
+				var leftSide = '<button class="button" name="finduser" title="Find an online user"><span class="pixelated usercount" title="Wooloo is cute." ></span><strong>' + userCount + '</strong> ' + (userCount === 1 ? 'user' : 'users') + ' online</button> ';
+				var rightSide = '<button class="button" name="roomlist" title="Watch an active battle"><span class="pixelated battlecount" title="Snom is cute." ></span><strong>' + battleCount + '</strong> active ' + (battleCount === 1 ? 'battle' : 'battles') + '</button>';
 				this.$('.roomlisttop').html('<div class="roomcounters">' + leftSide + '</td><td>' + rightSide + '</div>');
 			}
 

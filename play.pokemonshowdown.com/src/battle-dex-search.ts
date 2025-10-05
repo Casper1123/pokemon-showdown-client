@@ -1520,7 +1520,7 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 			if (id === 'metronome') return true;
 		}
 
-		if (this.formatType === 'natdexcustom') {
+		if (this.formatType === 'natdexcustom' && false) {
 			const table = BattleTeambuilderTable[`gen${dex.gen}natdexcustom`];
 			if (table && table.overrideMoveData && table.overrideMoveData[id]) {
 				return true;

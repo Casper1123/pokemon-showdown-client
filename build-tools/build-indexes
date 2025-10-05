@@ -59,27 +59,7 @@ function requireNoCache(pathSpec) {
 	index = index.concat([
 		'mod', 'ou', 'uu', 'ru', 'nu', 'pu', 'zu', 'lc', 'nfe', 'moduber', 'uber', 'uubl', 'rubl', 'nubl', 'publ', 'zubl', 'cap', 'caplc', 'capnfe',
 	].map(x => toID(x) + ' tier'));
-
-	if (Dex.mod('gen9natdexcustom').data) {
-		const modData = Dex.mod('gen9natdexcustom').data;
-
-		for (const id in modData.Moves) {
-			if (!Dex.data.Moves[id]) {
-				index.push(id + ' move');
-			}
-		}
-		for (const id in modData.Abilities) {
-			if (!Dex.data.Abilities[id]) {
-				index.push(id + ' ability');
-			}
-		}
-		for (const id in modData.Items) {
-			if (!Dex.data.Items[id]) {
-				index.push(id + ' item');
-			}
-		}
-	}
-
+	
 	const BattleArticleTitles = {};
 
 	try {
@@ -158,22 +138,6 @@ function requireNoCache(pathSpec) {
 	for (const id in Dex.data.Abilities) {
 		const name = Dex.data.Abilities[id].name;
 		generateAlias(id, name, 'ability');
-	}
-	if (Dex.mod('gen9natdexcustom').data) {
-		const modData = Dex.mod('gen9natdexcustom').data;
-
-		for (const id in modData.Moves) {
-			if (!Dex.data.Moves[id]) {
-				const name = modData.Moves[id].name;
-				generateAlias(id, name, 'move');
-			}
-		}
-		for (const id in modData.Abilities) {
-			if (!Dex.data.Abilities[id]) {
-				const name = modData.Abilities[id].name;
-				generateAlias(id, name, 'ability');
-			}
-		}
 	}
 
 	// hardcode ultra beasts
@@ -1174,15 +1138,19 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			}
 		}
 	}
+	console.log("Setting up Learnsets for gen9natdexcustom")
 	const G9NATDEXCUSTOMLearnsets = Dex.mod('gen9').data.Learnsets;
 	for (const id in G9NATDEXCUSTOMLearnsets) {
 		const species = Dex.mod('gen9natdexcustom').species.get(id);
 		if (species.isNonstandard && !['Unobtainable', 'CAP'].includes(species.isNonstandard)) continue;
 		const learnset = G9NATDEXCUSTOMLearnsets[id].learnset;
 		BattleTeambuilderTable['gen9natdexcustom'].learnsets[id] = {};
+		let moves = 0;
 		for (const moveid in learnset) {
+			moves++;
 			BattleTeambuilderTable['gen9natdexcustom'].learnsets[id][moveid] = '9';
 		}
+		console.log(`Learnset for mon: ${species?.name} with ${moves} moves in ${learnset}`);
 	}
 
 	// Client relevant data that should be overriden by past gens and mods
