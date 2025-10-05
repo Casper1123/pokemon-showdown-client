@@ -1176,7 +1176,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		}
 	}
 	console.log("Setting up Learnsets for gen9natdexcustom")
-	const G9NATDEXCUSTOMLearnsets = Dex.mod('gen9').data.Learnsets;
+	const G9NATDEXCUSTOMLearnsets = Dex.mod('gen9natdexcustom').data.Learnsets;
 	for (const id in G9NATDEXCUSTOMLearnsets) {
 		const species = Dex.mod('gen9natdexcustom').species.get(id);
 		if (species.isNonstandard && !['Unobtainable', 'CAP'].includes(species.isNonstandard)) continue;
