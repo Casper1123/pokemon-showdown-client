@@ -3178,7 +3178,10 @@ export class Battle {
 			// Find turn remainder for Spacial Distortion
 			if (this.formatId.includes('natdexcustom') && args[1]) {
 				const message = args[1];
-				const countdownMatch = message.match(/Space is winning its fight against the distortion \.\.\. \((\d+) turns?\)/);
+				let countdownMatch = message.match(/Space is winning its fight against the distortion \.\.\. \((\d+) turns?\)/);
+				if (!countdownMatch) {
+					countdownMatch = message.match(/Space turns the tides against the distortion \.\.\. \((\d+) turns?\)/);
+				}
 				if (countdownMatch) {
 					const turnsLeft = parseInt(countdownMatch[1]);
 					// Update the spacialdistortion pseudo-weather turn counter
