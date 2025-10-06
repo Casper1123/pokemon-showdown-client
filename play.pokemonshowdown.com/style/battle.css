@@ -481,6 +481,19 @@ License: GPLv2
 	color: #661155;
 }
 
+.chronaldistortionweather {
+	background: #CCAAEE url(../fx/weather-wonderroom.png) no-repeat scroll left top;
+	color: #661155;
+}
+.spacialdistortionweather {
+	background: #DDAAEE url(../fx/weather-gravity.png) no-repeat scroll left top;
+	color: #661155;
+}
+.absolutedistortionweather {
+	background: #AAAAAA url(../fx/bg-space.jpg) no-repeat scroll left top;
+	color: #333333;
+}
+
 .battle .result {
 	display: none;
 	position: absolute;
@@ -855,7 +868,7 @@ License: GPLv2
 		border-left: 2px solid #444444;
 		border-top: 2px solid #444444;
 	}
-	
+
 	100% {
 		width: calc(100% + 4px);
 		height: calc(100% + 4px);
@@ -870,7 +883,7 @@ License: GPLv2
 		height: 0;
 		opacity: 0;
 	}
-	
+
 	50% {
 		width: 0;
 		height: 0;
@@ -888,7 +901,7 @@ License: GPLv2
 		border-right: 2px solid #444444;
 		border-bottom: 2px solid #444444;
 	}
-	
+
 	100% {
 		height: calc(100% + 4px);
 		width: calc(100% + 4px);

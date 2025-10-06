@@ -3120,6 +3120,15 @@ export class Battle {
 				}
 				if (this.gen > 6) maxTimeLeft = 8;
 			}
+			// gen9natdexcustom overrides
+			if (this.formatId.includes('natdexcustom')) {
+				if (effect.id === 'trickroom') {
+					minTimeLeft = 6;
+				}
+				if (['chronaldistortion', 'spacialdistortion', 'absolutedistortion'].includes(effect.id)) {
+					minTimeLeft = 0;
+				}
+			}
 			if (kwArgs.persistent) minTimeLeft += 2;
 			this.addPseudoWeather(effect.name, minTimeLeft, maxTimeLeft);
 
@@ -3161,7 +3170,28 @@ export class Battle {
 			this.scene.afterMove(poke);
 			break;
 		}
-		case '-hint': case '-message': case '-candynamax': {
+		case '-hint':case '-candynamax': {
+			this.log(args, kwArgs);
+			break;
+		}
+		case '-message':{
+			// Find turn remainder for Spacial Distortion
+			if (this.formatId.includes('natdexcustom') && args[1]) {
+				const message = args[1];
+				const countdownMatch = message.match(/Space is winning its fight against the distortion \.\.\. \((\d+) turns?\)/);
+				if (countdownMatch) {
+					const turnsLeft = parseInt(countdownMatch[1]);
+					// Update the spacialdistortion pseudo-weather turn counter
+					for (const pWeather of this.pseudoWeather) {
+						if (pWeather[0] === 'Spacial Distortion') {
+							pWeather[1] = turnsLeft;
+							pWeather[2] = turnsLeft;
+							this.scene.updateWeather();
+							break;
+						}
+					}
+				}
+			}
 			this.log(args, kwArgs);
 			break;
 		}
