@@ -1702,7 +1702,8 @@ export class BattleTooltips {
 
 		if (move.id === 'photongeyser' || move.id === 'lightthatburnsthesky' ||
 			(move.id === 'terablast' && pokemon.terastallized) ||
-			(move.id === 'terastarstorm' && pokemon.getSpeciesForme() === 'Terapagos-Stellar')) {
+			(move.id === 'terastarstorm' && pokemon.getSpeciesForme() === 'Terapagos-Stellar') ||
+			(move.id === 'neutronray')) {
 			const stats = this.calculateModifiedStats(pokemon, serverPokemon, true);
 			if (stats.atk > stats.spa) category = 'Physical';
 		}
@@ -2138,7 +2139,8 @@ export class BattleTooltips {
 			value.abilityModify(1.5, "Toxic Boost");
 		}
 		if (['Rock', 'Ground', 'Steel'].includes(moveType) && this.battle.weather === 'sandstorm') {
-			if (value.tryAbility("Sand Force")) value.weatherModify(1.3, "Sandstorm", "Sand Force");
+			const damageAmp = this.battle.formatId.includes('natdexcustom') ? 1.5 : 1.3;
+			if (value.tryAbility("Sand Force")) value.weatherModify(damageAmp, "Sandstorm", "Sand Force");
 		}
 		if (move.secondaries) {
 			value.abilityModify(1.3, "Sheer Force");
