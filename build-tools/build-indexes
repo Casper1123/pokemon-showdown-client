@@ -294,7 +294,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	const LC = GENS.map(num => num + 0.7);
 	const STADIUM = [2.04, 1.04];
 	const NATDEX = [9.1, 8.1];
-	const CUSTOMNATDEX = [9.8];
+	const CUSTOMNATDEX = [9.8, -9.8];
 	const OTHER = [9.9, 9.6, 9.411, 9.41, 9.401, 9.4, 9.2, -9.4, -9.401, 8.6, 8.4, 8.2, 8.1, -8.4, -8.6, 7.1, 5.1, 3.1];
 
 	// process.stdout.write("\n  ");
@@ -621,20 +621,26 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			if (isRS) {
 				return ["Regular", "NFE", "LC", "Uber"];
 			}
-			if (isDoubles && genNum > 4) {
+			if (isCustomNatdex && isDoubles) {
 				return ["DMOD Uber", "DUber", "(DUber)", "DMOD", "DOU", "DBL", "(DOU)", "DUU", "(DUU)", "New", "NFE", "LC"];
+			}
+			if (isDoubles && genNum > 4) {
+				return ["DUber", "(DUber)", "DOU", "DBL", "(DOU)", "DUU", "(DUU)", "New", "NFE", "LC"];
 			}
 			if (gen === 'gen4') {
 				return ["CAP", "CAP NFE", "CAP LC", "AG", "Uber", "OU", "(OU)", "UUBL", "UU", "NUBL", "NU", "NFE", "LC"];
 			}
+			if (isCustomNatdex) {
+				return ["CAP", "CAP NFE", "CAP LC", "AG", "MOD Uber", "Uber", "(Uber)", "MOD", "OU", "(OU)", "UUBL", "UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased"];
+			}
 			return [
-				"CAP", "CAP NFE", "CAP LC", "AG", "MOD Uber", "Uber", "(Uber)", "MOD", "OU", "(OU)", "UUBL", "UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased",
+				"CAP", "CAP NFE", "CAP LC", "AG", "Uber", "(Uber)", "OU", "(OU)", "UUBL", "UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased",
 			];
 		})();
 
 		for (const tier of tierOrder) {
 			if (tier in {
-				MOD: 1, OU: 1, UUBL: 1, AG: 1, "MOD Uber": 1, Uber: 1, UU: 1, RU: 1, NU: 1, PU: 1, ZU: 1, NFE: 1, LC: 1, DOU: 1, DUU: 1,
+				MOD: 1, OU: 1, UUBL: 1, AG: 1, "MOD Uber": 1, Uber: 1, UU: 1, RU: 1, NU: 1, PU: 1, ZU: 1, NFE: 1, LC: 1, DMOD: 1, DOU: 1, "DMOD Uber": 1, DUU: 1,
 				"(DUU)": 1, New: 1, Legal: 1, Regular: 1, "Restricted Legendary": 1, "CAP LC": 1,
 			}) {
 				let usedTier = tier;

@@ -1148,6 +1148,12 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			tierSet = tierSet.slice(slices.Uber);
 		} else if (this.formatType === 'rs') {
 			tierSet = tierSet.slice(slices.Regular);
+		} else if (this.formatType === 'natdexcustom') {
+			if (isDoublesOrBS) {
+				tierSet = tierSet.slice(slices['DMOD Uber'] || slices.Uber);
+			} else {
+				tierSet = tierSet.slice(slices['MOD Uber'] || slices.Uber);
+			}
 		} else if (!isDoublesOrBS) {
 			tierSet = [
 				...tierSet.slice(slices.OU, slices.UU),
