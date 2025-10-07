@@ -811,7 +811,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (this.formatType === 'letsgo') table = table['gen7letsgo'];
 		if (this.formatType === 'bw1') table = table['gen5bw1'];
 		if (this.formatType === 'rs') table = table['gen3rs'];
-		if (this.formatType === 'natdexcustom') table = table[`gen${this.dex.gen}natdexcustom` + (this.isDoubles) ? 'doubles' : ''];
+		if (this.formatType === 'natdexcustom') table = table[`gen${this.dex.gen}natdexcustom` + ((this.isDoubles) ? 'doubles' : '')];
 		if (speciesid in table.learnsets) return speciesid;
 		const species = this.dex.species.get(speciesid);
 		if (!species.exists) return '' as ID;
@@ -882,7 +882,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			if (this.formatType === 'letsgo') table = table['gen7letsgo'];
 			if (this.formatType === 'bw1') table = table['gen5bw1'];
 			if (this.formatType === 'rs') table = table['gen3rs'];
-			if (this.formatType === 'natdexcustom') table = table[`gen${this.dex.gen}natdexcustom` + (this.isDoubles) ? 'doubles' : ''];
+			if (this.formatType === 'natdexcustom') table = table[`gen${this.dex.gen}natdexcustom` + ((this.isDoubles) ? 'doubles' : '')];
 			let learnset = table.learnsets[learnsetid];
 			const eggMovesOnly = this.eggMovesOnly(learnsetid, speciesid);
 			if (learnset && (moveid in learnset) && (!this.format.startsWith('tradebacks') ? learnset[moveid].includes(genChar) :
@@ -1051,7 +1051,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		} else if (this.formatType === 'natdex') {
 			table = table[`gen${dex.gen}natdex`];
 		} else if (this.formatType === 'natdexcustom') {
-			table = table[`gen${dex.gen}natdexcustom` + (this.isDoubles) ? 'doubles' : ''];
+			table = table[`gen${dex.gen}natdexcustom` + ((this.isDoubles) ? 'doubles' : '')];
 		} else if (this.formatType === 'metronome') {
 			table = table[`gen${dex.gen}metronome`];
 		} else if (this.formatType === 'nfe') {
@@ -1380,7 +1380,7 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 		} else if (this.formatType === 'natdex') {
 			table = table[`gen${this.dex.gen}natdex`];
 		} else if (this.formatType === 'natdexcustom') {
-			table = table[`gen${this.dex.gen}natdexcustom` + (this.isDoubles) ? 'doubles' : ''];
+			table = table[`gen${this.dex.gen}natdexcustom` + ((this.isDoubles) ? 'doubles' : '')];
 		} else if (this.formatType?.endsWith('doubles')) { // no natdex/bdsp doubles support
 			table = table[`gen${this.dex.gen}doubles`];
 		} else if (this.formatType === 'metronome') {
@@ -1530,7 +1530,7 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		}
 
 		if (this.formatType === 'natdexcustom') {
-			const table = BattleTeambuilderTable[`gen${dex.gen}natdexcustom` + (this.isDoubles) ? 'doubles' : ''];
+			const table = BattleTeambuilderTable[`gen${dex.gen}natdexcustom` + ((this.isDoubles) ? 'doubles' : '')];
 			if (table && table.overrideMoveData && table.overrideMoveData[id]) {
 				return true;
 			}
@@ -1775,7 +1775,7 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		if (this.formatType === 'letsgo') lsetTable = lsetTable['gen7letsgo'];
 		if (this.formatType === 'bw1') lsetTable = lsetTable['gen5bw1'];
 		if (this.formatType === 'rs') lsetTable = lsetTable['gen3rs'];
-		if (this.formatType === 'natdexcustom') lsetTable = lsetTable[`gen${gen}natdexcustom` + (this.isDoubles) ? 'doubles' : ''];
+		if (this.formatType === 'natdexcustom') lsetTable = lsetTable[`gen${gen}natdexcustom` + ((this.isDoubles) ? 'doubles' : '')];
 		if (this.formatType?.startsWith('ssdlc1')) lsetTable = lsetTable['gen8dlc1'];
 		if (this.formatType?.startsWith('predlc')) lsetTable = lsetTable['gen9predlc'];
 		if (this.formatType?.startsWith('svdlc1')) lsetTable = lsetTable['gen9dlc1'];
