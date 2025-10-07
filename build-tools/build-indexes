@@ -1189,11 +1189,9 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	const G9NATDEXCUSTOMLearnsets = Dex.mod('gen9natdexcustom').data.Learnsets;
 	const G9BaseLearnsets = BattleTeambuilderTable.learnsets;
 	for (const tableId of ['gen9natdexcustom', 'gen9natdexcustomdoubles']) {
-		for (const id in G9BaseLearnsets) {
+		for (const id in G9NATDEXCUSTOMLearnsets) {
 			const species = Dex.mod('gen9natdexcustom').species.get(id);
-			if (species.isNonstandard && ['Unobtainable', 'CAP'].includes(species.isNonstandard)) {
-				continue;
-			}
+			if (species.isNonstandard && ['Unobtainable', 'CAP'].includes(species.isNonstandard)) continue;
 
 			BattleTeambuilderTable[tableId].learnsets[id] = {};
 
