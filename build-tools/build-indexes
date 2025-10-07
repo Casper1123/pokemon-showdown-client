@@ -344,8 +344,9 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		const gen5zuBans = {};
 		const gen4puBans = {};
 		for (const id of pokemon) {
-			const species = Dex.mod(gen).species.get(id);
-			const baseSpecies = Dex.mod(gen).species.get(species.baseSpecies);
+			const _dex = Dex.mod(!isCustomNatdex? gen : `gen${gen}natdexcustom`);
+			const species = _dex.species.get(id);
+			const baseSpecies = _dex.species.get(species.baseSpecies);
 			if (species.gen > genNum) continue;
 			const speciesTier = (() => {
 				if (isMetBattle) {
@@ -472,8 +473,8 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 				}
 			}
 			if (genNum >= 8) {
-				const ndDoubles = Dex.formats.get(gen + 'nationaldexdoubles');
-				if (ndDoubles.exists && Dex.formats.getRuleTable(ndDoubles).isBannedSpecies(species)) {
+				const ndDoubles = Dex.formats.get(gen + isCustomNatdex ? 'nationaldexcustomdoubles' : 'nationaldexdoubles');
+				if (ndDoubles?.exists && Dex.formats.getRuleTable(ndDoubles).isBannedSpecies(species)) {
 					ndDoublesBans[species.id] = 1;
 				}
 			}
@@ -518,7 +519,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			if (isNatDex && genNum === 9) {
 				BattleTeambuilderTable['gen' + genNum + 'natdex'].thirtyfivePokes = thirtyfivePokes;
 			}
-		} else if (isCustomNatdex) {
+		} else if (isCustomNatdex && !isDoubles) {
 			BattleTeambuilderTable['gen' + genNum + 'natdexcustom'] = {};
 			BattleTeambuilderTable['gen' + genNum + 'natdexcustom'].learnsets = {};
 			BattleTeambuilderTable['gen' + genNum + 'natdexcustom'].tiers = tiers;
@@ -527,10 +528,14 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			BattleTeambuilderTable['gen' + genNum + 'natdexcustom'].ndDoublesBans = ndDoublesBans;
 			BattleTeambuilderTable['gen' + genNum + 'natdexcustom'].monotypeBans = monotypeBans;
 			BattleTeambuilderTable['gen' + genNum + 'natdexcustom'].formatSlices = formatSlices;
-			if (isCustomNatdex && genNum === 9) {
-				BattleTeambuilderTable['gen' + genNum + 'natdexcustom'].thirtyfivePokes = thirtyfivePokes;
-			}
-		} else if (isMetBattle) {
+		} else if (isCustomNatdex && isDoubles) {
+			BattleTeambuilderTable['gen' + genNum + 'natdexcustomdoubles'] = {};
+			BattleTeambuilderTable['gen' + genNum + 'natdexcustomdoubles'].learnsets = {};
+			BattleTeambuilderTable['gen' + genNum + 'natdexcustomdoubles'].tiers = tiers;
+			BattleTeambuilderTable['gen' + genNum + 'natdexcustomdoubles'].overrideTier = overrideTier;
+			BattleTeambuilderTable['gen' + genNum + 'natdexcustomdoubles'].items = items;
+			BattleTeambuilderTable['gen' + genNum + 'natdexcustomdoubles'].formatSlices = formatSlices;
+		}else if (isMetBattle) {
 			BattleTeambuilderTable[gen + 'metronome'] = {};
 			BattleTeambuilderTable[gen + 'metronome'].tiers = tiers;
 			BattleTeambuilderTable[gen + 'metronome'].items = items;
@@ -1184,61 +1189,64 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	}
 	const G9NATDEXCUSTOMLearnsets = Dex.mod('gen9natdexcustom').data.Learnsets;
 	const G9BaseLearnsets = Dex.mod('gen9').data.Learnsets;
-	for (const id in G9NATDEXCUSTOMLearnsets) {
-		const species = Dex.mod('gen9natdexcustom').species.get(id);
-		if (species.isNonstandard && !['Unobtainable', 'CAP'].includes(species.isNonstandard)) continue;
+	for (const tableId in ['gen9natdexcustom', 'gen9natdexcustomdoubles']) {
+		for (const id in G9NATDEXCUSTOMLearnsets) {
+			const species = Dex.mod('gen9natdexcustom').species.get(id);
+			if (species.isNonstandard && !['Unobtainable', 'CAP'].includes(species.isNonstandard)) continue;
 
-		BattleTeambuilderTable['gen9natdexcustom'].learnsets[id] = {};
+			BattleTeambuilderTable[tableId].learnsets[id] = {};
 
-		// Deep copy gen9 move data.
-		if (G9BaseLearnsets[id]?.learnset) {
-			for (const moveid in G9BaseLearnsets[id].learnset) {
-				const gens = G9BaseLearnsets[id].learnset[moveid].map(x => Number(x[0]));
-				const minGen = Math.min(...gens);
+			// Deep copy gen9 move data.
+			if (G9BaseLearnsets[id]?.learnset) {
+				for (const moveid in G9BaseLearnsets[id].learnset) {
+					const gens = G9BaseLearnsets[id].learnset[moveid].map(x => Number(x[0]));
+					const minGen = Math.min(...gens);
 
-				BattleTeambuilderTable['gen9natdexcustom'].learnsets[id][moveid] = '0123456789'.slice(minGen);
+					BattleTeambuilderTable[tableId].learnsets[id][moveid] = '0123456789'.slice(minGen);
 
-				if (gens.indexOf(6) >= 0) BattleTeambuilderTable['gen9natdexcustom'].learnsets[id][moveid] += 'p';
-				if (gens.indexOf(7) >= 0 && G9BaseLearnsets[id].learnset[moveid].some(x => x[0] === '7' && x !== '7V')) {
-					BattleTeambuilderTable['gen9natdexcustom'].learnsets[id][moveid] += 'q';
-				}
-				if (gens.indexOf(8) >= 0 && G9BaseLearnsets[id].learnset[moveid].some(x => x[0] === '8' && x !== '8V')) {
-					BattleTeambuilderTable['gen9natdexcustom'].learnsets[id][moveid] += 'g';
-				}
-				if (gens.indexOf(9) >= 0 && G9BaseLearnsets[id].learnset[moveid].some(x => x[0] === '9' && x !== '9V')) {
-					BattleTeambuilderTable['gen9natdexcustom'].learnsets[id][moveid] += 'a';
-				}
-				if (gens.indexOf(9) >= 0 && G9BaseLearnsets[id].learnset[moveid].some(x => x === '9E')) {
-					BattleTeambuilderTable['gen9natdexcustom'].learnsets[id][moveid] += 'e';
+					if (gens.indexOf(6) >= 0) BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'p';
+					if (gens.indexOf(7) >= 0 && G9BaseLearnsets[id].learnset[moveid].some(x => x[0] === '7' && x !== '7V')) {
+						BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'q';
+					}
+					if (gens.indexOf(8) >= 0 && G9BaseLearnsets[id].learnset[moveid].some(x => x[0] === '8' && x !== '8V')) {
+						BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'g';
+					}
+					if (gens.indexOf(9) >= 0 && G9BaseLearnsets[id].learnset[moveid].some(x => x[0] === '9' && x !== '9V')) {
+						BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'a';
+					}
+					if (gens.indexOf(9) >= 0 && G9BaseLearnsets[id].learnset[moveid].some(x => x === '9E')) {
+						BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'e';
+					}
 				}
 			}
-		}
 
-		// Add/override with custom mod's learnset additions
-		const customLearnset = G9NATDEXCUSTOMLearnsets[id].learnset;
-		if (customLearnset) {
-			for (const moveid in customLearnset) {
-				const gens = customLearnset[moveid].map(x => Number(x[0]));
-				const minGen = Math.min(...gens);
+			// Add/override with custom mod's learnset additions
+			const customLearnset = G9NATDEXCUSTOMLearnsets[id].learnset;
+			if (customLearnset) {
+				for (const moveid in customLearnset) {
+					const gens = customLearnset[moveid].map(x => Number(x[0]));
+					const minGen = Math.min(...gens);
 
-				BattleTeambuilderTable['gen9natdexcustom'].learnsets[id][moveid] = '0123456789'.slice(minGen);
+					BattleTeambuilderTable[tableId].learnsets[id][moveid] = '0123456789'.slice(minGen);
 
-				if (gens.indexOf(6) >= 0) BattleTeambuilderTable['gen9natdexcustom'].learnsets[id][moveid] += 'p';
-				if (gens.indexOf(7) >= 0 && customLearnset[moveid].some(x => x[0] === '7' && x !== '7V')) {
-					BattleTeambuilderTable['gen9natdexcustom'].learnsets[id][moveid] += 'q';
-				}
-				if (gens.indexOf(8) >= 0 && customLearnset[moveid].some(x => x[0] === '8' && x !== '8V')) {
-					BattleTeambuilderTable['gen9natdexcustom'].learnsets[id][moveid] += 'g';
-				}
-				if (gens.indexOf(9) >= 0 && customLearnset[moveid].some(x => x[0] === '9' && x !== '9V')) {
-					BattleTeambuilderTable['gen9natdexcustom'].learnsets[id][moveid] += 'a';
-				}
-				if (gens.indexOf(9) >= 0 && customLearnset[moveid].some(x => x === '9E')) {
-					BattleTeambuilderTable['gen9natdexcustom'].learnsets[id][moveid] += 'e';
+					if (gens.indexOf(6) >= 0) BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'p';
+					if (gens.indexOf(7) >= 0 && customLearnset[moveid].some(x => x[0] === '7' && x !== '7V')) {
+						BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'q';
+					}
+					if (gens.indexOf(8) >= 0 && customLearnset[moveid].some(x => x[0] === '8' && x !== '8V')) {
+						BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'g';
+					}
+					if (gens.indexOf(9) >= 0 && customLearnset[moveid].some(x => x[0] === '9' && x !== '9V')) {
+						BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'a';
+					}
+					if (gens.indexOf(9) >= 0 && customLearnset[moveid].some(x => x === '9E')) {
+						BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'e';
+					}
 				}
 			}
 		}
 	}
+
 
 	// Client relevant data that should be overriden by past gens and mods
 	const overrideSpeciesKeys = [
@@ -1336,8 +1344,8 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	// Mods
 	//
 
-	for (const mod of ['gen3rs', 'gen5bw1', 'gen7letsgo', 'gen8bdsp', 'gen9ssb', 'gen9natdexcustom']) {
-		const modDex = Dex.mod(mod);
+	for (const mod of ['gen3rs', 'gen5bw1', 'gen7letsgo', 'gen8bdsp', 'gen9ssb', 'gen9natdexcustom', 'gen9natdexcustomdoubles']) {
+		const modDex = Dex.mod(mod.replace('doubles', ''));
 		const modData = modDex.data;
 		const parentDex = Dex.forGen(modDex.gen);
 
