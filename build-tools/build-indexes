@@ -328,6 +328,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			if (isSSB) genStr += 'ssb';
 			if (isBW1) genStr += 'bw1';
 			if (isRS) genStr += 'rs';
+			if (isCustomNatdex) genStr += 'natdexcustom';
 			return genStr;
 		})();
 		// process.stdout.write("" + gen + (isDoubles ? " doubles" : "") + "... ");
