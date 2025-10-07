@@ -344,9 +344,8 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		const gen5zuBans = {};
 		const gen4puBans = {};
 		for (const id of pokemon) {
-			const _dex = Dex.mod(!isCustomNatdex? gen : `gen${gen}natdexcustom`);
-			const species = _dex.species.get(id);
-			const baseSpecies = _dex.species.get(species.baseSpecies);
+			const species = Dex.mod(gen).species.get(id);
+			const baseSpecies = Dex.mod(gen).species.get(species.baseSpecies);
 			if (species.gen > genNum) continue;
 			const speciesTier = (() => {
 				if (isMetBattle) {
