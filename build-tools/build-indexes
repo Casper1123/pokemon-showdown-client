@@ -1189,10 +1189,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	const G9NATDEXCUSTOMLearnsets = Dex.mod('gen9natdexcustom').data.Learnsets;
 	const G9BaseLearnsets = BattleTeambuilderTable.learnsets;
 	for (const tableId of ['gen9natdexcustom', 'gen9natdexcustomdoubles']) {
-		console.log("\nprocessing learnsets for ", tableId);
 		for (const id in G9BaseLearnsets) {
-			const log = id === 'celesteela';
-			if (log) console.log('logging for', id);
 			const species = Dex.mod('gen9natdexcustom').species.get(id);
 			if (species.isNonstandard && ['Unobtainable', 'CAP'].includes(species.isNonstandard)) {
 				continue;
@@ -1201,7 +1198,6 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			BattleTeambuilderTable[tableId].learnsets[id] = {};
 
 			// Deep copy gen9 move data.
-			if (log) console.log(`base learnset:`, G9BaseLearnsets[id]?.learnset);
 			if (G9BaseLearnsets[id]?.learnset) {
 				for (const moveid in G9BaseLearnsets[id].learnset) {
 					const gens = G9BaseLearnsets[id].learnset[moveid].map(x => Number(x[0]));
@@ -1227,7 +1223,6 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 
 			// Add/override with custom mod's learnset additions
 			const customLearnset = G9NATDEXCUSTOMLearnsets[id].learnset;
-			if (log) console.log(`custom learnset:`, customLearnset);
 			if (customLearnset) {
 				for (const moveid in customLearnset) {
 					const gens = customLearnset[moveid].map(x => Number(x[0]));
