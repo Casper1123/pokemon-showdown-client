@@ -1188,6 +1188,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	}
 	const G9NATDEXCUSTOMLearnsets = Dex.mod('gen9natdexcustom').data.Learnsets;
 	const G9BaseLearnsets = BattleTeambuilderTable.learnsets;
+
 	for (const tableId of ['gen9natdexcustom', 'gen9natdexcustomdoubles']) {
 		for (const id in G9BaseLearnsets) {
 			const species = Dex.mod('gen9natdexcustom').species.get(id);
@@ -1195,33 +1196,14 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 
 			BattleTeambuilderTable[tableId].learnsets[id] = {};
 
-			// Deep copy gen9 move data.
-			if (G9BaseLearnsets[id]?.learnset) {
-				for (const moveid in G9BaseLearnsets[id].learnset) {
-					const gens = G9BaseLearnsets[id].learnset[moveid].map(x => Number(x[0]));
-					const minGen = Math.min(...gens);
-
-					BattleTeambuilderTable[tableId].learnsets[id][moveid] = '0123456789'.slice(minGen);
-
-					if (gens.indexOf(6) >= 0) BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'p';
-					if (gens.indexOf(7) >= 0 && G9BaseLearnsets[id].learnset[moveid].some(x => x[0] === '7' && x !== '7V')) {
-						BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'q';
-					}
-					if (gens.indexOf(8) >= 0 && G9BaseLearnsets[id].learnset[moveid].some(x => x[0] === '8' && x !== '8V')) {
-						BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'g';
-					}
-					if (gens.indexOf(9) >= 0 && G9BaseLearnsets[id].learnset[moveid].some(x => x[0] === '9' && x !== '9V')) {
-						BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'a';
-					}
-					if (gens.indexOf(9) >= 0 && G9BaseLearnsets[id].learnset[moveid].some(x => x === '9E')) {
-						BattleTeambuilderTable[tableId].learnsets[id][moveid] += 'e';
-					}
-				}
+			// Deep copy base learnset data
+			for (const moveid in G9BaseLearnsets[id]) {
+				BattleTeambuilderTable[tableId].learnsets[id][moveid] = G9BaseLearnsets[id][moveid];
 			}
 
 			// Add/override with custom mod's learnset additions
-			const customLearnset = G9NATDEXCUSTOMLearnsets[id].learnset;
-			if (customLearnset) {
+			if (G9NATDEXCUSTOMLearnsets[id]?.learnset) {
+				const customLearnset = G9NATDEXCUSTOMLearnsets[id].learnset;
 				for (const moveid in customLearnset) {
 					const gens = customLearnset[moveid].map(x => Number(x[0]));
 					const minGen = Math.min(...gens);
