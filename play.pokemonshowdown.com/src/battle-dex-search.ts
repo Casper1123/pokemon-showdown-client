@@ -1771,13 +1771,16 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		let sketchMoves: string[] = [];
 		let sketch = false;
 		let gen = `${dex.gen}`;
-
+		console.debug('Selecting lsetTable');
 		let lsetTable = BattleTeambuilderTable;
 		if (this.formatType?.startsWith('bdsp')) lsetTable = lsetTable['gen8bdsp'];
 		if (this.formatType === 'letsgo') lsetTable = lsetTable['gen7letsgo'];
 		if (this.formatType === 'bw1') lsetTable = lsetTable['gen5bw1'];
 		if (this.formatType === 'rs') lsetTable = lsetTable['gen3rs'];
-		if (this.formatType === 'natdexcustom') lsetTable = lsetTable[`gen${gen}natdexcustom` + ((this.isDoubles) ? 'doubles' : '')];
+		if (this.formatType === 'natdexcustom') {
+			lsetTable = lsetTable[`gen${gen}natdexcustom` + ((this.isDoubles) ? 'doubles' : '')];
+			console.debug('Set lsetTable of move search to natdexcustom, doubles', this.isDoubles);
+		}
 		if (this.formatType?.startsWith('ssdlc1')) lsetTable = lsetTable['gen8dlc1'];
 		if (this.formatType?.startsWith('predlc')) lsetTable = lsetTable['gen9predlc'];
 		if (this.formatType?.startsWith('svdlc1')) lsetTable = lsetTable['gen9dlc1'];
