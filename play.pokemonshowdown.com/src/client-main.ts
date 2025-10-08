@@ -18,6 +18,7 @@ import { Dex, toID, type ID } from './battle-dex';
 import { BattleTextParser, type Args } from './battle-text-parser';
 import type { BattleRoom } from './panel-battle';
 import { Teams } from './battle-teams';
+import {BattleLog} from "./battle-log";
 
 declare const BattleTextAFD: any;
 declare const BattleTextNotAFD: any;
@@ -478,6 +479,7 @@ class PSTeams extends PSStreamModel<'team' | 'format'> {
 	}
 	loadRemoteTeams() {
 		return; // Redundant.
+		// @ts-ignore
 		PSLoginServer.query('getteams').then(data => {
 			if (!data) return;
 			if (data.actionerror) {
