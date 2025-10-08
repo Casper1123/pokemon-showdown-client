@@ -249,7 +249,7 @@ export const Dex = new class implements ModdedDex {
 	fxPrefix = (() => {
 		const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
 		// return `${protocol}//${Config.routes.client}/fx/`;
-		return `${protocol}//play.pokemonshowdown.com/`;
+		return `${protocol}//play.pokemonshowdown.com/fx/`;
 	})();
 
 	loadedSpriteData = { xy: 1, bw: 0 };
