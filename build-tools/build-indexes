@@ -1186,6 +1186,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			}
 		}
 	}
+	// Very inefficient with how I've now done the learnsets, but idc anymore man.
 	const G9NATDEXCUSTOMLearnsets = Dex.mod('gen9natdexcustom').data.Learnsets;
 	const G9BaseLearnsets = BattleTeambuilderTable.learnsets;
 	for (const tableId of ['gen9natdexcustom', 'gen9natdexcustomdoubles']) {
