@@ -3193,6 +3193,15 @@ export class Battle {
 							break;
 						}
 					}
+				} else if (message === 'Space crashes in on itself, fighting an endless struggle.') {
+					for (const pWeather of this.pseudoWeather) {
+						if (pWeather[0] === 'Spacial Distortion') {
+							pWeather[1] = 0;
+							pWeather[2] = 0;
+							this.scene.updateWeather();
+							break;
+						}
+					}
 				}
 			}
 			this.log(args, kwArgs);
