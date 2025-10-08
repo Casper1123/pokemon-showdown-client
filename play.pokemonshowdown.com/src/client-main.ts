@@ -79,7 +79,7 @@ class PSPrefs extends PSStreamModel<string | null> {
 	/**
 	 * The theme to use. "system" matches the theme of the system accessing the client.
 	 */
-	theme: 'light' | 'dark' | 'system' = 'dark';
+	theme: 'light' | 'dark' | 'system' = 'light';
 	/**
 	 * Disables animated GIFs, but keeps other animations enabled.
 	 * Workaround for a Chrome 64 bug with GIFs.
@@ -92,7 +92,7 @@ class PSPrefs extends PSStreamModel<string | null> {
 
 	/* Graphics Preferences */
 	noanim: boolean | null = null;
-	bwgfx: boolean | null = true;
+	bwgfx: boolean | null = null;
 	nopastgens: boolean | null = null;
 
 	/* Chat Preferences */
