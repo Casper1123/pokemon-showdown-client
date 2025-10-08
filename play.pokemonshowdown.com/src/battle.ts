@@ -3124,9 +3124,11 @@ export class Battle {
 			if (this.formatId.includes('natdexcustom')) {
 				if (effect.id === 'trickroom') {
 					minTimeLeft = 6;
+					minTimeLeft = 0
 				}
-				if (['chronaldistortion', 'spacialdistortion', 'absolutedistortion'].includes(effect.id)) {
+				if (['Chronal Distortion', 'Spacial Distortion', 'Absolute Distortion'].includes(effect)) {
 					minTimeLeft = 0;
+					maxTimeLeft = 0;
 				}
 			}
 			if (kwArgs.persistent) minTimeLeft += 2;
