@@ -118,8 +118,8 @@ export const BattleSound = new class {
 		try {
 			console.debug("Creating sound element with url", url);
 			const sound = document.createElement('audio');
-			//sound.src = `https://play.pokemonshowdown.com/${url}`;
-			sound.src = `https://${Config.routes.client}/${url}`;
+			sound.src = `https://play.pokemonshowdown.com/${url}`;
+			// sound.src = `https://${Config.routes.client}/${url}`;
 			sound.volume = this.effectVolume / 100;
 			this.soundCache[url] = sound;
 			return sound;
