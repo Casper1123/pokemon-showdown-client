@@ -73,12 +73,12 @@ export class ChatRoom extends PSRoom {
 			this.connectWhenLoggedIn = false;
 		}
 	}
-	override send(text: string) {
+	override send(text: string, elem: any = null) {
 		// Temporary workaround for disconnection issues.
 		if (this.id === 'lobby' && !this.connected) {
 			this.connect();
 		}
-		super.send(text);
+		super.send(text, elem);
 	}
 	override receiveLine(args: Args) {
 		switch (args[0]) {
