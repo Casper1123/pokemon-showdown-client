@@ -4,6 +4,7 @@
 const fs = require("fs");
 const path = require("path");
 const child_process = require("child_process");
+const imageSize = require('image-size');
 
 const rootDir = path.resolve(__dirname, '..');
 process.chdir(rootDir);
@@ -44,7 +45,6 @@ if (!fs.existsSync(assetsCache)) {
 }
 
 process.chdir(path.resolve(__dirname, '../play.pokemonshowdown.com'));
-const imageSize = require('image-size');
 
 const Dex = require('./../caches/pokemon-showdown/dist/sim/dex').Dex;
 const toID = Dex.toID;
@@ -72,12 +72,17 @@ exports.BattlePokemonSpritesBW = {
 
 function sizeObj(objPath) {
 	try {
+		if (!fs.existsSync(objPath)) {
+			return undefined;
+		}
 		const size = imageSize(objPath);
 		return {
 			w: size.width,
 			h: size.height,
 		};
-	} catch {}
+	} catch (e) {
+		console.log('Error reading:', objPath, e.message);
+	}
 }
 
 function updateSizes() {
