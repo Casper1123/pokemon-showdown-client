@@ -64,6 +64,8 @@
 
 
 
+
+
 var PSPrefsDefaults={};var
 
 
@@ -477,6 +479,8 @@ teamid:teamid
 };
 };_proto2.
 loadRemoteTeams=function loadRemoteTeams(){var _this3=this;
+return;
+
 PSLoginServer.query('getteams').then(function(data){
 if(!data)return;
 if(data.actionerror){
@@ -2401,21 +2405,29 @@ args:Object.assign({message:message},opts,{parentElem:null}),
 parentElem:opts.parentElem
 });
 };_proto7.
-confirm=function confirm(message){var _opts$cancelButton,_this1=this;var opts=arguments.length>1&&arguments[1]!==undefined?arguments[1]:{};
+confirm=function confirm(message)
+
+
+{var _opts$cancelButton,_this1=this;var opts=arguments.length>1&&arguments[1]!==undefined?arguments[1]:{};
 (_opts$cancelButton=opts.cancelButton)!=null?_opts$cancelButton:opts.cancelButton='Cancel';
 return new Promise(function(resolve){
 _this1.join("popup-"+_this1.popups.length,{
-args:Object.assign({message:message,okValue:true,cancelValue:false,callback:resolve},opts)
+args:Object.assign({message:message,okValue:true,cancelValue:false,callback:resolve},opts,{parentElem:null}),
+parentElem:opts.parentElem
 });
 });
 };_proto7.
 prompt=function prompt(message)
 
-{var _opts$cancelButton2,_this10=this;var defaultValue=arguments.length>1&&arguments[1]!==undefined?arguments[1]:'';var opts=arguments.length>2&&arguments[2]!==undefined?arguments[2]:{};
+
+{var _opts$cancelButton2,_this10=this;var opts=arguments.length>1&&arguments[1]!==undefined?arguments[1]:{};
 (_opts$cancelButton2=opts.cancelButton)!=null?_opts$cancelButton2:opts.cancelButton='Cancel';
 return new Promise(function(resolve){
 _this10.join("popup-"+_this10.popups.length,{
-args:Object.assign({message:message,value:defaultValue,okValue:true,cancelValue:false,callback:resolve},opts,{parentElem:null}),
+args:Object.assign({
+message:message,value:opts.defaultValue||'',
+okValue:true,cancelValue:false,callback:resolve},opts,{parentElem:null}),
+
 parentElem:opts.parentElem
 });
 });

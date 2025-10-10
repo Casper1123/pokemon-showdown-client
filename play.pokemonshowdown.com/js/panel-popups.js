@@ -1674,6 +1674,7 @@ _PSRoomPanel14.prototype.componentDidMount.call(this);
 var textbox=this.base.querySelector('input[name=value]');
 if(!textbox)return;
 textbox.value=((_this$props$room$args2=this.props.room.args)==null?void 0:_this$props$room$args2.value)||'';
+textbox.select();
 };_proto17.
 parseMessage=function parseMessage(message){
 if(message.startsWith('|html|')){

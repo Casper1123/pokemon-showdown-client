@@ -831,8 +831,10 @@ if(gender==='M'||gender==='F'){
 genderBuf=" <img src=\""+Dex.fxPrefix+"gender-"+gender.toLowerCase()+".png\" alt=\""+gender+"\" width=\"7\" height=\"10\" class=\"pixelated\" /> ";
 }
 
-var name=BattleLog.escapeHTML(pokemon.name);
-if(pokemon.speciesForme!==pokemon.name){
+var ignoreNicks=this.battle.ignoreNicks||this.battle.ignoreOpponent;
+var nickname=ignoreNicks?Dex.species.get(pokemon.speciesForme).baseSpecies:pokemon.name;
+var name=BattleLog.escapeHTML(nickname);
+if(pokemon.speciesForme!==nickname){
 name+=" <small>("+BattleLog.escapeHTML(pokemon.speciesForme)+")</small>";
 }
 
@@ -1156,6 +1158,13 @@ stats.spd=Math.floor(stats.spd*1.5);
 }
 if(this.pokemonHasType(pokemon,'Ice')&&weather==='snowscape'){
 stats.def=Math.floor(stats.def*1.5);
+if(this.battle.formatId.includes('natdexcustom')){
+if(this.battle.hasPseudoWeather('Trick Room')){
+speedModifiers.push(0.8);
+}else{
+speedModifiers.push(1.2);
+}
+}
 }
 if(ability==='sandrush'&&weather==='sandstorm'){
 speedModifiers.push(2);
@@ -1695,7 +1704,8 @@ moveType='Water';
 
 if(move.id==='photongeyser'||move.id==='lightthatburnsthesky'||
 move.id==='terablast'&&pokemon.terastallized||
-move.id==='terastarstorm'&&pokemon.getSpeciesForme()==='Terapagos-Stellar'){
+move.id==='terastarstorm'&&pokemon.getSpeciesForme()==='Terapagos-Stellar'||
+move.id==='neutronray'){
 var stats=this.calculateModifiedStats(pokemon,serverPokemon,true);
 if(stats.atk>stats.spa)category='Physical';
 }
@@ -2003,6 +2013,14 @@ if(this.battle.weather!=='deltastream'){
 value.weatherModify(2);
 }
 }
+if(this.battle.formatId.includes('natdexcustom')){
+if(this.battle.weather==='snowscape'&&moveType==='Ice'&&this.pokemonHasType(pokemon,'Ice')){
+value.modify(1.2,'Snowscape Ice boost');
+}
+}
+if(move.id==='desertsong'&&this.battle.weather==='sandstorm'){
+value.modify(1.5,'The Song reverberates along the Sand');
+}
 if(move.id==='hydrosteam'){
 value.weatherModify(1.5,'Sunny Day');
 }
@@ -2123,7 +2141,8 @@ if(['psn','tox'].includes(pokemon.status)&&move.category==='Physical'){
 value.abilityModify(1.5,"Toxic Boost");
 }
 if(['Rock','Ground','Steel'].includes(moveType)&&this.battle.weather==='sandstorm'){
-if(value.tryAbility("Sand Force"))value.weatherModify(1.3,"Sandstorm","Sand Force");
+var damageAmp=this.battle.formatId.includes('natdexcustom')?1.5:1.3;
+if(value.tryAbility("Sand Force"))value.weatherModify(damageAmp,"Sandstorm","Sand Force");
 }
 if(move.secondaries){
 value.abilityModify(1.3,"Sheer Force");

@@ -273,6 +273,20 @@ effect,start,end,
 transition,after,additionalCss)
 {
 if(typeof effect==='string')effect=BattleEffects[effect];
+
+var $effect=$("<img src=\""+effect.url+"\" style=\"display:block;position:absolute\" />");
+this.$fx.append($effect);
+if(additionalCss)$effect.css(additionalCss);
+$effect=this.$fx.children().last();
+
+return this.animateEffect($effect,effect,start,end,transition,after);
+};_proto.
+animateEffect=function animateEffect(
+$effect,effect,start,end,
+transition,after,additionalCss)
+{
+if(typeof effect==='string')effect=BattleEffects[effect];
+
 if(!start.time)start.time=0;
 if(!end.time)end.time=start.time+500;
 start.time+=this.timeOffset;
@@ -285,16 +299,13 @@ end=Object.assign({},start,end);
 var startpos=this.pos(start,effect);
 var endpos=this.posT(end,effect,transition,start);
 
-var $effect=$("<img src=\""+effect.url+"\" style=\"display:block;position:absolute\" />");
-this.$fx.append($effect);
-if(additionalCss)$effect.css(additionalCss);
-$effect=this.$fx.children().last();
-
 if(start.time){
 $effect.css(Object.assign({},startpos,{opacity:0}));
 $effect.delay(start.time).animate({
 opacity:startpos.opacity
 },1);
+}else if($effect.queue().length){
+$effect.animate(startpos,0);
 }else{
 $effect.css(startpos);
 }
@@ -313,6 +324,8 @@ var endendpos=this.pos(end,effect);
 $effect.animate(endendpos,200);
 }
 this.waitFor($effect);
+
+return $effect;
 };_proto.
 backgroundEffect=function backgroundEffect(bg,duration){var opacity=arguments.length>2&&arguments[2]!==undefined?arguments[2]:1;var delay=arguments.length>3&&arguments[3]!==undefined?arguments[3]:0;
 var $effect=$('<div class="background"></div>');
@@ -580,6 +593,9 @@ bg='fx/bg-spl.png';
 this.setBgm(-101);
 }else if(typeof rated==='string'&&rated.startsWith('National Pokemon Association')){
 bg='fx/bg-npa.png';
+this.setBgm(-101);
+}else if(typeof rated==='string'&&rated.startsWith('Smogon Champions League')){
+bg='fx/bg-scl.png';
 this.setBgm(-101);
 }else{
 if(gen<=1)bg='fx/bg-gen1.png?';else

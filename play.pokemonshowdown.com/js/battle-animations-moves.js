@@ -37412,6 +37412,508 @@ opacity:0,
 time:1000
 },'decel','fade');
 }
+},
+blazingtorque:{
+anim:function(scene,_ref460){var attacker=_ref460[0],defender=_ref460[1];
+
+var size=[2,3];
+var opct=[0.3,0.6];
+var tick=120;
+var stepX=(defender.x-attacker.x)/10;
+var stepY=(defender.y-attacker.y)/10;
+var stepZ=(defender.z-attacker.z)/10;
+var tallerBy=35;
+var projectileSprite='fireball';
+var projectileSpeed=10;
+
+var steps=[0,0,0,1,3,6,10,12.5];
+var ball,wisp;
+for(var i=0;i<7;i++){
+var offset1=steps[i];
+var offset2=steps[i+1];
+
+var ballArgs=['flareball',{
+x:attacker.x+offset1*stepX,
+y:attacker.y+offset1*stepY+tallerBy,
+z:attacker.z+offset1*stepZ,
+scale:size[i%2],
+opacity:opct[i%2],
+time:i*tick
+},{
+x:attacker.x+offset2*stepX,
+y:attacker.y+offset2*stepY+tallerBy,
+z:attacker.z+offset2*stepZ,
+scale:size[(i+1)%2],
+opacity:opct[(i+1)%2],
+time:(i+1)*tick
+},'swing',i===6?'explode':'gone',{filter:'hue-rotate(-12deg)'}];
+ball=ball?scene.animateEffect.apply(scene,[ball].concat(ballArgs)):scene.showEffect.apply(scene,ballArgs);
+
+var wispArgs=['wisp',{
+x:attacker.x+offset1*stepX,
+y:attacker.y+offset1*stepY+tallerBy,
+z:attacker.z+offset1*stepZ,
+scale:size[i%2],
+opacity:opct[(i+1)%2],
+time:i*tick
+},{
+x:attacker.x+offset2*stepX,
+y:attacker.y+offset2*stepY+tallerBy,
+z:attacker.z+offset2*stepZ,
+scale:size[(i+1)%2],
+opacity:opct[i%2],
+time:(i+1)*tick
+},'swing',i===6?'explode':'gone'];
+wisp=wisp?scene.animateEffect.apply(scene,[wisp].concat(wispArgs)):scene.showEffect.apply(scene,wispArgs);
+
+scene.showEffect(projectileSprite,{
+x:attacker.x+offset1*stepX+projectileSpeed*(i%2?2:-2),
+y:attacker.y+offset1*stepY,
+z:attacker.z+offset1*stepZ,
+opacity:0.5,
+time:i*tick
+},{
+x:attacker.x+offset1*stepX+projectileSpeed*(i%2?3:-3),
+y:attacker.y+offset1*stepY-projectileSpeed,
+z:attacker.behind(projectileSpeed)+offset1*stepZ,
+time:(i+1)*tick
+},'ballistic','fade');
+scene.showEffect(projectileSprite,{
+x:attacker.x+offset1*stepX+projectileSpeed*((i+1)%2?2:-2),
+y:attacker.y+offset1*stepY,
+z:attacker.z+offset1*stepZ,
+opacity:0.5,
+time:i*tick
+},{
+x:attacker.x+offset1*stepX+projectileSpeed*((i+1)%2?3:-3),
+y:attacker.y+offset1*stepY-projectileSpeed,
+z:attacker.behind(projectileSpeed)+offset1*stepZ,
+time:(i+1)*tick
+},'ballistic','fade');
+}
+
+
+attacker.delay(tick*2);
+attacker.anim({
+x:attacker.x+stepX*4,
+y:attacker.y+stepY*4,
+z:attacker.z+stepZ*4,
+time:tick*7/3
+},'accel');
+attacker.anim({
+time:tick*7/3+100
+},'ballistic2Back');
+defender.delay(tick*6-20);
+defender.anim({
+z:defender.behind(20),
+time:100
+},'swing');
+defender.anim({
+time:300
+},'swing');
+}
+},
+combattorque:{
+anim:function(scene,_ref461){var attacker=_ref461[0],defender=_ref461[1];
+
+var size=[2,3];
+var opct=[0.3,0.6];
+var tick=120;
+var stepX=(defender.x-attacker.x)/10;
+var stepY=(defender.y-attacker.y)/10;
+var stepZ=(defender.z-attacker.z)/10;
+var tallerBy=35;
+var projectileSprite='fireball';
+var projectileSpeed=10;
+
+var steps=[0,0,0,1,3,6,10,12.5];
+var ball,wisp;
+for(var i=0;i<7;i++){
+var offset1=steps[i];
+var offset2=steps[i+1];
+
+var ballArgs=['flareball',{
+x:attacker.x+offset1*stepX,
+y:attacker.y+offset1*stepY+tallerBy,
+z:attacker.z+offset1*stepZ,
+scale:size[i%2],
+opacity:opct[i%2],
+time:i*tick
+},{
+x:attacker.x+offset2*stepX,
+y:attacker.y+offset2*stepY+tallerBy,
+z:attacker.z+offset2*stepZ,
+scale:size[(i+1)%2],
+opacity:opct[(i+1)%2],
+time:(i+1)*tick
+},'swing',i===6?'explode':'gone',{filter:'brightness(1.5)'}];
+ball=ball?scene.animateEffect.apply(scene,[ball].concat(ballArgs)):scene.showEffect.apply(scene,ballArgs);
+
+var wispArgs=['waterwisp',{
+x:attacker.x+offset1*stepX,
+y:attacker.y+offset1*stepY+tallerBy,
+z:attacker.z+offset1*stepZ,
+scale:size[i%2],
+opacity:opct[(i+1)%2]*0.75,
+time:i*tick
+},{
+x:attacker.x+offset2*stepX,
+y:attacker.y+offset2*stepY+tallerBy,
+z:attacker.z+offset2*stepZ,
+scale:size[(i+1)%2],
+opacity:opct[i%2]*0.75,
+time:(i+1)*tick
+},'swing',i===6?'explode':'gone'];
+wisp=wisp?scene.animateEffect.apply(scene,[wisp].concat(wispArgs)):scene.showEffect.apply(scene,wispArgs);
+
+scene.showEffect(projectileSprite,{
+x:attacker.x+offset1*stepX+projectileSpeed*(i%2?2:-2),
+y:attacker.y+offset1*stepY,
+z:attacker.z+offset1*stepZ,
+opacity:0.5,
+time:i*tick
+},{
+x:attacker.x+offset1*stepX+projectileSpeed*(i%2?3:-3),
+y:attacker.y+offset1*stepY-projectileSpeed,
+z:attacker.behind(projectileSpeed)+offset1*stepZ,
+time:(i+1)*tick
+},'ballistic','fade',{filter:'brightness(1.5) hue-rotate(15deg)'});
+scene.showEffect(projectileSprite,{
+x:attacker.x+offset1*stepX+projectileSpeed*((i+1)%2?2:-2),
+y:attacker.y+offset1*stepY,
+z:attacker.z+offset1*stepZ,
+opacity:0.5,
+time:i*tick
+},{
+x:attacker.x+offset1*stepX+projectileSpeed*((i+1)%2?3:-3),
+y:attacker.y+offset1*stepY-projectileSpeed,
+z:attacker.behind(projectileSpeed)+offset1*stepZ,
+time:(i+1)*tick
+},'ballistic','fade',{filter:'brightness(1.5) hue-rotate(15deg)'});
+}
+
+
+attacker.delay(tick*2);
+attacker.anim({
+x:attacker.x+stepX*4,
+y:attacker.y+stepY*4,
+z:attacker.z+stepZ*4,
+time:tick*7/3
+},'accel');
+attacker.anim({
+time:tick*7/3+100
+},'ballistic2Back');
+defender.delay(tick*6-20);
+defender.anim({
+z:defender.behind(20),
+time:100
+},'swing');
+defender.anim({
+time:300
+},'swing');
+}
+},
+magicaltorque:{
+anim:function(scene,_ref462){var attacker=_ref462[0],defender=_ref462[1];
+
+var size=[2,3];
+var opct=[0.3,0.6];
+var tick=120;
+var stepX=(defender.x-attacker.x)/10;
+var stepY=(defender.y-attacker.y)/10;
+var stepZ=(defender.z-attacker.z)/10;
+var tallerBy=35;
+var projectileSprite='shine';
+var projectileSpeed=10;
+
+var steps=[0,0,0,1,3,6,10,12.5];
+var ball,wisp;
+for(var i=0;i<7;i++){
+var offset1=steps[i];
+var offset2=steps[i+1];
+
+var ballArgs=[i<6?'iceball':'mistball',{
+x:attacker.x+offset1*stepX,
+y:attacker.y+offset1*stepY+tallerBy,
+z:attacker.z+offset1*stepZ,
+scale:size[i%2],
+opacity:opct[i%2],
+time:i*tick
+},{
+x:attacker.x+offset2*stepX,
+y:attacker.y+offset2*stepY+tallerBy,
+z:attacker.z+offset2*stepZ,
+scale:size[(i+1)%2],
+opacity:opct[(i+1)%2],
+time:(i+1)*tick
+},'swing'].concat(i===6?['explode']:['gone',{filter:'saturate(300%)'}]);
+ball=ball?scene.animateEffect.apply(scene,[ball].concat(ballArgs)):scene.showEffect.apply(scene,ballArgs);
+
+var wispArgs=['wisp',{
+x:attacker.x+offset1*stepX,
+y:attacker.y+offset1*stepY+tallerBy,
+z:attacker.z+offset1*stepZ,
+scale:size[i%2],
+opacity:opct[(i+1)%2],
+time:i*tick
+},{
+x:attacker.x+offset2*stepX,
+y:attacker.y+offset2*stepY+tallerBy,
+z:attacker.z+offset2*stepZ,
+scale:size[(i+1)%2],
+opacity:opct[i%2],
+time:(i+1)*tick
+},'swing',i===6?'explode':'gone'];
+wisp=wisp?scene.animateEffect.apply(scene,[wisp].concat(wispArgs)):scene.showEffect.apply(scene,wispArgs);
+
+scene.showEffect(projectileSprite,{
+x:attacker.x+offset1*stepX+projectileSpeed*(i%2?2:-2),
+y:attacker.y+offset1*stepY,
+z:attacker.z+offset1*stepZ,
+scale:0.5,
+opacity:0.5,
+time:i*tick
+},{
+x:attacker.x+offset1*stepX+projectileSpeed*(i%2?3:-3),
+y:attacker.y+offset1*stepY-projectileSpeed,
+z:attacker.behind(projectileSpeed)+offset1*stepZ,
+time:(i+1)*tick
+},'ballistic','fade',{filter:'hue-rotate(90deg) saturate(300%)'});
+scene.showEffect(projectileSprite,{
+x:attacker.x+offset1*stepX+projectileSpeed*((i+1)%2?2:-2),
+y:attacker.y+offset1*stepY,
+z:attacker.z+offset1*stepZ,
+scale:0.5,
+opacity:0.5,
+time:i*tick
+},{
+x:attacker.x+offset1*stepX+projectileSpeed*((i+1)%2?3:-3),
+y:attacker.y+offset1*stepY-projectileSpeed,
+z:attacker.behind(projectileSpeed)+offset1*stepZ,
+time:(i+1)*tick
+},'ballistic','fade',{filter:'hue-rotate(90deg) saturate(300%)'});
+}
+
+
+attacker.delay(tick*2);
+attacker.anim({
+x:attacker.x+stepX*4,
+y:attacker.y+stepY*4,
+z:attacker.z+stepZ*4,
+time:tick*7/3
+},'accel');
+attacker.anim({
+time:tick*7/3+100
+},'ballistic2Back');
+defender.delay(tick*6-20);
+defender.anim({
+z:defender.behind(20),
+time:100
+},'swing');
+defender.anim({
+time:300
+},'swing');
+}
+},
+noxioustorque:{
+anim:function(scene,_ref463){var attacker=_ref463[0],defender=_ref463[1];
+
+var size=[2,3];
+var opct=[0.3,0.6];
+var tick=120;
+var stepX=(defender.x-attacker.x)/10;
+var stepY=(defender.y-attacker.y)/10;
+var stepZ=(defender.z-attacker.z)/10;
+var tallerBy=35;
+var projectileSprite='bluefireball';
+var projectileSpeed=10;
+
+var steps=[0,0,0,1,3,6,10,12.5];
+var ball,wisp;
+for(var i=0;i<7;i++){
+var offset1=steps[i];
+var offset2=steps[i+1];
+
+var ballArgs=['mistball',{
+x:attacker.x+offset1*stepX,
+y:attacker.y+offset1*stepY+tallerBy,
+z:attacker.z+offset1*stepZ,
+scale:size[i%2],
+opacity:opct[i%2],
+time:i*tick
+},{
+x:attacker.x+offset2*stepX,
+y:attacker.y+offset2*stepY+tallerBy,
+z:attacker.z+offset2*stepZ,
+scale:size[(i+1)%2],
+opacity:opct[(i+1)%2],
+time:(i+1)*tick
+},'swing',i===6?'explode':''];
+ball=ball?scene.animateEffect.apply(scene,[ball].concat(ballArgs)):scene.showEffect.apply(scene,ballArgs);
+
+var wispArgs=['waterwisp',{
+x:attacker.x+offset1*stepX,
+y:attacker.y+offset1*stepY+tallerBy,
+z:attacker.z+offset1*stepZ,
+scale:size[i%2],
+opacity:opct[(i+1)%2],
+time:i*tick
+},{
+x:attacker.x+offset2*stepX,
+y:attacker.y+offset2*stepY+tallerBy,
+z:attacker.z+offset2*stepZ,
+scale:size[(i+1)%2],
+opacity:opct[i%2],
+time:(i+1)*tick
+},'swing',i===6?'explode':'',{filter:'brightness(1.5)'}];
+wisp=wisp?scene.animateEffect.apply(scene,[wisp].concat(wispArgs)):scene.showEffect.apply(scene,wispArgs);
+
+scene.showEffect(projectileSprite,{
+x:attacker.x+offset1*stepX+projectileSpeed*(i%2?2:-2),
+y:attacker.y+offset1*stepY,
+z:attacker.z+offset1*stepZ,
+opacity:0.5,
+time:i*tick
+},{
+x:attacker.x+offset1*stepX+projectileSpeed*(i%2?3:-3),
+y:attacker.y+offset1*stepY-projectileSpeed,
+z:attacker.behind(projectileSpeed)+offset1*stepZ,
+time:(i+1)*tick
+},'ballistic','fade');
+scene.showEffect(projectileSprite,{
+x:attacker.x+offset1*stepX+projectileSpeed*((i+1)%2?2:-2),
+y:attacker.y+offset1*stepY,
+z:attacker.z+offset1*stepZ,
+opacity:0.5,
+time:i*tick
+},{
+x:attacker.x+offset1*stepX+projectileSpeed*((i+1)%2?3:-3),
+y:attacker.y+offset1*stepY-projectileSpeed,
+z:attacker.behind(projectileSpeed)+offset1*stepZ,
+time:(i+1)*tick
+},'ballistic','fade');
+}
+
+
+attacker.delay(tick*2);
+attacker.anim({
+x:attacker.x+stepX*4,
+y:attacker.y+stepY*4,
+z:attacker.z+stepZ*4,
+time:tick*7/3
+},'accel');
+attacker.anim({
+time:tick*7/3+100
+},'ballistic2Back');
+defender.delay(tick*6-20);
+defender.anim({
+z:defender.behind(20),
+time:100
+},'swing');
+defender.anim({
+time:300
+},'swing');
+}
+},
+wickedtorque:{
+anim:function(scene,_ref464){var attacker=_ref464[0],defender=_ref464[1];
+
+var size=[2,3];
+var opct=[0.3,0.6];
+var tick=120;
+var stepX=(defender.x-attacker.x)/10;
+var stepY=(defender.y-attacker.y)/10;
+var stepZ=(defender.z-attacker.z)/10;
+var tallerBy=35;
+var projectileSprite='fireball';
+var projectileSpeed=10;
+
+var steps=[0,0,0,1,3,6,10,12.5];
+
+var ball,wisp;
+for(var i=0;i<7;i++){
+var offset1=steps[i];
+var offset2=steps[i+1];
+
+var ballArgs=['flareball',{
+x:attacker.x+offset1*stepX,
+y:attacker.y+offset1*stepY+tallerBy,
+z:attacker.z+offset1*stepZ,
+scale:size[i%2],
+opacity:opct[i%2]*1.5,
+time:0
+},{
+x:attacker.x+offset2*stepX,
+y:attacker.y+offset2*stepY+tallerBy,
+z:attacker.z+offset2*stepZ,
+scale:size[(i+1)%2],
+opacity:opct[(i+1)%2]*1.5,
+time:tick
+},'swing',i===6?'explode':'',{filter:'hue-rotate(-45deg)'}];
+ball=ball?scene.animateEffect.apply(scene,[ball].concat(ballArgs)):scene.showEffect.apply(scene,ballArgs);
+
+var wispArgs=['blackwisp',{
+x:attacker.x+offset1*stepX,
+y:attacker.y+offset1*stepY+tallerBy,
+z:attacker.z+offset1*stepZ,
+scale:size[i%2],
+opacity:0.5,
+time:0
+},{
+x:attacker.x+offset2*stepX,
+y:attacker.y+offset2*stepY+tallerBy,
+z:attacker.z+offset2*stepZ,
+scale:size[(i+1)%2],
+time:tick
+},'swing',i===6?'explode':''];
+wisp=wisp?scene.animateEffect.apply(scene,[wisp].concat(wispArgs)):scene.showEffect.apply(scene,wispArgs);
+
+scene.showEffect(projectileSprite,{
+x:attacker.x+offset1*stepX+projectileSpeed*(i%2?2:-2),
+y:attacker.y+offset1*stepY,
+z:attacker.z+offset1*stepZ,
+opacity:0.5,
+time:i*tick
+},{
+x:attacker.x+offset1*stepX+projectileSpeed*(i%2?3:-3),
+y:attacker.y+offset1*stepY-projectileSpeed,
+z:attacker.behind(projectileSpeed)+offset1*stepZ,
+time:(i+1)*tick
+},'ballistic','fade',{filter:'hue-rotate(-45deg)'});
+scene.showEffect(projectileSprite,{
+x:attacker.x+offset1*stepX+projectileSpeed*((i+1)%2?2:-2),
+y:attacker.y+offset1*stepY,
+z:attacker.z+offset1*stepZ,
+opacity:0.5,
+time:i*tick
+},{
+x:attacker.x+offset1*stepX+projectileSpeed*((i+1)%2?3:-3),
+y:attacker.y+offset1*stepY-projectileSpeed,
+z:attacker.behind(projectileSpeed)+offset1*stepZ,
+time:(i+1)*tick
+},'ballistic','fade',{filter:'hue-rotate(-45deg)'});
+}
+
+
+attacker.delay(tick*2);
+attacker.anim({
+x:attacker.x+stepX*4,
+y:attacker.y+stepY*4,
+z:attacker.z+stepZ*4,
+time:tick*7/3
+},'accel');
+attacker.anim({
+time:tick*7/3+100
+},'ballistic2Back');
+defender.delay(tick*6-20);
+defender.anim({
+z:defender.behind(20),
+time:100
+},'swing');
+defender.anim({
+time:300
+},'swing');
+}
 }
 };
 
@@ -37770,7 +38272,7 @@ BattleMoveAnims['doubleshock']={anim:BattleMoveAnims['wildcharge'].anim};
 BattleMoveAnims['filletaway']={anim:BattleMoveAnims['bulkup'].anim};
 BattleMoveAnims['glaiverush']={anim:BattleMoveAnims['outrage'].anim};
 BattleMoveAnims['headlongrush']={
-anim:function(scene,_ref460){var attacker=_ref460[0],defender=_ref460[1];
+anim:function(scene,_ref465){var attacker=_ref465[0],defender=_ref465[1];
 BattleMoveAnims['closecombat'].anim(scene,[attacker,defender]);
 BattleMoveAnims['earthpower'].anim(scene,[attacker,defender]);
 }

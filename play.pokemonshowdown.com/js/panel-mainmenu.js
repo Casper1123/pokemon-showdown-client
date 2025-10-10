@@ -448,7 +448,7 @@ NewsPanel=function(_PSRoomPanel){function NewsPanel(){var _this2;for(var _len=ar
 change=function(ev){
 var target=ev.currentTarget;
 if(target.value==='1'){
-document.cookie="preactalpha=1; expires=Thu, 1 Sep 2025 12:00:00 UTC; path=/";
+document.cookie="preactalpha=1; expires=Thu, 1 Oct 2025 12:00:00 UTC; path=/";
 }else{
 document.cookie="preactalpha=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 }
@@ -458,10 +458,7 @@ document.location.href="/";
 };return _this2;}_inheritsLoose(NewsPanel,_PSRoomPanel);var _proto2=NewsPanel.prototype;_proto2.
 render=function render(){
 return preact.h(PSPanelWrapper,{room:this.props.room,fullSize:true,scrollable:true},
-preact.h("div",{"class":"construction"},"This is a custom modification of the Pok\xE9mon Showdown! beta test client. Source code can be found ",
-
-preact.h("a",{href:"https://github.com/Casper1123/pokemon-showdown-client"},"for this client")," and ",preact.h("a",{href:"https://github.com/smogon/pokemon-showdown-client"},"the vanilla one"),". If you are using this through my website, then we have a ",
-preact.h("a",{href:"https://discord.gg/NC2pwmVRQ7"},"discord server")," related to the mods we host. If you are from the Showdown team and want to tell me I did things incorrectly and I should stop it, please contact me through either Discord or Github."
+preact.h("div",{"class":"construction"},"TO USE THE WEBSITE, YOU NEED TO ALLOW POPUPS. OTHERWISE YOU CANNOT LOG IN."
 
 ),
 preact.h("div",{"class":"readable-bg",dangerouslySetInnerHTML:{__html:PS.newsHTML}})
