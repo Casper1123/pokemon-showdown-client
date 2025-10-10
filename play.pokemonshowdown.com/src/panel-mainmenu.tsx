@@ -459,9 +459,6 @@ class NewsPanel extends PSRoomPanel {
 	override render() {
 		return <PSPanelWrapper room={this.props.room} fullSize scrollable>
 			<div class="construction">
-				This is a custom modification of the Pokémon Showdown! beta test client.
-				Source code can be found <a href="https://github.com/Casper1123/pokemon-showdown-client">for this client</a> and <a href="https://github.com/smogon/pokemon-showdown-client">the vanilla one</a>.
-				If you are using this through my website, then we have a <a href="https://discord.gg/NC2pwmVRQ7">discord server</a> related to the mods we host.
 				TO USE THE WEBSITE, YOU NEED TO ALLOW POPUPS. OTHERWISE YOU CANNOT LOG IN.
 			</div>
 			<div class="readable-bg" dangerouslySetInnerHTML={{ __html: PS.newsHTML }}></div>
