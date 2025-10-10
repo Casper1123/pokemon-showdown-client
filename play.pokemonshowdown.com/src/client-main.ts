@@ -19,7 +19,6 @@ import { BattleTextParser, type Args } from './battle-text-parser';
 import type { BattleRoom } from './panel-battle';
 import { Teams } from './battle-teams';
 import {BattleLog} from "./battle-log";
-import type preact from '../js/lib/preact';
 
 declare const BattleTextAFD: any;
 declare const BattleTextNotAFD: any;
@@ -1675,7 +1674,7 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 		if (cmdResult === true) return line;
 		return cmdResult || null;
 	}
-	send(msg: string | null, element?: HTMLElement | null) {
+	send(msg: string | null, element?: HTMLElement) {
 		if (!msg) return;
 		msg = this.handleSend(msg, element);
 		if (!msg) return;
@@ -2405,29 +2404,21 @@ export const PS = new class extends PSModel {
 			parentElem: opts.parentElem,
 		});
 	}
-	confirm(message: string, opts: {
-		okButton?: string, cancelButton?: string,
-		otherButtons?: preact.ComponentChildren, parentElem?: HTMLElement,
-	} = {}) {
+	confirm(message: string, opts: { okButton?: string, cancelButton?: string } = {}) {
 		opts.cancelButton ??= 'Cancel';
 		return new Promise(resolve => {
 			this.join(`popup-${this.popups.length}` as RoomID, {
-				args: { message, okValue: true, cancelValue: false, callback: resolve, ...opts, parentElem: null },
-				parentElem: opts.parentElem,
+				args: { message, okValue: true, cancelValue: false, callback: resolve, ...opts },
 			});
 		});
 	}
-	prompt(message: string, opts: {
-		defaultValue?: string, okButton?: string, cancelButton?: string, type?: 'text' | 'password' | 'number',
-		otherButtons?: preact.ComponentChildren, parentElem?: HTMLElement,
+	prompt(message: string, defaultValue = '', opts: {
+		okButton?: string, cancelButton?: string, type?: 'text' | 'password' | 'number', parentElem?: HTMLElement,
 	} = {}): Promise<string | null> {
 		opts.cancelButton ??= 'Cancel';
 		return new Promise(resolve => {
 			this.join(`popup-${this.popups.length}` as RoomID, {
-				args: {
-					message, value: opts.defaultValue || '',
-					okValue: true, cancelValue: false, callback: resolve, ...opts, parentElem: null,
-				},
+				args: { message, value: defaultValue, okValue: true, cancelValue: false, callback: resolve, ...opts, parentElem: null },
 				parentElem: opts.parentElem,
 			});
 		});

@@ -87,71 +87,6 @@ class TeambuilderRoom extends PSRoom {
 			this.setExportMode(!this.exportMode);
 			this.update(null);
 		},
-		'createfolder'(name) {
-			if (name.includes('/') || name.includes('\\')) {
-				PS.alert("Names can't contain slashes, since they're used as a folder separator.");
-				name = name.replace(/[\\/]/g, '');
-			}
-			if (name.includes('|')) {
-				PS.alert("Names can't contain the character |, since they're used for storing teams.");
-				name = name.replace(/\|/g, '');
-			}
-			if (!name) return this.errorReply('Name required');
-
-			this.curFolderKeep = `${name}/`;
-			this.curFolder = `${name}/`;
-			this.update(null);
-		},
-		'renamefolder'(name) {
-			if (!name) return this.errorReply('New name required');
-			if (!this.curFolder.endsWith('/')) return this.errorReply('Not in a folder');
-
-			if (name.includes('/') || name.includes('\\')) {
-				PS.alert("Names can't contain slashes, since they're used as a folder separator.");
-				name = name.replace(/[\\/]/g, '');
-			}
-			if (name.includes('|')) {
-				PS.alert("Names can't contain the character |, since they're used for storing teams.");
-				name = name.replace(/\|/g, '');
-			}
-
-			const oldFolder = this.curFolder.slice(0, -1);
-			for (const team of PS.teams.list) {
-				if (team.folder !== oldFolder) continue;
-				team.folder = name;
-			}
-			if (this.curFolderKeep === this.curFolder) this.curFolderKeep = `${name}/`;
-			this.curFolder = `${name}/`;
-			PS.teams.save();
-			this.update(null);
-		},
-		'deletefolder'() {
-			if (!this.curFolder.endsWith('/')) return this.errorReply('Not in a folder');
-
-			const oldFolder = this.curFolder.slice(0, -1);
-			for (const team of PS.teams.list) {
-				if (team.folder !== oldFolder) continue;
-				team.folder = '';
-			}
-			if (this.curFolderKeep === this.curFolder) this.curFolderKeep = '';
-			this.curFolder = '';
-			PS.teams.save();
-			this.update(null);
-		},
-		'convertfoldertoprefix'() {
-			if (!this.curFolder.endsWith('/')) return this.errorReply('Not in a folder');
-
-			const oldFolder = this.curFolder.slice(0, -1);
-			for (const team of PS.teams.list) {
-				if (team.folder !== oldFolder) continue;
-				team.folder = '';
-				team.name = `${oldFolder} ${team.name}`;
-			}
-			if (this.curFolderKeep === this.curFolder) this.curFolderKeep = '';
-			this.curFolder = '';
-			PS.teams.save();
-			this.update(null);
-		},
 	});
 	override sendDirect(msg: string): void {
 		PS.alert(`Unrecognized command: ${msg}`);
@@ -219,7 +154,7 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 	static readonly Model = TeambuilderRoom;
 	static readonly icon = <i class="fa fa-pencil-square-o" aria-hidden></i>;
 	static readonly title = 'Teambuilder';
-	clickFolder = (e: MouseEvent) => {
+	selectFolder = (e: MouseEvent) => {
 		const room = this.props.room;
 		let elem = e.target as HTMLElement | null;
 		let folder: string | null = null;
@@ -240,11 +175,11 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 		e.preventDefault();
 		e.stopImmediatePropagation();
 		if (folder === '++') {
-			PS.prompt("Folder name?", { parentElem: elem!, okButton: "Create" }).then(name => {
-				name = (name || '').trim();
+			PS.prompt("Folder name?", '', { parentElem: elem!, okButton: "Create" }).then(name => {
 				if (!name) return;
-
-				room.send(`/createfolder ${name}`, elem);
+				room.curFolderKeep = `${name}/`;
+				room.curFolder = `${name}/`;
+				this.forceUpdate();
 			});
 			return;
 		}
@@ -490,33 +425,6 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 		PS.teams.update('team');
 		room.update(null);
 	};
-	renameFolder = (ev: MouseEvent) => {
-		const { room } = this.props;
-		const oldFolder = room.curFolder.slice(0, -1);
-		const elem = ev.currentTarget as HTMLElement;
-		ev.stopImmediatePropagation();
-		ev.preventDefault();
-		PS.prompt(`Rename \`\`${oldFolder}\`\` to?`, { defaultValue: oldFolder, okButton: "Rename", parentElem: elem }).then(name => {
-			name = (name || '').trim();
-			if (!name) return;
-			if (name === oldFolder) return;
-
-			room.send(`/renamefolder ${name}`, elem);
-		});
-	};
-	promptDeleteFolder = (ev: MouseEvent) => {
-		const { room } = this.props;
-		const oldFolder = room.curFolder.slice(0, -1);
-		const elem = ev.currentTarget as HTMLElement;
-		ev.stopImmediatePropagation();
-		ev.preventDefault();
-		PS.confirm(`Delete \`\`${oldFolder}\`\`? (doesn't delete teams)`, {
-			okButton: "Delete", otherButtons: <button class="button" data-cmd="/closeand /inopener /convertfoldertoprefix">Convert to prefix</button>,
-			parentElem: elem,
-		}).then(result => {
-			if (result) room.send(`/deletefolder`, elem);
-		});
-	};
 	renderFolderList() {
 		const room = this.props.room;
 		// The folder list isn't actually saved anywhere:
@@ -595,7 +503,7 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 		}
 		renderedFolders.push(...renderedFormatFolders);
 
-		return <div class="folderlist" onClick={this.clickFolder}>
+		return <div class="folderlist" onClick={this.selectFolder}>
 			<div class="folderlistbefore"></div>
 
 			{this.renderFolder('')}
@@ -677,10 +585,10 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 			{filterFolder ? (
 				<h2>
 					<i class="fa fa-folder-open" aria-hidden></i> {filterFolder} {}
-					<button class="button small" style="margin-left:5px" onClick={this.renameFolder}>
+					<button class="button small" style="margin-left:5px" name="renameFolder">
 						<i class="fa fa-pencil" aria-hidden></i> Rename
 					</button> {}
-					<button class="button small" style="margin-left:5px" onClick={this.promptDeleteFolder}>
+					<button class="button small" style="margin-left:5px" name="promptDeleteFolder">
 						<i class="fa fa-times" aria-hidden></i> Remove
 					</button>
 				</h2>
@@ -706,10 +614,8 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 			<ul class="teamlist">
 				{!teams.length ? (
 					<li><em>you have no teams lol</em></li>
-				) : !filteredTeams.length && room.searchTerms.length ? (
-					<li><em>you have no teams matching <code>{room.searchTerms.join(", ")}</code></em></li>
 				) : !filteredTeams.length ? (
-					<li><em>you have no teams in this folder</em></li>
+					<li><em>you have no teams matching <code>{room.searchTerms.join(", ")}</code></em></li>
 				) : filteredTeams.map(team => team ? (
 					<li key={team.key} onDragEnter={this.dragEnterTeam} data-teamkey={team.key}>
 						<TeamBox team={team} onClick={this.clearSearch} /> {}

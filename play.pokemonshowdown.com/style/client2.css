@@ -1061,7 +1061,7 @@ form.menugroup {
 	font-size: 18pt;
 	font-weight: normal;
 }
- .roomcounters .usercount {
+.roomcounters .usercount {
 	display: block;
 	width: 49px;
 	height: 63px;
@@ -1461,6 +1461,7 @@ pre.textbox.textbox-empty[placeholder]:before {
 	bottom: 0;
 	width: 145px;
 	height: auto;
+	border-right: 1px solid #AAAAAA;
 
 	overflow: auto;
 	-webkit-overflow-scrolling: touch;
@@ -1486,9 +1487,6 @@ pre.textbox.textbox-empty[placeholder]:before {
 .chat-log-add.hasuserlist,
 .tournament-wrapper.hasuserlist {
 	left: 146px;
-}
-.chat-log.hasuserlist {
-	border-left: 1px solid #AAAAAA;
 }
 .userlist ul,
 .userlist li {

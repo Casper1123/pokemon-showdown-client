@@ -8,7 +8,7 @@
  * @license MIT
  */
 
-import { Dex, toID, type ID } from "./battle-dex";
+import { toID, type ID } from "./battle-dex";
 
 export type Args = [string, ...string[]];
 export type KWArgs = { [kw: string]: string };
@@ -368,21 +368,11 @@ export class BattleTextParser {
 				if (BattleText[id][type].charAt(1) === '.') type = BattleText[id][type].slice(2) as ID;
 				if (BattleText[id][type].startsWith('#')) id = BattleText[id][type].slice(1) as ID;
 				if (!BattleText[id][type]) return '';
-				let template = BattleText[id][type];
-				for (let i = Dex.gen - 1; i >= this.gen; i--) {
-					let curTemplate = BattleText[id][`${type}Gen${i}`];
-					if (curTemplate) template = curTemplate;
-				}
-				return template + '\n';
+				return BattleText[id][type] + '\n';
 			}
 		}
 		if (!BattleText.default[type]) return '';
-		let template = BattleText.default[type];
-		for (let i = Dex.gen - 1; i >= this.gen; i--) {
-			let curTemplate = BattleText.default[`${type}Gen${i}`];
-			if (curTemplate) template = curTemplate;
-		}
-		return template + '\n';
+		return BattleText.default[type] + '\n';
 	}
 
 	maybeAbility(effect: string | undefined, holder: string) {
@@ -652,6 +642,8 @@ export class BattleTextParser {
 			if (kwArgs.damage) templateId = 'activate';
 			if (kwArgs.block) templateId = 'block';
 			if (kwArgs.upkeep) templateId = 'upkeep';
+			if (id === 'mist' && this.gen <= 2) templateId = `startGen${this.gen}`;
+			if (id === 'reflect' || id === 'lightscreen') templateId = 'startGen1';
 			if (templateId === 'start' && kwArgs.from?.startsWith('item:')) {
 				templateId += 'FromItem';
 			}
@@ -1087,7 +1079,10 @@ export class BattleTextParser {
 		case '-block': {
 			let [, pokemon, effect, move, attacker] = args;
 			const line1 = this.maybeAbility(effect, kwArgs.of || pokemon);
-			const template = this.template('block', effect);
+			let id = BattleTextParser.effectId(effect);
+			let templateId = 'block';
+			if (id === 'mist' && this.gen <= 2) templateId = `blockGen${this.gen}`;
+			const template = this.template(templateId, effect);
 			return line1 + template.replace('[POKEMON]', this.pokemon(pokemon))
 				.replace('[SOURCE]', this.pokemon(attacker || kwArgs.of)).replace('[MOVE]', move);
 		}
@@ -1163,6 +1158,7 @@ export class BattleTextParser {
 				id = 'dragonascent';
 				templateId = 'megaNoItem';
 			}
+			if (!id && cmd === '-mega' && this.gen < 7) templateId = 'megaGen6';
 			if (!item && cmd === '-mega') templateId = 'megaNoItem';
 			let template = this.template(templateId, id);
 			const side = pokemon.slice(0, 2);

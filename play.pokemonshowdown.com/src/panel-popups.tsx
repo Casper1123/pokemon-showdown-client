@@ -1674,7 +1674,6 @@ class PopupPanel extends PSRoomPanel<PopupRoom> {
 		const textbox = this.base!.querySelector<HTMLInputElement>('input[name=value]');
 		if (!textbox) return;
 		textbox.value = this.props.room.args?.value as string || '';
-		textbox.select();
 	}
 	parseMessage(message: string) {
 		if (message.startsWith('|html|')) {
