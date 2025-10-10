@@ -108,10 +108,10 @@ https://replay.pokemonshowdown.com/gen7randomdoublesbattle-865046831.log
 
 -->
 
-<link rel="stylesheet" href="//pokemonshowdown.com/style/global.css?0.48798724293672624" />
-<link rel="stylesheet" href="//showdown.casper1123.nl/style/font-awesome.css?0.7913471410318016" />
-<link rel="stylesheet" href="//showdown.casper1123.nl/style/battle.css?0.9033247610660959" />
-<link rel="stylesheet" href="//showdown.casper1123.nl/style/utilichart.css?0.02648880103173057" />
+<link rel="stylesheet" href="//pokemonshowdown.com/style/global.css?0.8117176212017518" />
+<link rel="stylesheet" href="//showdown.casper1123.nl/style/font-awesome.css?0.30055876332989606" />
+<link rel="stylesheet" href="//showdown.casper1123.nl/style/battle.css?0.4688435770725825" />
+<link rel="stylesheet" href="//showdown.casper1123.nl/style/utilichart.css?0.6779218434732706" />
 
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-26211653-1"></script>
@@ -249,25 +249,25 @@ https://replay.pokemonshowdown.com/gen7randomdoublesbattle-865046831.log
 <script defer nomodule src="//showdown.casper1123.nl/js/lib/ps-polyfill.js"></script>
 <script defer src="//showdown.casper1123.nl/js/lib/preact.min.js"></script>
 
-<script defer src="//showdown.casper1123.nl/config/config.js?11e4ce40"></script>
+<script defer src="//showdown.casper1123.nl/config/config.js?4f2f5054"></script>
 <script defer src="//showdown.casper1123.nl/js/lib/jquery-1.11.0.min.js"></script>
 <script defer src="//showdown.casper1123.nl/js/lib/html-sanitizer-minified.js"></script>
 <script defer src="//showdown.casper1123.nl/js/battle-sound.js"></script>
-<script defer src="//showdown.casper1123.nl/js/battledata.js?0.01748904987523603"></script>
-<script defer src="//showdown.casper1123.nl/data/pokedex-mini.js?0.42192824296362863"></script>
-<script defer src="//showdown.casper1123.nl/data/pokedex-mini-bw.js?0.7415003579437165"></script>
-<script defer src="//showdown.casper1123.nl/data/graphics.js?0.7832057593947048"></script>
-<script defer src="//showdown.casper1123.nl/data/pokedex.js?0.7588957208574556"></script>
-<script defer src="//showdown.casper1123.nl/data/moves.js?0.05672610004567957"></script>
-<script defer src="//showdown.casper1123.nl/data/abilities.js?0.2904301316496005"></script>
-<script defer src="//showdown.casper1123.nl/data/items.js?0.7914522356595937"></script>
-<script defer src="//showdown.casper1123.nl/data/teambuilder-tables.js?0.4471909938118275"></script>
-<script defer src="//showdown.casper1123.nl/js/battle-tooltips.js?0.4863700589146809"></script>
-<script defer src="//showdown.casper1123.nl/js/battle.js?0.8944352762775256"></script>
+<script defer src="//showdown.casper1123.nl/js/battledata.js?0.5751467580128231"></script>
+<script defer src="//showdown.casper1123.nl/data/pokedex-mini.js?0.4030023183133604"></script>
+<script defer src="//showdown.casper1123.nl/data/pokedex-mini-bw.js?0.11760674885040823"></script>
+<script defer src="//showdown.casper1123.nl/data/graphics.js?0.18217150474566113"></script>
+<script defer src="//showdown.casper1123.nl/data/pokedex.js?0.1528265586349491"></script>
+<script defer src="//showdown.casper1123.nl/data/moves.js?0.5345708734326515"></script>
+<script defer src="//showdown.casper1123.nl/data/abilities.js?0.31925356317658116"></script>
+<script defer src="//showdown.casper1123.nl/data/items.js?0.21581005228658157"></script>
+<script defer src="//showdown.casper1123.nl/data/teambuilder-tables.js?0.2861254437493499"></script>
+<script defer src="//showdown.casper1123.nl/js/battle-tooltips.js?0.08695631113764257"></script>
+<script defer src="//showdown.casper1123.nl/js/battle.js?0.6653659293224681"></script>
 
-<script defer src="/js/utils.js?0.007409405717818673"></script>
-<script defer src="/js/replays-battle.js?0.4676017252075815"></script>
-<script defer src="/js/replays-index.js?0.4026441654471071"></script>
+<script defer src="/js/utils.js?0.7173568064813696"></script>
+<script defer src="/js/replays-battle.js?0.27818374092541087"></script>
+<script defer src="/js/replays-index.js?0.33855064502955434"></script>
 
 <?php
 
@@ -294,4 +294,4 @@ if ($replay) {
 
 ?>
 
-<script defer src="/js/replays.js?0.12848939758925693"></script>
+<script defer src="/js/replays.js?0.8104358757354688"></script>

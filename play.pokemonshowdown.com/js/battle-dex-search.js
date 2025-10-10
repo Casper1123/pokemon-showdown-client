@@ -594,6 +594,7 @@ BattleTypedSearch=function(){
 
 
 function BattleTypedSearch(searchType){var format=arguments.length>1&&arguments[1]!==undefined?arguments[1]:'';var speciesOrSet=arguments.length>2&&arguments[2]!==undefined?arguments[2]:'';this.searchType=void 0;this.dex=Dex;this.format='';this.species='';this.set=null;this.formatType=null;this.isDoubles=false;this.baseResults=null;this.baseIllegalResults=null;this.illegalReasons=null;this.results=null;this.sortRow=null;
+console.debug("Setting dex for type "+searchType+" and format "+format);
 this.searchType=searchType;
 
 this.baseResults=null;
@@ -677,17 +678,11 @@ if(format.includes('letsgo')){
 this.formatType='letsgo';
 this.dex=Dex.mod('gen7letsgo');
 }
-if(format.includes('nationaldex')||format.startsWith('nd')||format.includes('natdex')){
+if((format.includes('nationaldex')||format.startsWith('nd')||format.includes('natdex'))&&
+!(format.includes('nationaldexcustom')||format.startsWith('ndc')||format.includes('natdexcustom'))){
 format=format.startsWith('nd')?format.slice(2):
 format.includes('natdex')?format.slice(6):format.slice(11);
 this.formatType='natdex';
-if(!format)format='ou';
-this.isDoubles=format.includes('doubles');
-}
-if(format.includes('nationaldexcustom')||format.startsWith('ndc')||format.includes('natdexcustom')){
-format=format.startsWith('ndc')?format.slice(3):
-format.includes('natdexcustom')?format.slice(12):format.slice(17);
-this.formatType='natdexcustom';
 if(!format)format='ou';
 this.isDoubles=format.includes('doubles');
 }
@@ -711,6 +706,18 @@ format='lc';
 if(format.endsWith('draft')){
 format=format.slice(0,-5);
 if(!format)format='anythinggoes';
+}
+if(format.includes('nationaldexcustom')||format.startsWith('ndc')||format.includes('natdexcustom')){
+console.debug("Constructor taken natdexcustom branch");
+format=format.startsWith('ndc')?format.slice(3):
+format.includes('natdexcustom')?format.slice(12):format.slice(17);
+this.formatType='natdexcustom';
+if(!format)format='uber';
+this.isDoubles=format.includes('doubles');
+var dexmod="gen"+this.dex.gen+"natdexcustom";
+if(this.isDoubles)dexmod+='doubles';
+this.dex=Dex.mod(dexmod);
+console.debug("Constructor dex set to Dex.mod("+dexmod+")");
 }
 this.format=format;
 
@@ -807,7 +814,7 @@ if((_this$formatType=this.formatType)!=null&&_this$formatType.startsWith('bdsp')
 if(this.formatType==='letsgo')table=table['gen7letsgo'];
 if(this.formatType==='bw1')table=table['gen5bw1'];
 if(this.formatType==='rs')table=table['gen3rs'];
-if(this.formatType==='natdexcustom')table=table["gen"+this.dex.gen+"natdexcustom"];
+if(this.formatType==='natdexcustom')table=table["gen"+this.dex.gen+"natdexcustom"+(this.isDoubles?'doubles':'')];
 if(speciesid in table.learnsets)return speciesid;
 var species=this.dex.species.get(speciesid);
 if(!species.exists)return'';
@@ -878,7 +885,7 @@ if((_this$formatType2=this.formatType)!=null&&_this$formatType2.startsWith('bdsp
 if(this.formatType==='letsgo')table=table['gen7letsgo'];
 if(this.formatType==='bw1')table=table['gen5bw1'];
 if(this.formatType==='rs')table=table['gen3rs'];
-if(this.formatType==='natdexcustom')table=table["gen"+gen+"natdexcustom"];
+if(this.formatType==='natdexcustom')table=table["gen"+this.dex.gen+"natdexcustom"+(this.isDoubles?'doubles':'')];
 var learnset=table.learnsets[learnsetid];
 var eggMovesOnly=this.eggMovesOnly(learnsetid,speciesid);
 if(learnset&&moveid in learnset&&(!this.format.startsWith('tradebacks')?learnset[moveid].includes(genChar):
@@ -899,7 +906,8 @@ var table=window.BattleTeambuilderTable;
 
 var gen=this.dex.gen;
 var tableKey=this.formatType==='doubles'?"gen"+gen+"doubles":
-this.formatType==='natdexcustom'?"gen"+gen+"natdexcustom":
+this.formatType==='natdexcustom'&&!this.isDoubles?"gen"+gen+"natdexcustom":
+this.formatType==='natdexcustom'&&this.isDoubles?"gen"+gen+"natdexcustomdoubles":
 this.formatType==='letsgo'?'gen7letsgo':
 this.formatType==='bdsp'?'gen8bdsp':
 this.formatType==='bdspdoubles'?'gen8bdspdoubles':
@@ -1046,7 +1054,8 @@ table=table['gen3rs'];
 }else if(this.formatType==='natdex'){
 table=table["gen"+dex.gen+"natdex"];
 }else if(this.formatType==='natdexcustom'){
-table=table["gen"+dex.gen+"natdexcustom"];
+table=table["gen"+dex.gen+"natdexcustom"+(this.isDoubles?'doubles':'')];
+console.debug("Pokemon Search table set to gen"+dex.gen+"natdexcustom"+(this.isDoubles?'doubles':''));
 }else if(this.formatType==='metronome'){
 table=table["gen"+dex.gen+"metronome"];
 }else if(this.formatType==='nfe'){
@@ -1080,7 +1089,6 @@ table=table["gen"+dex.gen+"stadium"+(dex.gen>1?dex.gen:'')];
 }
 
 if(!table.tierSet){
-console.debug("Constructing Tierset");
 table.tierSet=table.tiers.map(function(r){
 if(typeof r==='string')return['pokemon',r];
 return[r[0],r[1]];
@@ -1089,7 +1097,10 @@ table.tiers=null;
 }
 var tierSet=table.tierSet;
 var slices=table.formatSlices;
-if(format==='ubers'||format==='uber'||format==='ubersuu'||format==='nationaldexdoubles'){
+if(this.formatType==='natdexcustom'){
+if(!this.isDoubles)tierSet=tierSet.slice(slices["MOD Uber"]);else
+tierSet=tierSet.slice(slices["DMOD"]);
+}else if(format==='ubers'||format==='uber'||format==='ubersuu'||format==='nationaldexdoubles'){
 tierSet=tierSet.slice(slices.Uber);
 }else if(isVGCOrBS||isHackmons&&dex.gen===9&&!this.formatType){var _this$formatType9;
 if(format.endsWith('series13')||format.endsWith('regj')||isHackmons){
@@ -1146,6 +1157,12 @@ if((_this$formatType0=this.formatType)!=null&&_this$formatType0.startsWith('bdsp
 tierSet=tierSet.slice(slices.Uber);
 }else if(this.formatType==='rs'){
 tierSet=tierSet.slice(slices.Regular);
+}else if(this.formatType==='natdexcustom'){
+if(isDoublesOrBS){
+tierSet=tierSet.slice(slices['DMOD Uber']||slices.Uber);
+}else{
+tierSet=tierSet.slice(slices['MOD Uber']||slices.Uber);
+}
 }else if(!isDoublesOrBS){
 tierSet=[].concat(
 tierSet.slice(slices.OU,slices.UU),
@@ -1369,7 +1386,7 @@ table=table['gen3rs'];
 }else if(this.formatType==='natdex'){
 table=table["gen"+this.dex.gen+"natdex"];
 }else if(this.formatType==='natdexcustom'){
-table=table["gen"+this.dex.gen+"natdexcustom"];
+table=table["gen"+this.dex.gen+"natdexcustom"+(this.isDoubles?'doubles':'')];
 }else if((_this$formatType10=this.formatType)!=null&&_this$formatType10.endsWith('doubles')){
 table=table["gen"+this.dex.gen+"doubles"];
 }else if(this.formatType==='metronome'){
@@ -1519,7 +1536,7 @@ if(id==='metronome')return true;
 }
 
 if(this.formatType==='natdexcustom'){
-var table=BattleTeambuilderTable["gen"+dex.gen+"natdexcustom"];
+var table=BattleTeambuilderTable["gen"+dex.gen+"natdexcustom"+(this.isDoubles?'doubles':'')];
 if(table&&table.overrideMoveData&&table.overrideMoveData[id]){
 return true;
 }
@@ -1751,20 +1768,23 @@ var isSTABmons=format.includes('stabmons')||format==='staaabmons';
 var isTradebacks=format.includes('tradebacks');
 var regionBornLegality=dex.gen>=6&&(
 /^battle(spot|stadium|festival)/.test(format)||format.startsWith('bss')||
-format.startsWith('vgc')||dex.gen===9&&this.formatType!=='natdex');
+format.startsWith('vgc')||dex.gen===9&&this.formatType!=='natdex'&&this.formatType!=='natdexcustom');
 
 var learnsetid=this.firstLearnsetid(species.id);
 var moves=[];
 var sketchMoves=[];
 var sketch=false;
 var gen=""+dex.gen;
-
+console.debug('Selecting lsetTable');
 var lsetTable=BattleTeambuilderTable;
 if((_this$formatType12=this.formatType)!=null&&_this$formatType12.startsWith('bdsp'))lsetTable=lsetTable['gen8bdsp'];
 if(this.formatType==='letsgo')lsetTable=lsetTable['gen7letsgo'];
 if(this.formatType==='bw1')lsetTable=lsetTable['gen5bw1'];
 if(this.formatType==='rs')lsetTable=lsetTable['gen3rs'];
-if(this.formatType==='natdexcustom')lsetTable=lsetTable["gen"+gen+"natdexcustom"];
+if(this.formatType==='natdexcustom'){
+lsetTable=lsetTable["gen"+gen+"natdexcustom"+(this.isDoubles?'doubles':'')];
+console.debug('Set lsetTable of move search to natdexcustom, doubles',this.isDoubles);
+}
 if((_this$formatType13=this.formatType)!=null&&_this$formatType13.startsWith('ssdlc1'))lsetTable=lsetTable['gen8dlc1'];
 if((_this$formatType14=this.formatType)!=null&&_this$formatType14.startsWith('predlc'))lsetTable=lsetTable['gen9predlc'];
 if((_this$formatType15=this.formatType)!=null&&_this$formatType15.startsWith('svdlc1'))lsetTable=lsetTable['gen9dlc1'];
