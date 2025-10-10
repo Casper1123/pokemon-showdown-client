@@ -35,7 +35,8 @@ import {
 } from "./battle-dex-data";
 import type {Teams} from "./battle-teams";
 import {Config, PS} from "./client-main";
-import {DexSearch, type SearchType} from "./battle-dex-search";
+
+import {DexSearch, type SearchType} from "./battle-dex-search"; // Redundant
 
 export declare namespace Dex {
 	/* eslint-disable @typescript-eslint/no-shadow */
@@ -769,7 +770,8 @@ export const Dex = new class implements ModdedDex {
 		return parseInt(formatid.charAt(3)) || Dex.gen;
 	}
 	forFormat(format: string) {
-
+		// Note: old modloader content. Keeping here as a sample location for editing &
+		// 	reminders on how you can make things work too.
 		// Inject custom format. I really hope this works ;-;
 		// const formatId = toID(format).slice(4);
 		// if (window.FormatModMapping && window.FormatModMapping[formatId]) {
@@ -778,8 +780,8 @@ export const Dex = new class implements ModdedDex {
 		// }
 
 		let dex = Dex.forGen(Dex.formatGen(format));
-
 		const formatid = toID(format).slice(4);
+
 		if (dex.gen === 7 && formatid.includes('letsgo')) {
 			dex = Dex.mod('gen7letsgo' as ID);
 		}
