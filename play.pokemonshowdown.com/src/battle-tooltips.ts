@@ -2016,8 +2016,8 @@ export class BattleTooltips {
 				value.modify(1.2, 'Snowscape Ice boost');
 			}
 		}
-		if (move.id === 'desertsong') {
-			value.weatherModify(1.5, 'The Song reverberates along the Sand');
+		if (move.id === 'desertsong' && this.battle.weather === 'sandstorm') {
+			value.modify(1.5, 'The Song reverberates along the Sand');
 		}
 		if (move.id === 'hydrosteam') {
 			value.weatherModify(1.5, 'Sunny Day');
