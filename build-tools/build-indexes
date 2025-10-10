@@ -160,7 +160,7 @@ function requireNoCache(pathSpec) {
 		const name = Dex.data.Abilities[id].name;
 		generateAlias(id, name, 'ability');
 	}
-	
+
 	// hardcode ultra beasts
 	const ultraBeasts = {
 		ub01symbiont: "nihilego",
