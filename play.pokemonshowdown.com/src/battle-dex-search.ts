@@ -594,6 +594,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 	protected readonly sortRow: SearchRow | null = null;
 
 	constructor(searchType: T, format = '' as ID, speciesOrSet: ID | Dex.PokemonSet = '' as ID) {
+		console.debug(`Setting dex for type ${searchType} and format ${format}`);
 		this.searchType = searchType;
 
 		this.baseResults = null;
@@ -685,16 +686,6 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			if (!format) format = 'ou' as ID;
 			this.isDoubles = format.includes('doubles');
 		}
-		if (format.includes('nationaldexcustom') || format.startsWith('ndc') || format.includes('natdexcustom')) {
-			format = (format.startsWith('ndc') ? format.slice(3) :
-				format.includes('natdexcustom') ? format.slice(12) : format.slice(17)) as ID;
-			this.formatType = 'natdexcustom';
-			if (!format) format = 'uber' as ID;
-			this.isDoubles = format.includes('doubles');
-			let dexmod = `gen${this.dex.gen}natdexcustom`
-			if (this.isDoubles) dexmod += 'doubles';
-			this.dex = Dex.mod(dexmod as ID);
-		}
 		if (format.includes('doubles') && this.dex.gen > 4 && !this.formatType) {
 			this.formatType = 'doubles';
 			this.isDoubles = true;
@@ -715,6 +706,18 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (format.endsWith('draft')) {
 			format = format.slice(0, -5) as ID;
 			if (!format) format = 'anythinggoes' as ID;
+		}
+		if (format.includes('nationaldexcustom') || format.startsWith('ndc') || format.includes('natdexcustom')) {
+			console.debug(`Constructor taken natdexcustom branch`);
+			format = (format.startsWith('ndc') ? format.slice(3) :
+				format.includes('natdexcustom') ? format.slice(12) : format.slice(17)) as ID;
+			this.formatType = 'natdexcustom';
+			if (!format) format = 'uber' as ID;
+			this.isDoubles = format.includes('doubles');
+			let dexmod = `gen${this.dex.gen}natdexcustom`
+			if (this.isDoubles) dexmod += 'doubles';
+			this.dex = Dex.mod(dexmod as ID);
+			console.debug(`Constructor dex set to Dex.mod(${dexmod})`);
 		}
 		this.format = format;
 
@@ -1052,6 +1055,7 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			table = table[`gen${dex.gen}natdex`];
 		} else if (this.formatType === 'natdexcustom') {
 			table = table[`gen${dex.gen}natdexcustom` + ((this.isDoubles) ? 'doubles' : '')];
+			console.debug(`Pokemon Search table set to gen${dex.gen}natdexcustom${((this.isDoubles) ? 'doubles' : '')}`);
 		} else if (this.formatType === 'metronome') {
 			table = table[`gen${dex.gen}metronome`];
 		} else if (this.formatType === 'nfe') {
