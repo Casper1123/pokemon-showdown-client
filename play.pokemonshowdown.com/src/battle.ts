@@ -3790,6 +3790,7 @@ export class Battle {
 			// This stupid case keeps overwriting the client-side mod. Thanks.
 			// Setting the dex to the one we need instead of running forGen to avoid getting a non-modded mod.
 			this.gen = parseInt(args[1], 10);
+			console.debug('setting Battle dex for format', this.formatId);
 			this.dex = Dex.forFormat(this.formatId);
 			console.debug('set Battle dex to', this.dex.modid);
 			this.scene.updateGen();
