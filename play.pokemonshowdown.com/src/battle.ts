@@ -3790,21 +3790,8 @@ export class Battle {
 			// This stupid case keeps overwriting the client-side mod. Thanks.
 			// Setting the dex to the one we need instead of running forGen to avoid getting a non-modded mod.
 			this.gen = parseInt(args[1], 10);
-			console.debug('battle; case gen;', this.id, this.roomid);
-			if (this.id) {
-				const formatMatch = this.id.match(/^battle-([^-]+)/);
-				console.debug('formatMatch;', formatMatch);
-				if (formatMatch) {
-					this.dex = Dex.forFormat(formatMatch[1]);
-				} else {
-					console.debug(`forGen`);
-					this.dex = Dex.forGen(this.gen);
-				}
-			} else {
-				console.debug(`forGen`);
-				this.dex = Dex.forGen(this.gen);
-			}
-
+			this.dex = Dex.forFormat(this.formatId);
+			console.debug('set Battle dex to', this.dex.modid);
 			this.scene.updateGen();
 			this.log(args);
 			break;
