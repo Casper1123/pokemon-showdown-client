@@ -26,6 +26,16 @@ export class PSSearchResults extends preact.Component<{
 	moveIds: ID[] = [];
 	resultIndex = -1;
 
+	collapsedTiers: Set<string> = new Set();
+	toggleTier = (tierName: string) => {
+		if (this.collapsedTiers.has(tierName)) {
+			this.collapsedTiers.delete(tierName);
+		} else {
+			this.collapsedTiers.add(tierName);
+		}
+		this.forceUpdate();
+	};
+
 	renderPokemonSortRow() {
 		const search = this.props.search;
 		const sortCol = search.sortCol;
@@ -389,7 +399,20 @@ export class PSSearchResults extends preact.Component<{
 				<p dangerouslySetInnerHTML={{ __html: sanitizedHTML }}></p>
 			</li>;
 		case 'header':
-			return <li class="result"><h3>{id}</h3></li>;
+			const isFilterActive = this.props.search.filters && this.props.search.filters.length > 0;
+			if (isFilterActive) {
+				return <li class="result"><h3>{id}</h3></li>;
+			}
+
+			const isCollapsed = this.collapsedTiers.has(id);
+			return <li class="result">
+				<h3
+					style="cursor: pointer; user-select: none;"
+					onClick={() => this.toggleTier(id)}
+				>
+					<i class={`fa fa-chevron-${isCollapsed ? 'right' : 'down'}`} aria-hidden="true"></i> {id}
+				</h3>
+			</li>;
 		case 'sortpokemon':
 			return this.renderPokemonSortRow();
 		case 'sortmove':
@@ -498,6 +521,19 @@ export class PSSearchResults extends preact.Component<{
 		}
 
 		let results = search.results;
+
+		const isFilterActive = search.filters && search.filters.length > 0;
+		if (!isFilterActive && results) {
+			let currentTier: string | null = null;
+			results = results.filter(row => {
+				if (row[0] === 'header') {
+					currentTier = row[1];
+					return true;
+				}
+				return !(currentTier && this.collapsedTiers.has(currentTier));
+			});
+		}
+
 		if (this.props.windowing) results = results?.slice(0, this.props.windowing) || null;
 
 		return <ul
