@@ -3790,9 +3790,8 @@ export class Battle {
 			// This stupid case keeps overwriting the client-side mod. Thanks.
 			// Setting the dex to the one we need instead of running forGen to avoid getting a non-modded mod.
 			this.gen = parseInt(args[1], 10);
-			if (window.FormatModMapping && window.FormatModMapping[this.formatId] && this.formatId) {
-				const modId = window.FormatModMapping[this.formatId];
-				this.dex =  Dex.mod(modId);
+			if (this.roomid && toID(this.roomid).includes('natdexcustom')) {
+				this.dex = Dex.mod(`gen${this.gen}natdexcustom` as ID);
 			} else {
 				this.dex = Dex.forGen(this.gen);
 			}
