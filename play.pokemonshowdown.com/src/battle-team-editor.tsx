@@ -97,6 +97,7 @@ class TeamEditorState extends PSModel {
 			this.search.typedSearch.dex = this.dex;
 		}
 		window.search = this.search;
+		if (window.editor) window.editor.dex = this.dex;
 
 		// Injecting custom mods
 		// if (window.FormatModMapping && window.FormatModMapping[formatid]) {
