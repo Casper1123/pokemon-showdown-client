@@ -96,6 +96,7 @@ class TeamEditorState extends PSModel {
 		if (this.search.typedSearch) {
 			this.search.typedSearch.dex = this.dex;
 		}
+		window.editor = this
 		window.search = this.search;
 
 		// Injecting custom mods
