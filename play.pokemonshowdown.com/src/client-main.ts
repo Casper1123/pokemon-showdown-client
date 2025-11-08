@@ -2957,6 +2957,12 @@ export const OfficialAuth = new class {
 				token: encodeURIComponent(token as string), // Casting because token === null is excluded by Authorized.
 			})
 		})
+		const responseText = await response.text();
+		// if it starts with ] or { then it's not good. Then crash out.
+		if (responseText.startsWith(']') || responseText.startsWith('{')) {
+			this.clearTokenStorage();
+			this.authorize(user);
+		}
 		console.debug("Returning response text.");
 		return await response.text(); // This is our assertion!
 	}
