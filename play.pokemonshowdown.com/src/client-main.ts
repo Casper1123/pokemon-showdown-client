@@ -2964,7 +2964,7 @@ export const OfficialAuth = new class {
 			this.authorize(user);
 		}
 		console.debug("Returning response text.");
-		return await response.text(); // This is our assertion!
+		return await responseText; // This is our assertion!
 	}
 
 	async revoke() {
