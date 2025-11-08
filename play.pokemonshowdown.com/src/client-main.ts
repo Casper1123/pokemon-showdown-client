@@ -2960,8 +2960,7 @@ export const OfficialAuth = new class {
 		const responseText = await response.text();
 		// if it starts with ] or { then it's not good. Then crash out.
 		if (responseText.startsWith(']') || responseText.startsWith('{')) {
-			this.clearTokenStorage();
-			this.authorize(user);
+			return null;
 		}
 		console.debug("Returning response text.");
 		return await responseText; // This is our assertion!
