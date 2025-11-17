@@ -399,10 +399,10 @@ export class PSSearchResults extends preact.Component<{
 				<p dangerouslySetInnerHTML={{ __html: sanitizedHTML }}></p>
 			</li>;
 		case 'header':
-			const isFilterActive = this.props.search.filters && this.props.search.filters.length > 0;
-			if (isFilterActive) {
-				return <li class="result"><h3>{id}</h3></li>;
-			}
+			// const isFilterActive = this.props.search.filters && this.props.search.filters.length > 0;
+			// if (isFilterActive) {
+			//	return <li class="result"><h3>{id}</h3></li>;
+			// }
 
 			const isCollapsed = this.collapsedTiers.has(id);
 			return <li class="result">
