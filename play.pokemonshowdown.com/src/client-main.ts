@@ -2813,7 +2813,7 @@ export const OfficialAuth = new class {
 	}
 
 	/**
-	 * Refreshes the currently stored auth token in cookies.
+	 * Refreshes the currently stored auth token in local storage.
 	 * Returns false if no token was found, or it already expired.
 	 * True if operation succeeded.
 	 */
