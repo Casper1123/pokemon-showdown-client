@@ -1244,7 +1244,7 @@
 		},
 		rewindTurn: function () {
 			if (this.battle.turn) {
-				this.battle.seekBy(-1);
+				this.battle.seekTurn(this.battle.turn - 1);
 			}
 		},
 		goToEnd: function () {
