@@ -268,9 +268,11 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		const isDoubles = (genIdent < 0);
 		const isVGC = ('' + genIdent).endsWith('.5');
 		const genNum = Math.floor(isDoubles ? -genIdent : genIdent);
+		const isLegendsZA = genIdent === 9.33;
 		const gen = (() => {
 			let genStr = 'gen' + genNum;
 			if (isCustomNatdex) genStr += 'natdexcustom';
+			if (isLegendsZA) genStr += 'legendsou';
 			return genStr;
 		})();
 		// process.stdout.write("" + gen + (isDoubles ? " doubles" : "") + "... ");
@@ -396,6 +398,13 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			BattleTeambuilderTable[gen + 'doubles'].items = items;
 			BattleTeambuilderTable[gen + 'doubles'].overrideTier = overrideTier;
 			BattleTeambuilderTable[gen + 'doubles'].formatSlices = formatSlices;
+		} else if (isLegendsZA) {
+			BattleTeambuilderTable['gen9legendsou'] = {};
+			BattleTeambuilderTable['gen9legendsou'].tiers = tiers;
+			BattleTeambuilderTable['gen9legendsou'].overrideTier = overrideTier;
+			BattleTeambuilderTable['gen9legendsou'].formatSlices = formatSlices;
+			BattleTeambuilderTable['gen9legendsou'].items = items;
+			BattleTeambuilderTable['gen9legendsou'].learnsets = {};
 		} else if (gen === 'gen9') {
 			BattleTeambuilderTable.tiers = tiers;
 			BattleTeambuilderTable.items = items;
