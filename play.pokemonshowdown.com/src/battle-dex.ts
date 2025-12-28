@@ -18,25 +18,14 @@
  * @license MIT
  */
 
-import {Pokemon, type ServerPokemon} from "./battle";
-import type * as DexData from "./battle-dex-data";
+import { Pokemon, type ServerPokemon } from "./battle";
 import {
-	Ability,
-	BattleAvatarNumbers,
-	BattleBaseSpeciesChart,
-	BattlePokemonIconIndexes,
-	BattlePokemonIconIndexesLeft,
-	type ID,
-	Item,
-	Move,
-	PureEffect,
-	Species,
-	type Type,
+	BattleAvatarNumbers, BattleBaseSpeciesChart, BattlePokemonIconIndexes, BattlePokemonIconIndexesLeft,
+	Ability, Item, Move, Species, PureEffect, type ID, type Type,
 } from "./battle-dex-data";
-import type {Teams} from "./battle-teams";
-import {Config, PS} from "./client-main";
-
-import {DexSearch, type SearchType} from "./battle-dex-search"; // Redundant
+import type * as DexData from "./battle-dex-data";
+import type { Teams } from "./battle-teams";
+import { Config } from "./client-main";
 
 export declare namespace Dex {
 	/* eslint-disable @typescript-eslint/no-shadow */
@@ -243,14 +232,12 @@ export const Dex = new class implements ModdedDex {
 	resourcePrefix = (() => {
 		let prefix = '';
 		if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
-		//return `${prefix}//play.pokemonshowdown.com/`;
-		return `${prefix}//${Config.routes.client}/`;
+		return `${prefix}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/`;
 	})();
 
 	fxPrefix = (() => {
 		const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
-		return `${protocol}//${Config.routes.client}/fx/`;
-		// return `${protocol}//play.pokemonshowdown.com/fx/`;
+		return `${protocol}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/fx/`;
 	})();
 
 	loadedSpriteData = { xy: 1, bw: 0 };
@@ -264,498 +251,12 @@ export const Dex = new class implements ModdedDex {
 	 */
 	afdMode?: boolean | 'sprites';
 
-	/**
-	 * Takes in an input array for a moveset change and converts it to a string used internally.
-	 */
-	convertLearnsetArrayToString(learnsetArray: string[] | any): string | any {
-		if (!Array.isArray(learnsetArray)) {
-			return learnsetArray;
-		}
-
-		const generations = new Set();
-		const versionChars = new Set();
-
-		for (const moveSource of learnsetArray) {
-			// Extract generation number (first character)
-			const gen = parseInt(moveSource.charAt(0));
-			if (gen >= 1 && gen <= 9) {  // todo: test and maintain properly. I hate this piece of code.
-				generations.add(gen);
-
-				if (gen === 6) versionChars.add('p');
-				else if (gen === 7 && !moveSource.includes('V')) versionChars.add('q');
-				else if (gen === 8 && !moveSource.includes('V')) versionChars.add('g');
-				else if (gen === 9 && !moveSource.includes('V')) versionChars.add('a');
-
-				// Handle egg moves for Gen 9 (following build-tools logic)
-				if (gen === 9 && moveSource.includes('E')) versionChars.add('e');
-			}
-		}
-
-		// Convert to sorted string format
-		const genString = Array.from(generations).sort().join('');
-		const versionString = Array.from(versionChars).join('');
-
-		return genString + versionString;
-	}
-
-	/**
-	 * Load mod data recursively based on parent mod.
-	 */
-	loadModData(modId: ID, depth = 0) {
-		if (depth > 10) throw new Error('Max mod inheritance depth exceeded. Potential cyclicality may be in effect.'); // todo: move magic number to config.
-		if (window.BattleTeambuilderTable[modId]) return; // Already loaded
-
-		if (!window.AvailableCustomMods.includes(modId)) {
-			throw new Error(`Attempt at loading mod that is not available from server: (${modId} not in [${window.AvailableCustomMods}])`);
-		}
-
-		try {
-			const xhr = new XMLHttpRequest();
-			const serverUrl = `https://${PS.server.host}`;
-			console.log(`Attempting to fetch moddata for ${modId} from ${serverUrl}`)
-			xhr.open('GET', `${serverUrl}/data/moddata?mod=${modId}`, false); // false = synchronous. Intentional.
-			xhr.send();
-
-			if (xhr.status !== 200) {
-				throw new Error(`HTTP ${xhr.status}: ${xhr.statusText}`);
-			}
-
-			let modData;
-			try {
-				modData = JSON.parse(xhr.responseText);
-			} catch (e) {
-				throw new Error(`Invalid JSON for mod ${modId}: ${e}`);
-			}
-
-			if (!modData || typeof modData !== 'object') {
-				throw new Error(`Invalid mod data structure for ${modId}`);
-			}
-
-			console.log(`Integrating data for mod ${modId}`);
-			this.integrateModData(modId, modData, depth);
-
-		} catch (error) {
-			console.error(`Failed to load mod data for ${modId}:`, error);
-			throw error;
-		}
-	}
-
-	private insert(index: number, entry: [ID, SearchType, number?, number?]): void {
-		window.BattleSearchIndex.splice(index, 0, entry);
-	}
-	private attemptInsertObject(id: any, objectType: SearchType): void {
-		try{
-			let ID = toID(id);
-			const closestIndex = DexSearch.getClosest(ID);
-			const indexEntry = window.BattleSearchIndex[closestIndex][0];
-			if (indexEntry === ID) { return; } // object id is already our custom index. Skipping.
-			console.debug("Registering new Search Index entry for", ID, "of type", objectType)
-			const ordering = (indexEntry < ID) ? 1 : 0 // < because cannot be =
-			this.insert(closestIndex + ordering, [ID, objectType]);
-		} catch (e) { console.error("Error when inserting into object:", e); throw e; }
-
-	}
-	/**
-	 * Integrates fetched mod data to be applied to modId's mod.
-	 * @param modId The ID of the mod to integrade this data into.
-	 * @param modData The data fetched from server to integrate this data into.
-	 * @param depth Current recursion depth for being able to load into parentMods.
-	 */
-	integrateModData(modId: ID, modData: any, depth: number) {
-		// Recursively load parent if specified. Skips if it's the base gen; this is handled below.
-		console.debug(`Mod: ${modId} has parent ${modData.parentMod}.`);
-
-		if (modData.parentMod && modData.parentMod !== `gen${Dex.gen}`) {
-			console.debug(`Preparing parent data of mod ${modData.parentMod} for ${modId}`);
-			this.loadModData(modData.parentMod, depth + 1);
-			// Inherit parent data
-			const parentData = window.BattleTeambuilderTable[modData.parentMod];
-			window.BattleTeambuilderTable[modId] = JSON.parse(JSON.stringify(parentData));
-		// Create a copy of the base gen.
-		} else if (modData.parentMod === `gen${Dex.gen}`) {
-			console.debug(`Loading base gen (gen${Dex.gen}) into ${modId} as it's parent.`)
-			const baseProps = [
-				'tiers', 'items', 'overrideTier', 'ubersUUBans', 'monotypeBans',
-				'formatSlices', 'learnsets', 'overrideSpeciesData', 'overrideMoveData',
-				'overrideAbilityData', 'overrideItemData', 'overrideTypeChart', 'removeType',
-			];
-
-			const parentData: { [prop: string] : any} = {};
-			for (const prop of baseProps) {
-				if (window.BattleTeambuilderTable[prop] !== undefined) {
-					parentData[prop] = window.BattleTeambuilderTable[prop];
-				}
-				else {
-					// Horrible, brute-ish solution.
-					if (prop === 'learnsets') {
-						parentData[prop] = window.BattleTeambuilderTable.learnsets || {};
-					} else if (['tiers', 'items'].includes(prop)) {
-						parentData[prop] = [];
-					} else {
-						parentData[prop] = {};
-					}
-				}
-			}
-			window.BattleTeambuilderTable[modId] = JSON.parse(JSON.stringify(parentData));
-		} else {
-			// No parent, initialize empty structure
-			console.debug(`Mod ${modId} has no parent, initializing empty table.`)
-			window.BattleTeambuilderTable[modId] = {
-				overrideSpeciesData: {},
-				overrideMoveData: {},
-				overrideAbilityData: {},
-				overrideItemData: {},
-				learnsets: {},
-				overrideTier: {},
-				overrideTypeChart: {},
-				conditionsData: {}
-			};
-		}
-		const table = window.BattleTeambuilderTable[modId];
-
-		// Note: This repeated code segment is here by intention as it allows us to easily modify specific behaviour for each response format output we expect.
-		// Merge pokedex entries
-		console.debug(`Merging pokedex entries.`);
-		if (!table.overrideSpeciesData) {
-			console.warn("No preset override data table for", "Species");
-			table.overrideSpeciesData = {};
-		}
-		for (const mon in modData.pokedex) {
-			const monData = modData.pokedex[mon];
-			if (!monData.inherit) {
-				window.BattleTeambuilderTable[modId].overrideSpeciesData[mon] = monData;
-				this.attemptInsertObject(mon, 'pokemon');
-				continue;
-			}
-			if (!window.BattleTeambuilderTable[modId].overrideSpeciesData[mon]) {
-				window.BattleTeambuilderTable[modId].overrideSpeciesData[mon] = {};
-			}
-			for (const attribute in monData) {
-				if (attribute !== 'inherit') {
-					window.BattleTeambuilderTable[modId].overrideSpeciesData[mon][attribute] = monData[attribute];
-				}
-			}
-		}
-
-		// Merge ability entries
-		console.debug(`Merging ability entries.`);
-		if (!table.overrideAbilityData) {
-			console.warn("No preset override data table for", "Ability");
-			table.overrideAbilityData = {};
-		}
-		for (const ability in modData.abilities) {
-			const abilityData = modData.abilities[ability];
-			if (!abilityData.inherit) {
-				table.overrideAbilityData[ability] = abilityData;
-				this.attemptInsertObject(ability, 'ability');
-				continue;
-			}
-			if (!table.overrideAbilityData[ability]) {
-				table.overrideAbilityData[ability] = {};
-			}
-			for (const attribute in abilityData) {
-				table.overrideAbilityData[ability][attribute] = abilityData[attribute];
-				if (attribute !== 'inherit') { } // Keeping this here in case it's required.
-			}
-		}
-
-		// Merge move entries
-		console.debug(`Merging move entries.`);
-		if (!table.overrideMoveData) {
-			console.warn("No preset override data table for", "Move");
-			table.overrideMoveData = {};
-		}
-		for (const move in modData.moves) {
-			const moveData = modData.moves[move];
-			if (!moveData.inherit) {
-				table.overrideMoveData[move] = moveData;
-				this.attemptInsertObject(move, 'move');
-				continue;
-			}
-			if (!table.overrideMoveData[move]) {
-				table.overrideMoveData[move] = {};
-			}
-			for (const attribute in moveData) {
-				if (['condition'].includes(attribute) && table.overrideMoveData[move][attribute]) {
-					const deeperData = moveData[attribute];
-					for (const deepAttribute in deeperData) {
-						table.overrideMoveData[move][attribute][deepAttribute] = deeperData[deepAttribute];
-					}
-					continue;
-				}
-				table.overrideMoveData[move][attribute] = moveData[attribute];
-			}
-		}
-
-		// Merge items entries
-		console.debug(`Merging item entries.`);
-		if (!table.overrideItemData) {
-			console.warn("No preset override data table for", "Item");
-			table.overrideItemData = {};
-		}
-		for (const item in modData.items) {
-			const itemData = modData.items[item];
-			if (!itemData.inherit) {
-				table.overrideItemData[item] = itemData;
-				this.attemptInsertObject(item, 'item');
-				continue;
-			}
-			if (!table.overrideItemData[item]) {
-				table.overrideItemData[item] = {};
-			}
-			for (const attribute in itemData) {
-				if (attribute !== 'inherit') {
-					table.overrideItemData[item][attribute] = itemData[attribute];
-				}
-			}
-		}
-
-		// Merge learnset entries
-		// Todo: remove being able to learn a move by passing in an empty learnset array.
-		console.debug(`Merging learnset entries.`);
-		if (!table.learnsets) {
-			console.warn("No preset override data table for", "Learnsets");
-			table.learnsets = {};
-		}
-		for (const mon in modData.learnsets) {
-			const monLearnsetData = modData.learnsets[mon];
-			if (!table.learnsets[mon]) {
-				table.learnsets[mon] = {};
-			}
-			for (const move in monLearnsetData) {
-				// Set availability of moves here. Inherit is not applied as changes to base are assumed.
-				// Have to have their type converted first.
-				table.learnsets[mon][move] = this.convertLearnsetArrayToString(monLearnsetData[move]);
-			}
-		}
-
-		// Merge type chart changes.
-		console.debug("Merging typechart entries.");
-		if (!table.overrideTypeChart) {
-			table.overrideTypeChart = {};
-		}
-		// if (!table.removeType) {table.removeType = {};} // Not currently supported, but might be in the future.
-
-		// From server:
-		// 1 = super effective
-		// 0 = neutral
-		// 2 = not effective
-		// 3 = immune
-		const transform = {
-			1: 2,
-			0: 1,
-			2: 0.5,
-			3: 0,
-		}
-		for (const typeId in modData.typechart) {
-			const typeData = modData.typechart[typeId];
-			table.overrideTypeChart[typeId] = {};
-			for (const resistKey in typeData) {
-				if (resistKey === 'inherit') {
-					table.overrideTypeChart[typeId]['inherit'] = typeData[resistKey];
-					continue;
-				}
-				try {
-					// @ts-ignore If it crashes, it crashes. This should be the incoming from the server.
-					table.overrideTypeChart[typeId][resistKey] = transform[typeData[resistKey] as number];
-				} catch (e) {
-					console.error("Error integrating type chart overrides. Setting value to 1 for", resistKey);
-					table.overrideTypeChart[typeId][resistKey] = 1;
-				}
-			}
-		}
-
-		// Add custom duration information.
-		// Note: Should contain duration data on field effects only (so far). Might be changed later.
-		console.debug(`Merging conditionsdata.`);
-		if (!table.conditionsData) {
-			table.conditionsData = {}
-		}
-		for (const conditionId in modData.conditionsData) {
-			table.conditionsData[conditionId] = modData.conditionsData[conditionId];
-		}
-		console.debug(`Conditionsdata integrated:`, table.conditionsData);
-
-
-		// Merge formats data
-		console.debug(`Merging formatdata entries.`);
-		if (modData.formatsData) {
-			if (!table.overrideTier) {
-				table.overrideTier = {};
-			}
-
-			const monTiers: { [ tier: string ]: string } = {};
-			const defaultTierOrder = ["CAP", "CAP NFE", "CAP LC", "AG", "Uber", "(Uber)", "OU", "(OU)", "UUBL",
-				"UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased", "Illegal"]
-			const customTiers: string[] = []; // NOTE: WILL APPEAR IN ORDER ENCOUNTERED IN.
-			// Back up existing data before altering. flipping structure here;
-			let currentTier = ""
-			console.debug("backing up exising tiering data");
-			for (const entry of table.tiers) {
-				if (entry[0] === 'header') {
-					currentTier = entry[1];
-					if (currentTier.endsWith('s not in a higher tier')) { currentTier = currentTier.replace('s not in a higher tier', ''); }
-					console.debug("\tset current tier", currentTier);
-					if (!defaultTierOrder.includes(currentTier) && !customTiers.includes(currentTier)) {
-						customTiers.push(currentTier);
-						console.debug("\tpushed", currentTier, "to custom tiers");
-					}
-				} else if (currentTier !== 'header' && currentTier === '') {
-					console.error('Error backing up tiering data; no format header found.', entry, table.tiers);
-					throw new Error('Error backing up tiering data');
-				} else {
-					monTiers[entry] = currentTier; // In this case, entry is a species id.
-				}
-			}
-
-			console.debug("merging modData into table.")
-			for (const speciesId in modData.formatsData) {
-				const formatData = modData.formatsData[speciesId];
-				if (!formatData.tier) {
-					continue;
-				}
-				const tier = formatData.tier;
-				table.overrideTier[speciesId] = tier;
-				monTiers[speciesId] = tier;
-				if (!defaultTierOrder.includes(tier) && !customTiers.includes(tier)) {
-					customTiers.push(tier);
-					console.debug("\tpushed", tier, "to custom tiers");
-				}
-			}
-			const tierGroups: { [ tier: string] : string[] } = {};
-
-			console.debug("Pre-creating tierGroups");
-			for (const tierGroup of [...customTiers, ...defaultTierOrder]) {
-				if (!tierGroups[tierGroup]) {
-					tierGroups[tierGroup] = [];
-					console.debug("\tcreated tierGroup for", tierGroup);
-				}
-			}
-			console.debug("going through known data.");
-			for (const species in monTiers) {
-				const speciesTier = monTiers[species];
-				try{
-					tierGroups[speciesTier].push(species);
-				} catch (e) {
-					console.error(e, species, speciesTier, tierGroups);
-					break;
-				}
-
-			}
-			console.debug("Sorting tierGroups");
-			for (const tierGroup in tierGroups) {
-				tierGroups[tierGroup].sort();
-			}
-			console.debug("Prepared tiering information with custom tiers:", customTiers, "and tierGroups:", tierGroups);
-
-			const newTiers = [];
-			for (const tier of [...customTiers, ...defaultTierOrder]) {
-				if (tierGroups[tier] && tierGroups[tier].length > 0 && tier.toLowerCase() !== 'illegal') {
-					let baseTier = tier;
-					const byTechnicality = baseTier.startsWith('(') && baseTier.endsWith(')');
-					if (byTechnicality) {
-						baseTier = baseTier.substring(1, -1);
-					}
-					const NFE = baseTier.endsWith('NFE');
-					if (NFE) {
-						baseTier = baseTier + " not in a higher tier";
-					}
-					if (byTechnicality) {
-						baseTier = baseTier + " by technicality";
-					}
-					console.debug("\tpushing basetier, tier", baseTier, tier);
-					newTiers.push(['header', baseTier]);
-					newTiers.push(...tierGroups[tier]);
-				} else { console.debug("Skipping push for", tier, "(it is empty or Illegal)"); }
-			}
-			console.debug("Created new table tiers", table.tiers);
-
-			table.tiers = newTiers;
-			table.tierSet = null;
-		}
-
-
-		// todo: implement custom types and whatnot.
-		console.debug(`Implemented overrides from server on mod ${modId} with ${Object.keys(window.BattleTeambuilderTable[modId].overrideSpeciesData).length} species & ${Object.keys(window.BattleTeambuilderTable[modId].learnsets).length} learnsets.`);
-	}
-
-	/**
-	 * Function to initialise custom mods fetched from the configurated server.
-	 * Assumes to be ran after BattleTeambuilderTable is loaded.
-	 * Will always fetch from server if it's an available mod from the server.
-	 */
-	initializeCustomMods(): void {
-		try {
-			console.log('Initializing custom-mods. Requires connection to server with the right endpoint infrastructure.');
-
-			const serverUrl = `https://${PS.server.host}`;
-			const availableModsXhr = new XMLHttpRequest();
-			console.log(`Attempting to fetch availablemods from ${serverUrl}`)
-			availableModsXhr.open('GET', `${serverUrl}/data/availablemods`, false); // false = synchronous
-			availableModsXhr.send();
-
-			if (availableModsXhr.status !== 200) {
-				throw new Error(`HTTP ${availableModsXhr.status}: ${availableModsXhr.statusText}`);
-			}
-
-			let availableMods: string[] = [];
-			try {
-				const availableModsData = JSON.parse(availableModsXhr.responseText);
-				if (Array.isArray(availableModsData)) {
-					availableMods = availableModsData.map(String);
-				} else {
-					console.warn('Unexpected availableMods structure');
-				}
-			} catch (e) {
-				throw new Error(`Invalid JSON for availableMods: ${e}`);
-			}
-			console.log(`Found ${availableMods.length} available mods`);
-
-			const formatModsXhr = new XMLHttpRequest();
-			console.log(`Attempting to fetch formatmods from ${serverUrl}`)
-			formatModsXhr.open('GET', `${serverUrl}/data/formatmods`, false); // false = synchronous
-			formatModsXhr.send();
-
-			if (formatModsXhr.status !== 200) {
-				throw new Error(`HTTP ${formatModsXhr.status}: ${formatModsXhr.statusText}`);
-			}
-
-			let formatMods: { [formatId: string]: string } = {};
-
-			try {
-				formatMods = JSON.parse(formatModsXhr.responseText);
-			} catch (e) {
-				throw new Error(`Invalid JSON for formatMods: ${e}`);
-			}
-			console.log(`Found ${Object.keys(formatMods).length} format mappings`);
-
-			window.FormatModMapping = formatMods;
-			window.AvailableCustomMods = availableMods;
-
-			// Load all mods synchronously
-			for (const modId of availableMods) {
-				this.loadModData(modId as ID);
-			}
-
-		} catch (error) {
-			console.warn('Failed to load custom mods:', error);
-		}
-	}
-
 	mod(modid: ID): ModdedDex {
 		if (modid === 'gen9') return this;
-		if (!window.BattleTeambuilderTable) {
-			console.error(`Loading mod ${modid} isn't in the battleteambuildertable`);
-			return this;
-		}
+		if (!window.BattleTeambuilderTable) return this;
 		if (modid in this.moddedDexes) {
 			return this.moddedDexes[modid];
 		}
-
-		// if (!window.BattleTeambuilderTable[modid]) {
-		// 	this.loadModData(modid);
-		// }
-
 		this.moddedDexes[modid] = new ModdedDex(modid);
 		return this.moddedDexes[modid];
 	}
@@ -770,18 +271,9 @@ export const Dex = new class implements ModdedDex {
 		return parseInt(formatid.charAt(3)) || Dex.gen;
 	}
 	forFormat(format: string) {
-		// Note: old modloader content. Keeping here as a sample location for editing &
-		// 	reminders on how you can make things work too.
-		// Inject custom format. I really hope this works ;-;
-		// const formatId = toID(format).slice(4);
-		// if (window.FormatModMapping && window.FormatModMapping[formatId]) {
-		// 	const modId = window.FormatModMapping[formatId];
-		// 	return Dex.mod(modId);
-		// }
-
 		let dex = Dex.forGen(Dex.formatGen(format));
-		const formatid = toID(format).slice(4);
 
+		const formatid = toID(format).slice(4);
 		if (dex.gen === 7 && formatid.includes('letsgo')) {
 			dex = Dex.mod('gen7letsgo' as ID);
 		}
@@ -792,6 +284,9 @@ export const Dex = new class implements ModdedDex {
 			dex = Dex.mod((`gen${dex.gen}natdexcustom` + (formatid.includes('doubles') ? 'doubles' : '')) as ID);
 		}
 
+		if (dex.gen === 9 && formatid.includes('legends')) {
+			dex = Dex.mod('gen9legendsou' as ID);
+		}
 		return dex;
 	}
 
@@ -1494,16 +989,6 @@ export class ModdedDex {
 				id = toID(name);
 			}
 			if (this.cache.Moves.hasOwnProperty(id)) return this.cache.Moves[id];
-
-			// Allows for the introduction of new Custom moves *per mod* keeping everything isolated.
-			if (window.AvailableCustomMods && window.AvailableCustomMods.includes(this.modid)) {
-				const table = window.BattleTeambuilderTable[this.modid];
-				if (table && table.moveData && table.moveData[id]) {
-					const move = new Move(id, name, table.moveData[id]);
-					this.cache.Moves[id] = move;
-					return move;
-				}
-			}
 
 			let data = { ...Dex.moves.get(name) };
 

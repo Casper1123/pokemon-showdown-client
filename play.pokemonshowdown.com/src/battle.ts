@@ -1123,7 +1123,6 @@ export class Battle {
 	id = '';
 	/** used to forward some information to the room in the old client */
 	roomid = '';
-	formatId: string = '';  // Used to maintain information about modded rooms.
 	hardcoreMode = false;
 	ignoreNicks = !!Dex.prefs('ignorenicks');
 	ignoreOpponent = !!Dex.prefs('ignoreopp');
@@ -1143,7 +1142,6 @@ export class Battle {
 		$logFrame?: JQuery,
 		id?: ID,
 		log?: string[] | string | null,
-		formatId?: string | null,
 		paused?: boolean,
 		isReplay?: boolean,
 		debug?: boolean,
@@ -1152,7 +1150,6 @@ export class Battle {
 		autoresize?: boolean,
 	} = {}) {
 		this.id = options.id || '';
-		this.formatId = options.formatId || '';
 
 		if (options.$frame && options.$logFrame) {
 			this.scene = new BattleScene(this, options.$frame, options.$logFrame);
@@ -3109,7 +3106,6 @@ export class Battle {
 			this.activateAbility(poke, fromeffect);
 			let minTimeLeft = 5;
 			let maxTimeLeft = 0;
-
 			if (effect.id.endsWith('terrain')) {
 				for (let i = this.pseudoWeather.length - 1; i >= 0; i--) {
 					let pwID = toID(this.pseudoWeather[i][0]);
@@ -3120,18 +3116,7 @@ export class Battle {
 				}
 				if (this.gen > 6) maxTimeLeft = 8;
 			}
-			// gen9natdexcustom overrides
-			if (this.dex.modid.includes('natdexcustom')) {
-				if (effect.id === 'trickroom' && !this.formatId.includes('doubles')) {
-					minTimeLeft = 6;
-					maxTimeLeft = 0;
-				}
-			}
 			if (kwArgs.persistent) minTimeLeft += 2;
-			if (['Chronal Distortion', 'Spacial Distortion', 'Absolute Distortion'].includes(effect.name)) {
-				minTimeLeft = 0;
-				maxTimeLeft = 0;
-			}
 			this.addPseudoWeather(effect.name, minTimeLeft, maxTimeLeft);
 
 			switch (effect.id) {
@@ -3172,40 +3157,7 @@ export class Battle {
 			this.scene.afterMove(poke);
 			break;
 		}
-		case '-hint':case '-candynamax': {
-			this.log(args, kwArgs);
-			break;
-		}
-		case '-message':{
-			// Find turn remainder for Spacial Distortion
-			if (this.formatId.includes('natdexcustom') && args[1]) {
-				const message = args[1];
-				let countdownMatch = message.match(/Space is winning its fight against the distortion \.\.\. \((\d+) turns?\)/);
-				if (!countdownMatch) {
-					countdownMatch = message.match(/Space turns the tides against the distortion \.\.\. \((\d+) turns?\)/);
-				}
-				if (countdownMatch) {
-					const turnsLeft = parseInt(countdownMatch[1]);
-					// Update the spacialdistortion pseudo-weather turn counter
-					for (const pWeather of this.pseudoWeather) {
-						if (pWeather[0] === 'Spacial Distortion') {
-							pWeather[1] = turnsLeft;
-							pWeather[2] = turnsLeft;
-							this.scene.updateWeather();
-							break;
-						}
-					}
-				} else if (message === 'Space crashes in on itself, fighting an endless struggle.') {
-					for (const pWeather of this.pseudoWeather) {
-						if (pWeather[0] === 'Spacial Distortion') {
-							pWeather[1] = 0;
-							pWeather[2] = 0;
-							this.scene.updateWeather();
-							break;
-						}
-					}
-				}
-			}
+		case '-hint': case '-message': case '-candynamax': {
 			this.log(args, kwArgs);
 			break;
 		}
@@ -3489,6 +3441,9 @@ export class Battle {
 			}
 			if (toID(this.tier).includes('nationaldexcustom') || toID(this.tier).includes('natdexcustom')) {
 				this.dex = Dex.mod(`gen${this.gen}natdexcustom` as ID)
+			}
+			if (this.tier.includes(`Legends`)) {
+				this.dex = Dex.mod('gen9legendsou' as ID);
 			}
 			this.log(args);
 			break;
@@ -3787,18 +3742,8 @@ export class Battle {
 			break;
 		}
 		case 'gen': {
-			// This stupid case keeps overwriting the client-side mod. Thanks.
-			// Setting the dex to the one we need instead of running forGen to avoid getting a non-modded mod.
 			this.gen = parseInt(args[1], 10);
-			if (this.formatId) {
-				console.debug('setting Battle dex for format', this.formatId);
-				this.dex = Dex.forFormat(this.formatId);
-				console.debug('set Battle dex to', this.dex.modid);
-			} else {
-				console.debug('set Battle dex to default gen', this.gen);
-				this.dex = Dex.forGen(this.gen);
-			}
-
+			this.dex = Dex.forGen(this.gen);
 			this.scene.updateGen();
 			this.log(args);
 			break;
