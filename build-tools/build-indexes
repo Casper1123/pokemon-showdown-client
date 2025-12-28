@@ -255,8 +255,8 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 
 	let buf = '// DO NOT EDIT - automatically built with build-tools/build-indexes\n\n';
 	const GENS = [9, 8];
-	const DOUBLES = GENS.filter(x => x > 2).map(num => -num);
-	const VGC = GENS.filter(x => x > 3).map(num => -num - 0.5);
+	const DOUBLES = [-9, -8];
+	const VGC = [-9.5, -8.5];
 	const NATDEX = [9.1, 8.1];
 	const CUSTOMNATDEX = [9.8, -9.8];
 	const OTHER = [9.33];
@@ -268,6 +268,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		const isDoubles = (genIdent < 0);
 		const isVGC = ('' + genIdent).endsWith('.5');
 		const genNum = Math.floor(isDoubles ? -genIdent : genIdent);
+		if (genNum < 8) console.log('geNnum', genNum, 'for genIdent', genIdent);
 		const isLegendsZA = genIdent === 9.33;
 		const gen = (() => {
 			let genStr = 'gen' + genNum;
