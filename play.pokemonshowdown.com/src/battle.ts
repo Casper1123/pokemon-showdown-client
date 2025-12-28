@@ -3121,7 +3121,7 @@ export class Battle {
 				if (this.gen > 6) maxTimeLeft = 8;
 			}
 			// gen9natdexcustom overrides
-			if (this.formatId.includes('natdexcustom')) {
+			if (this.dex.modid.includes('natdexcustom')) {
 				if (effect.id === 'trickroom' && !this.formatId.includes('doubles')) {
 					minTimeLeft = 6;
 					maxTimeLeft = 0;
