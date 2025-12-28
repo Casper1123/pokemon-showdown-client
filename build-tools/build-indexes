@@ -267,7 +267,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		const isNatDex = ('' + genIdent).endsWith('.1') && genIdent > 8;
 		const isDoubles = (genIdent < 0);
 		const isVGC = ('' + genIdent).endsWith('.5');
-		const genNum = Math.floor(isDoubles ? -genIdent : genIdent);
+		const genNum = Math.floor(Math.abs(genIdent)); // negative is only doubles.
 		if (genNum < 8) console.log('geNnum', genNum, 'for genIdent', genIdent);
 		const isLegendsZA = genIdent === 9.33;
 		const gen = (() => {
