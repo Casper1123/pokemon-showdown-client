@@ -439,6 +439,12 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			if (gen === 'gen4') {
 				return ["CAP", "CAP NFE", "CAP LC", "AG", "Uber", "OU", "(OU)", "UUBL", "UU", "NUBL", "NU", "NFE", "LC"];
 			}
+			if (isCustomNatdex && isDoubles) {
+				return ["DMOD Uber", "DUber", "(DUber)", "DMOD", "DOU", "DBL", "(DOU)", "DUU", "(DUU)", "New", "NFE", "LC"];
+			}
+			if (isCustomNatdex) {
+				return ["CAP", "CAP NFE", "CAP LC", "AG", "MOD Uber", "Uber", "(Uber)", "MOD", "OU", "(OU)", "UUBL", "UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased"];
+			}
 			return [
 				"CAP", "CAP NFE", "CAP LC", "AG", "Uber", "(Uber)", "OU", "(OU)", "UUBL", "UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased",
 			];
@@ -446,7 +452,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 
 		for (const tier of tierOrder) {
 			if (tier in {
-				OU: 1, UUBL: 1, AG: 1, Uber: 1, UU: 1, RU: 1, NU: 1, PU: 1, ZU: 1, NFE: 1, LC: 1, DOU: 1, DUU: 1,
+				MOD: 1, OU: 1, UUBL: 1, AG: 1, "MOD Uber": 1, Uber: 1, UU: 1, RU: 1, NU: 1, PU: 1, ZU: 1, NFE: 1, LC: 1, DMOD: 1, DOU: 1, "DMOD Uber": 1, DUU: 1,
 				"(DUU)": 1, New: 1, Legal: 1, Regular: 1, "Restricted Legendary": 1, "CAP LC": 1,
 			}) {
 				let usedTier = tier;
@@ -490,6 +496,19 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			const item = Dex.mod(gen).items.get(id);
 			if (item.gen > genNum) {
 				continue;
+			}
+			if (item.isNonstandard) {
+				if (isNatDex || isCustomNatdex) {
+					let curItem = item;
+					let curGen = genNum;
+					while (curItem.isNonstandard && curGen >= 7) {
+						curItem = Dex.forGen(curGen).items.get(item.id);
+						curGen--;
+					}
+					if (curItem.isNonstandard) continue;
+				} else if (genNum !== 2) {
+					continue;
+				}
 			}
 			switch (id) {
 			// mainstays
@@ -692,7 +711,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 				} else if (item.name.startsWith("TR")) {
 					badItems.push(id);
 				} else if (item.name.endsWith(" Gem") && item.name !== "Normal Gem") {
-					if (genNum >= 6) {
+					if (genNum >= 6 && !isCustomNatdex) {
 						unreleasedItems.push(id);
 					} else {
 						goodItems.push(id);
@@ -867,13 +886,13 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 
 	// Client relevant data that should be overridden by past gens and mods
 	const overrideSpeciesKeys = [
-		'abilities', 'baseStats', 'cosmeticFormes', 'isNonstandard', 'requiredItems', 'types', 'unreleasedHidden',
+		'abilities', 'baseStats', 'cosmeticFormes', 'isNonstandard', 'requiredItems', 'types', 'unreleasedHidden', 'name'
 	];
 	const overrideMoveKeys = [
-		'accuracy', 'basePower', 'category', 'desc', 'flags', 'isNonstandard', 'pp', 'priority', 'shortDesc', 'target', 'type',
+		'accuracy', 'basePower', 'category', 'desc', 'flags', 'isNonstandard', 'pp', 'priority', 'shortDesc', 'desc', 'name', 'target', 'type',
 	];
-	const overrideAbilityKeys = ['desc', 'flags', 'isNonstandard', 'rating', 'shortDesc'];
-	const overrideItemKeys = ['desc', 'fling', 'isNonstandard', 'naturalGift', 'shortDesc'];
+	const overrideAbilityKeys = ['desc', 'flags', 'isNonstandard', 'rating', 'shortDesc', 'desc', 'name'];
+	const overrideItemKeys = ['desc', 'fling', 'isNonstandard', 'naturalGift', 'shortDesc', 'desc', 'name'];
 
 	//
 	// Past gen table
