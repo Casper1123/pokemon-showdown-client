@@ -2963,7 +2963,7 @@ export const OfficialAuth = new class {
 			return null;
 		}
 		console.debug("Returning response text.");
-		return await responseText; // This is our assertion!
+		return responseText; // This is our assertion!
 	}
 
 	async revoke() {
