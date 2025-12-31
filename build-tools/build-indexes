@@ -303,11 +303,15 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 				if (species.tier === 'CAP' || species.tier === 'CAP NFE' || species.tier === 'CAP LC') {
 					return species.tier;
 				}
+				if (isNatDex || isCustomNatdex) {
+					if (isDoubles) {
+						const monTier = species.natDexDoublesOverride;
+						if (monTier) return monTier;
+					}
+					return species.natDexTier;
+				}
 				if (isDoubles && genNum > 4) {
 					return species.doublesTier;
-				}
-				if (isNatDex || isCustomNatdex) {
-					return species.natDexTier;
 				}
 				return species.tier;
 			})();
