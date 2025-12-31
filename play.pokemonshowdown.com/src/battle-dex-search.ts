@@ -1098,7 +1098,11 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		let tierSet: SearchRow[] = table.tierSet;
 		let slices: { [k: string]: number } = table.formatSlices;
 		if (this.formatType === 'natdexcustom') {
-			tierSet = tierSet.slice(slices["MOD Uber"]);
+			if (this.isDoubles) {
+				tierSet = tierSet.slice(slices['MOD']);
+			} else {
+				tierSet = tierSet.slice(slices["MOD Uber"]);
+			}
 		} else if (format === 'ubers' || format === 'uber' || format === 'ubersuu' || format === 'nationaldexdoubles') {
 			tierSet = tierSet.slice(slices.Uber);
 		} else if (isVGCOrBS || (isHackmons && dex.gen === 9 && !this.formatType)) {
