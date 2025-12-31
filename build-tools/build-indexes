@@ -438,9 +438,6 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			if (isVGC) {
 				return ["Mythical", "Restricted Legendary", "Regular", "NFE", "LC"];
 			}
-			if (isCustomNatdex && isDoubles) {
-				return ["DMOD Uber", "DUber", "(DUber)", "DMOD", "DOU", "DBL", "(DOU)", "DUU", "(DUU)", "New", "NFE", "LC"];
-			}
 			if (isCustomNatdex) {
 				return ["CAP", "CAP NFE", "CAP LC", "AG", "MOD Uber", "Uber", "(Uber)", "MOD", "OU", "(OU)", "UUBL", "UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased"];
 			}
