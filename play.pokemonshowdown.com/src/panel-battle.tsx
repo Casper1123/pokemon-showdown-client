@@ -370,6 +370,9 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		scene.tooltips.listen(scene.log.elem);
 		super.componentDidMount();
 		battle.seekTurn(Infinity);
+		if (PS.prefs.autohardcore) {
+			battle.setHardcoreMode(true);
+		}
 
 		if (window.FormatModMapping && window.FormatModMapping[formatId]) {
 			const modId = window.FormatModMapping[formatId];
@@ -441,6 +444,9 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 			room.battle.setViewpoint(request.side.id);
 			room.side = request.side;
 		}
+		if (request.ally) {
+			room.battle.myAllyPokemon = request.ally.pokemon;
+		}
 
 		room.request = request;
 		room.choices = new BattleChoiceBuilder(request);
@@ -487,29 +493,34 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 						<i class="fa fa-pause" aria-hidden></i><br />Pause
 					</button>
 				)} {}
-				<button class={"button button-first" + (atStart ? " disabled" : "")} data-cmd="/ffto 0" style="margin-right:2px">
-					<i class="fa fa-undo" aria-hidden></i><br />First turn
-				</button>
-				<button class={"button button-first" + (atStart ? " disabled" : "")} data-cmd="/ffto -1">
-					<i class="fa fa-step-backward" aria-hidden></i><br />Prev turn
-				</button>
-				<button class={"button button-last" + (atEnd ? " disabled" : "")} data-cmd="/ffto +1" style="margin-right:2px">
-					<i class="fa fa-step-forward" aria-hidden></i><br />Skip turn
-				</button>
-				<button class={"button button-last" + (atEnd ? " disabled" : "")} data-cmd="/ffto end">
-					<i class="fa fa-fast-forward" aria-hidden></i><br />Skip to end
-				</button>
+				{!room.battle.hardcoreMode && <>
+					<button class={"button button-first" + (atStart ? " disabled" : "")} data-cmd="/ffto 0" style="margin-right:2px">
+						<i class="fa fa-undo" aria-hidden></i><br />First turn
+					</button>
+					<button class={"button button-first" + (atStart ? " disabled" : "")} data-cmd="/ffto -1">
+						<i class="fa fa-step-backward" aria-hidden></i><br />Prev turn
+					</button>
+					<button class={"button button-last" + (atEnd ? " disabled" : "")} data-cmd="/ffto +1" style="margin-right:2px">
+						<i class="fa fa-step-forward" aria-hidden></i><br />Skip turn
+					</button>
+					<button class={"button button-last" + (atEnd ? " disabled" : "")} data-cmd="/ffto end">
+						<i class="fa fa-fast-forward" aria-hidden></i><br />Skip to end
+					</button>
+				</>}
 			</p>
 			<p>
 				<button class="button" data-cmd="/switchsides">
 					<i class="fa fa-random" aria-hidden></i> Switch viewpoint
-				</button>
+				</button> {}
+				{!room.battle.hardcoreMode && <button class="button" data-cmd="/ffto">
+					<i class="fa fa-random" aria-hidden></i> Go to turn
+				</button>}
 			</p>
 		</div>;
 	}
 	renderMoveButton(props: {
-		name: string,
-		cmd: string, type: Dex.TypeName, tooltip: string, moveData: { pp?: number, maxpp?: number, disabled?: boolean },
+		name: string, cmd: string, type: Dex.TypeName, tags: string, tooltip: string,
+		moveData: { pp?: number, maxpp?: number, disabled?: boolean },
 	} | null) {
 		if (!props) {
 			return <button class="movebutton" disabled>&nbsp;</button>;
@@ -521,7 +532,8 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 			aria-disabled={props.moveData.disabled}
 		>
 			{props.name}<br />
-			<small class="type">{props.type}</small> <small class="pp">{pp}</small>&nbsp;
+			<small class="type">{props.type} <span class="effectiveness-icon">{props.tags}</span></small> {}
+			<small class="pp">{pp}</small>&nbsp;
 		</button>;
 	}
 	renderPokemonButton(props: {
@@ -633,7 +645,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 			const gmax = active.gigantamax && dex.moves.get(active.gigantamax);
 			return active.moves.map((moveData, i) => {
 				const move = dex.moves.get(moveData.name);
-				const moveType = tooltips.getMoveType(move, valueTracker, gmax || true)[0];
+				const [moveType, tags] = tooltips.getMoveTypeText(move, valueTracker, gmax || true);
 				let maxMoveData: { name: string, id: ID } = active.maxMoves![i];
 				if (maxMoveData.name !== 'Max Guard') {
 					maxMoveData = tooltips.getMaxMoveFromType(moveType, gmax);
@@ -644,6 +656,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 					name: maxMoveData.name,
 					cmd: `/move ${i + 1} max`,
 					type: moveType,
+					tags,
 					tooltip,
 					moveData,
 				});
@@ -661,12 +674,13 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 				}
 				const specialMove = dex.moves.get(zMoveData.name);
 				const move = specialMove.exists ? specialMove : dex.moves.get(moveData.name);
-				const moveType = tooltips.getMoveType(move, valueTracker)[0];
+				const [moveType, tags] = tooltips.getMoveTypeText(move, valueTracker);
 				const tooltip = `zmove|${moveData.name}|${pokemonIndex}`;
 				return this.renderMoveButton({
 					name: zMoveData.name,
 					cmd: `/move ${i + 1} zmove`,
 					type: moveType,
+					tags,
 					tooltip,
 					moveData: { pp: 1, maxpp: 1 },
 				});
@@ -676,12 +690,13 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		const special = choices.moveSpecial(choices.current);
 		return active.moves.map((moveData, i) => {
 			const move = dex.moves.get(moveData.name);
-			const moveType = tooltips.getMoveType(move, valueTracker)[0];
+			const [moveType, tags] = tooltips.getMoveTypeText(move, valueTracker);
 			const tooltip = `move|${moveData.name}|${pokemonIndex}`;
 			return this.renderMoveButton({
 				name: move.name,
 				cmd: `/move ${i + 1}${special}`,
 				type: moveType,
+				tags,
 				tooltip,
 				moveData,
 			});
@@ -764,6 +779,14 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 					tooltip: `switchpokemon|${i}`,
 				});
 			})}
+			{request.ally?.pokemon?.map((serverPokemon, i) => {
+				return this.renderPokemonButton({
+					pokemon: serverPokemon,
+					cmd: `/switch notMine`,
+					disabled: true,
+					tooltip: `allypokemon|${i}`,
+				});
+			})}
 		</div>;
 	}
 	renderTeamPreviewChooser(request: | BattleTeamRequest, choices: BattleChoiceBuilder) {
@@ -813,7 +836,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		let buf: preact.ComponentChild[] = [
 			<button data-cmd="/cancel" class="button"><i class="fa fa-chevron-left" aria-hidden></i> Back</button>, ' ',
 		];
-		if (choices.isDone() && choices.noCancel) {
+		if (choices.isDone() && (choices.noCancel || this.props.room.battle.hardcoreMode)) {
 			buf = ['Waiting for opponent...', <br />];
 		} else if (choices.isDone() && choices.choices.length <= 1) {
 			buf = [];
@@ -873,10 +896,11 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 		return buf;
 	}
 	renderPlayerWaitingControls() {
+		const room = this.props.room;
 		return <div class="controls">
-			<div class="whatdo">
+			{!room.battle.hardcoreMode && <div class="whatdo">
 				<button class="button" data-cmd="/ffto end">Skip animation <i class="fa fa-fast-forward" aria-hidden></i></button>
-			</div>
+			</div>}
 			{this.renderTeamList()}
 		</div>;
 	}
@@ -898,7 +922,8 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 					{this.renderOldChoices(request, choices)}
 				</div>
 				<div class="pad">
-					{choices.noCancel ? null : <button data-cmd="/cancel" class="button">Cancel</button>}
+					{choices.noCancel || room.battle.hardcoreMode ?
+						null : <button data-cmd="/cancel" class="button">Cancel</button>}
 				</div>
 				{this.renderTeamList()}
 			</div>;
@@ -1012,12 +1037,14 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 				<button class="button" data-cmd="/play" style="min-width:4.5em">
 					<i class="fa fa-undo" aria-hidden></i><br />Replay
 				</button> {}
-				{isNotTiny && <button class="button button-first" data-cmd="/ffto 0" style="margin-right:2px">
-					<i class="fa fa-undo" aria-hidden></i><br />First turn
-				</button>}
-				{isNotTiny && <button class="button button-first" data-cmd="/ffto -1">
-					<i class="fa fa-step-backward" aria-hidden></i><br />Prev turn
-				</button>}
+				{isNotTiny && !room.battle.hardcoreMode && <>
+					<button class="button button-first" data-cmd="/ffto 0" style="margin-right:2px">
+						<i class="fa fa-undo" aria-hidden></i><br />First turn
+					</button>
+					<button class="button button-first" data-cmd="/ffto -1">
+						<i class="fa fa-step-backward" aria-hidden></i><br />Prev turn
+					</button>
+				</>}
 			</p>
 			{room.side ? (
 				<p>
@@ -1030,7 +1057,10 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 				</p>
 			) : (
 				<p>
-					<button class="button" data-cmd="/switchsides"><i class="fa fa-random" aria-hidden></i> Switch viewpoint</button>
+					<button class="button" data-cmd="/switchsides"><i class="fa fa-random" aria-hidden></i> Switch viewpoint</button> {}
+					{!room.battle.hardcoreMode && <button class="button" data-cmd="/ffto">
+						<i class="fa fa-random" aria-hidden></i> Go to turn
+					</button>}
 				</p>
 			)}
 		</div>;
