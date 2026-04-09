@@ -44,6 +44,8 @@ export class ChatRoom extends PSRoom {
 	challengeMenuOpen = false;
 	initialSlash = false;
 	challenging: Challenge | null = null;
+	/** True after challenge send/accept before server acknowledgement */
+	teamSent: string | null = null;
 	challenged: Challenge | null = null;
 	/** n.b. this will be null outside of battle rooms */
 	battle: Battle | null = null;
@@ -140,16 +142,26 @@ export class ChatRoom extends PSRoom {
 			if (args[0] === 'c:') PS.lastMessageTime = args[1];
 			this.lastMessage = args;
 			this.joinLeave = null;
+			const name = args[args[0] === 'c:' ? 2 : 1];
 			this.markUserActive(args[args[0] === 'c:' ? 2 : 1]);
 			if (this.tour) this.tour.joinLeave = null;
 			if (this.id.startsWith("dm-")) {
 				const fromUser = args[args[0] === 'c:' ? 2 : 1];
 				if (toID(fromUser) === PS.user.userid) break;
 				const message = args[args[0] === 'c:' ? 3 : 2];
-				this.notify({
-					title: `${this.title}`,
-					body: message,
-				});
+				const noNotify = this.log?.parseChatMessage(message, name, args[1])?.[2];
+				const isIgnored = PS.prefs.ignore?.[toID(fromUser)];
+				if (!noNotify && !isIgnored) {
+					let textContent = message;
+					if (/^\/(log|raw|html|uhtml|uhtmlchange) /.test(message)) {
+						textContent = message.split(' ').slice(1).join(' ')
+							.replace(/<[^>]*?>/g, '');
+					}
+					this.notify({
+						title: `${this.title}`,
+						body: textContent,
+					});
+				}
 			} else {
 				this.subtleNotify();
 			}
@@ -191,6 +203,14 @@ export class ChatRoom extends PSRoom {
 					if (!lines[i - 1]) cutOffEnd = i - 1;
 				}
 			}
+			console.log("Reconnection log splice:");
+			console.log([
+				...lines.slice(0, cutOffStart),
+				'====================',
+				...lines.slice(cutOffStart, cutOffEnd),
+				'====================',
+				...lines.slice(cutOffEnd),
+			].join('\n'));
 			lines = lines.slice(cutOffStart, cutOffEnd);
 
 			if (lines.length) {
@@ -326,6 +346,40 @@ export class ChatRoom extends PSRoom {
 		'clear'() {
 			this.log?.reset();
 			this.update(null);
+		},
+		'togglemessages'(target) {
+			if (this.pmTarget ||
+				this.type !== 'chat') return this.errorReply('This command can only be used in proper chat rooms.');
+			if (this.log) {
+				const userid = toID(target);
+				const classStart = 'revealed chat chatmessage-' + userid;
+				const nodes: HTMLElement[] = [];
+				let isHidden = true;
+				for (const node of this.log.innerElem.childNodes as any as HTMLElement[]) {
+					if (node.className && (node.className + ' ').startsWith(classStart)) {
+						nodes.push(node);
+					}
+				}
+				if (this.log.preemptElem) {
+					for (const node of this.log.preemptElem.childNodes as any as HTMLElement[]) {
+						if (node.className && (node.className + ' ').startsWith(classStart)) {
+							nodes.push(node);
+						}
+					}
+				}
+				isHidden = nodes[0].style.display === 'none';
+				nodes.every(node => {
+					node.style.display = isHidden ? '' : 'none';
+					return true;
+				});
+				isHidden = !isHidden;
+				const toggleButtons = this.log.innerElem.querySelectorAll(`button[name="toggleMessages"][value="${userid}"]`);
+				for (const button of toggleButtons) {
+					button.innerHTML = isHidden ?
+						`<small>(${nodes.length} line${nodes.length > 1 ? 's' : ''} from ${userid} hidden)</small>` :
+						`<small>(Hide ${nodes.length} line${nodes.length > 1 ? 's' : ''} from ${userid})</small>`;
+				}
+			}
 		},
 		'rank,ranking,rating,ladder'(target) {
 			let arg = target;
@@ -468,6 +522,10 @@ export class ChatRoom extends PSRoom {
 			}
 			if (isNaN(turnNum)) {
 				this.receiveLine([`error`, `/ffto - Invalid turn number: ${target}`]);
+				return;
+			}
+			if (this.battle.hardcoreMode) {
+				this.errorReply(`Turn navigation is disabled in hardcore mode.`);
 				return;
 			}
 			this.battle.seekTurn(turnNum);
@@ -893,6 +951,7 @@ export class ChatTextEntry extends preact.Component<{
 	}
 	handleKey(ev: KeyboardEvent) {
 		const cmdKey = ((ev.metaKey ? 1 : 0) + (ev.ctrlKey ? 1 : 0) === 1) && !ev.altKey && !ev.shiftKey;
+		const altKey = ev.altKey;
 		// const anyModifier = ev.ctrlKey || ev.altKey || ev.metaKey || ev.shiftKey;
 		if (ev.keyCode === 13 && !ev.shiftKey) { // Enter key
 			return this.submit();
@@ -924,6 +983,93 @@ export class ChatTextEntry extends preact.Component<{
 		// 	const newValue = `/pm ${PS.user.lastPM}, `;
 		// 	this.setValue(newValue, newValue.length);
 		// 	return true;
+		} else if (ev.shiftKey && ev.keyCode === 37 && !altKey) {
+			if (PS.prefs.onepanel === 'vertical' || this.getValue().length > 0) return;
+			const curLoc = PS.room.location;
+			let newLoc = curLoc;
+			let newIndex: number | null = null;
+			switch (curLoc) {
+			case 'right': {
+				newIndex = PS.rightRoomList.indexOf(PS.room.id) - 1;
+				if (newIndex < 0) {
+					newLoc = 'left';
+					newIndex = PS.leftRoomList.length + 1;
+				}
+				break;
+			}
+			case 'left': {
+				newIndex = PS.leftRoomList.indexOf(PS.room.id) - 1;
+				// newIndex <= 0 because MainMenu is always at 0 index
+				if (newIndex <= 0) {
+					newLoc = 'mini-window';
+					newIndex = PS.miniRoomList.length + 1;
+				}
+				break;
+			}
+			case 'mini-window': {
+				newIndex = PS.miniRoomList.indexOf(PS.room.id) - 1;
+				if (newIndex < 0) {
+					newLoc = 'right';
+					newIndex = PS.rightRoomList.length + 1;
+				}
+				break;
+			}
+			}
+			if (newIndex !== null) {
+				PS.moveRoom(PS.room, newLoc, false, newIndex);
+				PS.update();
+			}
+			return true;
+		} else if (ev.shiftKey && ev.keyCode === 39 && !altKey) {
+			if (PS.prefs.onepanel === 'vertical' || this.getValue().length > 0) return;
+			const curLoc = PS.room.location;
+			let newLoc = curLoc;
+			let newIndex: number | null = null;
+			switch (curLoc) {
+			case 'right': {
+				newIndex = PS.rightRoomList.indexOf(PS.room.id) + 1;
+				if (newIndex >= PS.rightRoomList.length - 1) {
+					// newIndex = 1 because NewsPanel is at 0
+					newLoc = 'mini-window';
+					newIndex = 1;
+				}
+				break;
+			}
+			case 'left': {
+				newIndex = PS.leftRoomList.indexOf(PS.room.id) + 1;
+				if (newIndex >= PS.leftRoomList.length) {
+					newLoc = 'right';
+					newIndex = 0;
+				}
+				break;
+			}
+			case 'mini-window': {
+				newIndex = PS.miniRoomList.indexOf(PS.room.id) + 1;
+				if (newIndex >= PS.miniRoomList.length) {
+					newLoc = 'left';
+					// newIndex = 1 because MainMenu is at 0
+					newIndex = 1;
+				}
+				break;
+			}
+			}
+			if (newIndex !== null) {
+				PS.moveRoom(PS.room, newLoc, false, newIndex);
+				PS.update();
+			}
+			return true;
+		} else if (ev.shiftKey && ev.keyCode === 38) {
+			if (PS.prefs.onepanel !== 'vertical' || this.getValue().length > 0) return;
+			let newIndex = PS.rightRoomList.indexOf(PS.room.id) - 1;
+			if (newIndex < 0) newIndex = PS.rightRoomList.length - 1;
+			PS.moveRoom(PS.room, 'right', false, newIndex);
+			PS.update();
+		} else if (ev.shiftKey && ev.keyCode === 40) {
+			if (PS.prefs.onepanel !== 'vertical' || this.getValue().length > 0) return;
+			let newIndex = PS.rightRoomList.indexOf(PS.room.id) + 1;
+			if (newIndex >= PS.rightRoomList.length - 1) newIndex = 0;
+			PS.moveRoom(PS.room, 'right', false, newIndex);
+			PS.update();
 		}
 		return false;
 	}
@@ -1163,12 +1309,7 @@ class ChatPanel extends PSRoomPanel<ChatRoom> {
 		if (!room.pmTarget) throw new Error("Not a PM room");
 		PS.send(`/utm ${packedTeam}`);
 		PS.send(`${privacy}/challenge ${room.pmTarget}, ${format}`);
-		room.challengeMenuOpen = false;
-		room.challenging = {
-			formatName: format,
-			teamFormat: format,
-		};
-		PS.mainmenu.lastChallenged = now;
+		room.teamSent = format || '-';
 		room.update(null);
 	};
 	acceptChallenge = (e: Event, format: string, team?: Team) => {
@@ -1177,7 +1318,7 @@ class ChatPanel extends PSRoomPanel<ChatRoom> {
 		if (!room.pmTarget) throw new Error("Not a PM room");
 		PS.send(`/utm ${packedTeam}`);
 		this.props.room.send(`/accept`);
-		room.challenged = null;
+		room.teamSent = format || '-';
 		room.update(null);
 	};
 
@@ -1185,29 +1326,50 @@ class ChatPanel extends PSRoomPanel<ChatRoom> {
 		const room = this.props.room;
 		const tinyLayout = room.width < 450;
 
-		const challengeTo = room.challenging ? <div class="challenge">
+		const defaultFormat = room.args?.format as string | undefined;
+		if (defaultFormat?.startsWith('!!')) {
+			room.args!.format = undefined;
+		}
+
+		const challengeSent = room.teamSent && !room.challenged;
+		const challengeTo = room.challenging ? <div class="challenge outgoing">
 			<p>Waiting for {room.pmTarget}...</p>
-			<TeamForm format={room.challenging.formatName} teamFormat={room.challenging.teamFormat} onSubmit={null}>
+			<TeamForm
+				format={room.challenging.formatName} teamFormat={room.challenging.teamFormat}
+				onSubmit={null} selectType="challenge"
+			>
 				<button data-cmd="/cancelchallenge" class="button">Cancel</button>
 			</TeamForm>
-		</div> : room.challengeMenuOpen ? <div class="challenge">
-			<TeamForm onSubmit={this.makeChallenge}>
-				<button type="submit" class="button button-first">
+		</div> : room.challengeMenuOpen ? <div class="challenge outgoing">
+			<TeamForm onSubmit={this.makeChallenge} defaultFormat={defaultFormat} selectType="challenge">
+				{challengeSent && <button class="button" disabled>
+					Challenging...
+				</button>}
+				{!challengeSent && <button type="submit" class="button button-first" disabled={!!room.challenged}>
 					<strong>Challenge</strong>
-				</button><button data-href="battleoptions" class="button button-last" aria-label="Battle options">
+				</button>}
+				{!challengeSent && <button data-href="battleoptions" class="button button-last" aria-label="Battle options">
 					<i class="fa fa-caret-down" aria-hidden></i>
-				</button> {}
+				</button>} {}
 				<button data-cmd="/cancelchallenge" class="button">Cancel</button>
 			</TeamForm>
 		</div> : null;
 
 		const challengeFrom = room.challenged ? <div class="challenge">
 			{!!room.challenged.message && <p>{room.challenged.message}</p>}
-			<TeamForm format={room.challenged.formatName} teamFormat={room.challenged.teamFormat} onSubmit={this.acceptChallenge}>
-				<button type="submit" class={room.challenged.formatName ? `button button-first` : `button`}>
+			<TeamForm
+				format={room.challenged.formatName} teamFormat={room.challenged.teamFormat}
+				onSubmit={this.acceptChallenge} selectType="challenge"
+			>
+				{room.teamSent && <button class="button" disabled>
+					Accepting...
+				</button>}
+				{!room.teamSent && <button type="submit" class={room.challenged.formatName ? `button button-first` : `button`}>
 					<strong>{room.challenged.acceptButtonLabel || 'Accept'}</strong>
-				</button>
-				{room.challenged.formatName && <button data-href="battleoptions" class="button button-last" aria-label="Battle options">
+				</button>}
+				{!room.teamSent && room.challenged.formatName && <button
+					data-href="battleoptions" class="button button-last" aria-label="Battle options"
+				>
 					<i class="fa fa-caret-down" aria-hidden></i>
 				</button>} {}
 				<button data-cmd="/reject" class="button">{room.challenged.rejectButtonLabel || 'Reject'}</button>
@@ -1220,11 +1382,11 @@ class ChatPanel extends PSRoomPanel<ChatRoom> {
 				left={tinyLayout ? 0 : 146} top={room.tour?.info.isActive ? 30 : 0}
 			>
 				{challengeTo}{challengeFrom}{PS.isOffline && <p class="buttonbar">
-					<button class="button" data-cmd="/reconnect">
-						<i class="fa fa-plug" aria-hidden></i> <strong>Reconnect</strong>
-					</button> {}
-					{PS.connection?.reconnectTimer && <small>(Autoreconnect in {Math.round(PS.connection.reconnectDelay / 1000)}s)</small>}
-				</p>}
+				<button class="button" data-cmd="/reconnect">
+					<i class="fa fa-plug" aria-hidden></i> <strong>Reconnect</strong>
+				</button> {}
+				{PS.connection?.reconnectTimer && <small>(Autoreconnect in {Math.round(PS.connection.reconnectDelay / 1000)}s)</small>}
+			</p>}
 			</ChatLog>
 			{room.tour && <TournamentBox tour={room.tour} left={tinyLayout ? 0 : 146} />}
 			<ChatTextEntry

@@ -281,7 +281,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		pokemon.sort();
 		const tierTable = {};
 		const overrideTier = {};
-		const ubersUUBans = {};
+		const metagameBans = {};
 		const ndDoublesBans = {};
 		const thirtyfivePokes = {};
 		const monotypeBans = {};
@@ -295,7 +295,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 				if (isVGC) {
 					if (species.isNonstandard && species.isNonstandard !== 'Gigantamax') return 'Illegal';
 					if (baseSpecies.tags.includes('Mythical')) return 'Mythical';
-					if (baseSpecies.tags.includes('Restricted Legendary')) return 'Restricted Legendary';
+					if (baseSpecies.tags.includes('Restricted Legendary')) return 'Restricted';
 					if (species.tier === 'NFE') return 'NFE';
 					if (species.tier === 'LC') return 'LC';
 					return 'Regular';
@@ -330,14 +330,53 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			if (!tierTable[speciesTier]) tierTable[speciesTier] = [];
 			tierTable[speciesTier].push(id);
 
-			if (genNum === 9) {
-				const ubersUU = Dex.formats.get(gen + 'ubersuu');
-				if (ubersUU.exists && Dex.formats.getRuleTable(ubersUU).isBannedSpecies(species)) {
-					ubersUUBans[species.id] = 1;
+			if (genNum >= 5) {
+				for (const meta of (isVGC && genNum === 9 ? ['4v4doublesuu'] : [
+					'1v1', '2v2doubles', 'lcuu', 'freeforall', 'ubersuu', 'almostanyability', 'balancedhackmons', 'godlygift', 'mixandmega', 'sharedpower', 'stabmons',
+					'12switch', '350cup', 'alphabetcup', 'badnboosted', 'battlefields', 'biomechmons', 'camomons', 'categoryswap', 'categoryswap',
+					'convergence', 'crossevolution', 'categoryswap', 'ferventimpersonation', 'foresighters', 'formemons', 'fortemons', 'franticfusions',
+					'fullpotential', 'inheritance', 'inverse', 'natureswap', 'partnersincrime', 'passiveaggressive', 'pokebilities',
+					'pokemoves', 'relayrace', 'revelationmons', 'sharingiscaring', 'teradonation', 'teraoverride', 'thecardgame',
+					'thelosersgame', 'trademarked', 'triples', 'typesplit', 'voltturnmayhem', 'flipped', 'monotype',
+					'aaa', 'bh', 'doubles', // natdex abbreviations
+					'tiershift', 'linked', 'pokebilitiesaaa',
+				])) {
+					const format = Dex.formats.get(`${gen}${isNatDex ? 'nationaldex' : ''}${meta}`);
+					if (!format.exists) continue;
+					const ruleTable = Dex.formats.getRuleTable(format);
+					let banned = ruleTable.isBannedSpecies(species);
+					if (!banned) {
+						const requiredItems = species.requiredItems;
+						if (requiredItems && requiredItems.length) {
+							for (const itemName of requiredItems) {
+								const item = Dex.items.get(itemName);
+								if (((item.itemUser && item.itemUser.includes(species.name)) ||
+									(item.megaStone && Object.values(item.megaStone).includes(species.name))
+								) && ruleTable.isBanned('item:' + item.id)) {
+									banned = true;
+									break;
+								}
+							}
+						}
+					}
+					if (!banned && species.requiredAbility) {
+						const ability = Dex.abilities.get(species.requiredAbility);
+						banned = ruleTable.isBanned('ability:' + ability.id);
+					}
+					if (banned) {
+						if (!metagameBans[meta]) {
+							metagameBans[meta] = {};
+							if (ruleTable.has('megarayquazaclause')) {
+								metagameBans[meta]['megarayquazaclause'] = 1;
+							}
+						}
+						metagameBans[meta][species.id] = 1;
+					}
 				}
 				const nd35Pokes = Dex.formats.get(gen + 'nationaldex35pokes');
 				if (nd35Pokes.exists && !Dex.formats.getRuleTable(nd35Pokes).isBannedSpecies(species)) {
-					thirtyfivePokes[species.id] = 1;
+					if (!metagameBans['nationaldex35pokes']) metagameBans['nationaldex35pokes'] = {};
+					metagameBans['nationaldex35pokes'][species.id] = 1;
 				}
 			}
 			if (genNum >= 8) {
@@ -362,6 +401,12 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 
 
 
+		nonstandardMoves.push(...Object.keys(Dex.data.Moves).filter(id => {
+			const move = Dex.mod(isSSDLC1 ? 'gen8dlc1' : isPreDLC ? 'gen9predlc' : 'gen9dlc1').moves.get(id);
+			const bMove = Dex.mod(isSSDLC1 ? 'gen8' : 'gen9').moves.get(id);
+			return bMove.isNonstandard !== move.isNonstandard;
+		}));
+
 		const tiers = [];
 		const items = [];
 		const formatSlices = {};
@@ -371,8 +416,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			BattleTeambuilderTable['gen' + genNum + 'natdex'].tiers = tiers;
 			BattleTeambuilderTable['gen' + genNum + 'natdex'].overrideTier = overrideTier;
 			BattleTeambuilderTable['gen' + genNum + 'natdex'].items = items;
-			BattleTeambuilderTable['gen' + genNum + 'natdex'].ndDoublesBans = ndDoublesBans;
-			BattleTeambuilderTable['gen' + genNum + 'natdex'].monotypeBans = monotypeBans;
+			BattleTeambuilderTable['gen' + genNum + 'natdex'].metagameBans = metagameBans;
 			BattleTeambuilderTable['gen' + genNum + 'natdex'].formatSlices = formatSlices;
 			if (isNatDex && genNum === 9) {
 				BattleTeambuilderTable['gen' + genNum + 'natdex'].thirtyfivePokes = thirtyfivePokes;
@@ -397,11 +441,13 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			BattleTeambuilderTable[gen + 'vgc'] = {};
 			BattleTeambuilderTable[gen + 'vgc'].tiers = tiers;
 			BattleTeambuilderTable[gen + 'vgc'].formatSlices = formatSlices;
+			if (genNum === 9) BattleTeambuilderTable[gen + 'vgc'].metagameBans = metagameBans;
 		} else if (isDoubles) {
 			BattleTeambuilderTable[gen + 'doubles'] = {};
 			BattleTeambuilderTable[gen + 'doubles'].tiers = tiers;
 			BattleTeambuilderTable[gen + 'doubles'].items = items;
 			BattleTeambuilderTable[gen + 'doubles'].overrideTier = overrideTier;
+			BattleTeambuilderTable[gen + 'doubles'].metagameBans = metagameBans;
 			BattleTeambuilderTable[gen + 'doubles'].formatSlices = formatSlices;
 		} else if (isLegendsZA) {
 			BattleTeambuilderTable['gen9legendsou'] = {};
@@ -414,8 +460,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			BattleTeambuilderTable.tiers = tiers;
 			BattleTeambuilderTable.items = items;
 			BattleTeambuilderTable.overrideTier = overrideTier;
-			BattleTeambuilderTable.ubersUUBans = ubersUUBans;
-			BattleTeambuilderTable.monotypeBans = monotypeBans;
+			BattleTeambuilderTable.metagameBans = metagameBans;
 			BattleTeambuilderTable.formatSlices = formatSlices;
 		} else {
 			BattleTeambuilderTable[gen] = {};
@@ -430,13 +475,13 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			BattleTeambuilderTable[gen].items = items;
 			BattleTeambuilderTable[gen].formatSlices = formatSlices;
 			if (genNum >= 5) {
-				BattleTeambuilderTable[gen].monotypeBans = monotypeBans;
+				BattleTeambuilderTable[gen].metagameBans = metagameBans;
 			}
 		}
 
 		const tierOrder = (() => {
 			if (isVGC) {
-				return ["Mythical", "Restricted Legendary", "Regular", "NFE", "LC"];
+				return ["Mythical", "Restricted", "Regular", "NFE", "LC"];
 			}
 			if (isCustomNatdex) {
 				return ["CAP", "CAP NFE", "CAP LC", "AG", "MOD Uber", "Uber", "(Uber)", "MOD", "OU", "(OU)", "UUBL", "UU", "RUBL", "RU", "NUBL", "NU", "PUBL", "PU", "ZUBL", "ZU", "New", "NFE", "LC", "Unreleased"];
@@ -455,7 +500,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		for (const tier of tierOrder) {
 			if (tier in {
 				MOD: 1, OU: 1, UUBL: 1, AG: 1, "MOD Uber": 1, Uber: 1, UU: 1, RU: 1, NU: 1, PU: 1, ZU: 1, NFE: 1, LC: 1, DMOD: 1, DOU: 1, "DMOD Uber": 1, DUU: 1,
-				"(DUU)": 1, New: 1, Legal: 1, Regular: 1, "Restricted Legendary": 1, "CAP LC": 1,
+				"(DUU)": 1, New: 1, Legal: 1, Regular: 1, Restricted: 1, "CAP LC": 1,
 			}) {
 				let usedTier = tier;
 				if (usedTier === "(DUU)") usedTier = "DNU";
