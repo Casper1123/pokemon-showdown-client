@@ -854,6 +854,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 
 			// Deep copy base learnset data
 			for (const moveid in G9BaseLearnsets[id]) {
+				if (G9NATDEXCUSTOMLearnsets[id][moveid] === undefined) { continue; } // If removed in mod, do not add data.
 				BattleTeambuilderTable[tableId].learnsets[id][moveid] = G9BaseLearnsets[id][moveid];
 			}
 
