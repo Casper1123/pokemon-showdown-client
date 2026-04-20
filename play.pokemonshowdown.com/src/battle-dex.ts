@@ -18,25 +18,15 @@
  * @license MIT
  */
 
-import {Pokemon, type ServerPokemon} from "./battle";
-import type * as DexData from "./battle-dex-data";
+import { Pokemon, type ServerPokemon } from "./battle";
 import {
-	Ability,
-	BattleAvatarNumbers,
-	BattleBaseSpeciesChart,
-	BattlePokemonIconIndexes,
-	BattlePokemonIconIndexesLeft,
-	type ID,
-	Item,
-	Move,
-	PureEffect,
-	Species,
-	type Type,
+	BattleAvatarNumbers, BattleBaseSpeciesChart, BattlePokemonIconIndexes, BattlePokemonIconIndexesLeft,
+	Ability, Item, Move, Species, PureEffect, type ID, type Type,
 } from "./battle-dex-data";
-import type {Teams} from "./battle-teams";
+import type * as DexData from "./battle-dex-data";
+import type { Teams } from "./battle-teams";
 import {Config, PS} from "./client-main";
-
-import {DexSearch, type SearchType} from "./battle-dex-search"; // Redundant
+import {DexSearch, type SearchType} from "./battle-dex-search";
 
 export declare namespace Dex {
 	/* eslint-disable @typescript-eslint/no-shadow */
@@ -54,6 +44,7 @@ export declare namespace Dex {
 	export type StatNameExceptHP = DexData.StatNameExceptHP;
 	export type BoostStatName = DexData.BoostStatName;
 	export type TypeName = DexData.TypeName;
+	export type CategoryName = DexData.CategoryName;
 	export type StatusName = DexData.StatusName;
 	export type GenderName = DexData.GenderName;
 	export type NatureName = DexData.NatureName;
@@ -243,14 +234,12 @@ export const Dex = new class implements ModdedDex {
 	resourcePrefix = (() => {
 		let prefix = '';
 		if (window.document?.location?.protocol !== 'http:') prefix = 'https:';
-		//return `${prefix}//play.pokemonshowdown.com/`;
-		return `${prefix}//${Config.routes.client}/`;
+		return `${prefix}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/`;
 	})();
 
 	fxPrefix = (() => {
 		const protocol = (window.document?.location?.protocol !== 'http:') ? 'https:' : '';
-		return `${protocol}//${Config.routes.client}/fx/`;
-		// return `${protocol}//play.pokemonshowdown.com/fx/`;
+		return `${protocol}//${window.Config ? Config.routes.client : 'play.pokemonshowdown.com'}/fx/`;
 	})();
 
 	loadedSpriteData = { xy: 1, bw: 0 };
@@ -780,6 +769,7 @@ export const Dex = new class implements ModdedDex {
 		// }
 
 		let dex = Dex.forGen(Dex.formatGen(format));
+
 		const formatid = toID(format).slice(4);
 
 		if (dex.gen === 7 && formatid.includes('letsgo')) {
@@ -788,10 +778,15 @@ export const Dex = new class implements ModdedDex {
 		if (dex.gen === 8 && formatid.includes('bdsp')) {
 			dex = Dex.mod('gen8bdsp' as ID);
 		}
+		if (dex.gen === 9 && formatid.includes('legends')) {
+			dex = Dex.mod('gen9legendsou' as ID);
+		}
 		if (formatid.includes('natdexcustom') || formatid.includes('nationaldexcustom')) {
 			dex = Dex.mod((`gen${dex.gen}natdexcustom` + (formatid.includes('doubles') ? 'doubles' : '')) as ID);
 		}
-
+		if (dex.gen === 9 && formatid.includes('champions')) {
+			dex = Dex.mod('champions' as ID);
+		}
 		return dex;
 	}
 
@@ -1482,8 +1477,9 @@ export class ModdedDex {
 	pokeballs: string[] | null = null;
 	constructor(modid: ID) {
 		this.modid = modid;
-		const gen = parseInt(modid.charAt(3), 10);
-		if (!modid.startsWith('gen') || !gen) throw new Error("Unsupported modid");
+		let gen = parseInt(modid.charAt(3), 10);
+		if (this.modid === 'champions') gen = 9;
+		if ((modid !== 'champions' && !modid.startsWith('gen')) || !gen) throw new Error("Unsupported modid");
 		this.gen = gen;
 	}
 	moves = {

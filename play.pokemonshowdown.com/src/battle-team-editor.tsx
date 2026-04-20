@@ -7,7 +7,7 @@
  */
 
 import preact from "../js/lib/preact";
-import { type Team, Config } from "./client-main";
+import { type Team, Config, PS } from "./client-main";
 import { Dex, type ModdedDex, toID, type ID, PSUtils } from "./battle-dex";
 import { Teams } from './battle-teams';
 import { DexSearch, type SearchRow, type SearchType } from "./battle-dex-search";
@@ -27,7 +27,7 @@ type SampleSets = {
 };
 type SampleSetsTable = { dex?: SampleSets, stats?: SampleSets };
 
-class TeamEditorState extends PSModel {
+export class TeamEditorState extends PSModel {
 	static clipboard: {
 		teams: {
 			[teamKey: string]: {
@@ -138,7 +138,9 @@ class TeamEditorState extends PSModel {
 		if (
 			formatid.includes('vgc') || formatid.includes('bss') || formatid.includes('ultrasinnohclassic') ||
 			formatid.includes('battlespot') || formatid.includes('battlestadium') || formatid.includes('battlefestival') ||
-			formatid.includes('natdexcustomdoubles') || formatid.includes('nationaldexcustomdoubles')
+			formatid.includes('natdexcustomdoubles') || formatid.includes('nationaldexcustomdoubles') ||
+			formatid.includes('battlespot') || formatid.includes('battlestadium') || formatid.includes('battlefestival') ||
+			formatid.includes('letsgo') || formatid.includes('champions')
 		) {
 			this.defaultLevel = 50;
 		}
@@ -284,6 +286,7 @@ class TeamEditorState extends PSModel {
 
 		if (TeamEditorState.clipboard.teams[this.team.key].sets[index] === this.sets[index]) {
 			// remove
+			TeamEditorState.clipboard.teams[this.team.key].entire = false;
 			delete TeamEditorState.clipboard.teams[this.team.key].sets[index];
 			if (!Object.keys(TeamEditorState.clipboard.teams[this.team.key].sets).length) {
 				delete TeamEditorState.clipboard.teams[this.team.key];
@@ -297,6 +300,33 @@ class TeamEditorState extends PSModel {
 			return;
 		}
 		TeamEditorState.clipboard.teams[this.team.key].sets[index] = this.sets[index];
+	}
+	static copyTeam(team: Team) {
+		TeamEditorState.clipboard ||= {
+			teams: {},
+			otherSets: null,
+			readonly: false,
+		};
+		TeamEditorState.clipboard.teams ||= {};
+
+		if (TeamEditorState.clipboard.teams[team.key]) {
+			// remove
+			delete TeamEditorState.clipboard.teams[team.key];
+			if (!Object.keys(TeamEditorState.clipboard.teams).length) {
+				TeamEditorState.clipboard.teams = null;
+				if (!TeamEditorState.clipboard.otherSets) {
+					TeamEditorState.clipboard = null;
+				}
+			}
+			return;
+		}
+		TeamEditorState.clipboard.teams[team.key] ||= {
+			team, sets: {}, entire: true,
+		};
+		const sets = Teams.unpack(team.packedTeam);
+		for (let i = 0; i < sets.length; i++) {
+			TeamEditorState.clipboard.teams[team.key].sets[i] = sets[i];
+		}
 	}
 	pasteSet(index: number, isMove?: boolean) {
 		if (!TeamEditorState.clipboard) return;
@@ -319,6 +349,7 @@ class TeamEditorState extends PSModel {
 						const sets = Teams.unpack(team.packedTeam);
 						sets.splice(source, 1);
 						team.packedTeam = Teams.pack(sets);
+						team.iconCache = null;
 					}
 				}
 			}
@@ -339,6 +370,74 @@ class TeamEditorState extends PSModel {
 			this.sets.splice(index, 0, newSet);
 			index++;
 		}
+		TeamEditorState.clipboard = null;
+		this.save();
+	}
+	static pasteTeam(index: number, isMove?: boolean, folder = '') {
+		if (!TeamEditorState.clipboard) return;
+
+		if (isMove) {
+			if (TeamEditorState.clipboard.readonly) return;
+
+			const indexesToRemove: number[] = [];
+			for (const key in TeamEditorState.clipboard.teams) {
+				if (TeamEditorState.clipboard.teams[key].entire) {
+					const team = TeamEditorState.clipboard.teams[key].team;
+					const i = PS.teams.list.indexOf(team);
+					if (i >= 0) indexesToRemove.push(i);
+				}
+			}
+			// descending order, so splices won't affect future indices
+			indexesToRemove.sort((a, b) => -(a - b));
+			for (const i of indexesToRemove) {
+				PS.teams.list.splice(i, 1);
+				if (i < index) index--;
+			}
+		}
+
+		const teams: Team[] = [];
+
+		const sets: Teams.PokemonSet[] = [];
+		for (const key in TeamEditorState.clipboard.teams) {
+			const clipboardTeam = TeamEditorState.clipboard.teams[key];
+			if (clipboardTeam.entire) {
+				if (isMove) {
+					teams.push(clipboardTeam.team);
+					clipboardTeam.team.folder = folder;
+				} else {
+					const team: Team = {
+						name: `${clipboardTeam.team.name} (copy)`,
+						format: clipboardTeam.team.format,
+						folder,
+						packedTeam: clipboardTeam.team.packedTeam,
+						isBox: clipboardTeam.team.isBox,
+						iconCache: null,
+						key: '',
+					};
+					teams.push(team);
+				}
+			} else {
+				for (const set of Object.values(clipboardTeam.sets)) {
+					sets.push(set);
+				}
+			}
+		}
+		sets.push(...TeamEditorState.clipboard.otherSets || []);
+		if (sets.length) {
+			const team: Team = {
+				name: `Pasted Team`,
+				format: Dex.modid,
+				folder,
+				packedTeam: Teams.pack(sets),
+				isBox: false,
+				iconCache: null,
+				key: '',
+			};
+			teams.push(team);
+		}
+
+		PS.teams.spliceIn(index, teams);
+
 		TeamEditorState.clipboard = null;
 	}
 	ignoreRows = ['header', 'sortpokemon', 'sortmove', 'html'];
@@ -598,9 +697,7 @@ class TeamEditorState extends PSModel {
 		}
 	}
 	getStat(stat: StatName, set: Dex.PokemonSet, ivOverride: number, evOverride?: number, natureOverride?: number) {
-		const team = this.team;
-
-		const supportsEVs = !team.format.includes('letsgo');
+		const supportsEVs = !this.isLetsGo;
 		const supportsAVs = !supportsEVs;
 
 		// do this after setting set.evs because it's assumed to exist
@@ -637,7 +734,7 @@ class TeamEditorState extends PSModel {
 		return Math.trunc(val);
 	}
 	export(compat?: boolean) {
-		return Teams.export(this.sets, this.dex, compat);
+		return Teams.export(this.sets, this.dex, !compat);
 	}
 	import(value: string) {
 		this.sets = Teams.import(value);
@@ -814,6 +911,37 @@ class TeamEditorState extends PSModel {
 		if (Object.keys(cachedSets).length === 0) return null;
 		return cachedSets[set.species] || {};
 	}
+
+	static renderClipboard(cancelClipboard: () => void) {
+		if (!TeamEditorState.clipboard) return null;
+
+		const renderSet = (set: Dex.PokemonSet) => <div class="set">
+			<small>
+				<PSIcon pokemon={set} /> {set.name || set.species}
+				{set.ability && ` [${set.ability}]`}{set.item && ` @ ${set.item}`}
+				{} - {set.moves.join(' / ') || '(No moves)'}
+			</small>
+		</div>;
+		const renderTeam = (team: Team, sets: Dex.PokemonSet[]) => <div class="set"><small>
+			<strong>{team.name}</strong><br />
+			{sets.map(set => <PSIcon pokemon={set} />)}
+		</small></div>;
+
+		return <div class="infobox">
+			Clipboard
+			{Object.values(TeamEditorState.clipboard.teams || {})?.map(clipboardTeam => (
+				clipboardTeam.entire ? (
+					renderTeam(clipboardTeam.team, Object.values(clipboardTeam.sets))
+				) : (
+					Object.values(clipboardTeam.sets).map(set => renderSet(set))
+				)
+			))}
+			{TeamEditorState.clipboard.otherSets?.map(set => renderSet(set))}
+			<button class="button" onClick={cancelClipboard}>
+				<i class="fa fa-times" aria-hidden></i> Cancel
+			</button>
+		</div>;
+	}
 }
 
 export class TeamEditor extends preact.Component<{
@@ -873,27 +1001,6 @@ export class TeamEditor extends preact.Component<{
 	update = () => {
 		this.forceUpdate();
 	};
-	renderClipboard() {
-		if (!TeamEditorState.clipboard) return null;
-
-		const renderSet = (set: Dex.PokemonSet) => <div class="set">
-			<small>
-				<PSIcon pokemon={set} /> {set.name || set.species}
-				{set.ability && ` [${set.ability}]`}{set.item && ` @ ${set.item}`}
-				{} - {set.moves.join(' / ') || '(No moves)'}
-			</small>
-		</div>;
-		return <div class="infobox">
-			Clipboard
-			{Object.values(TeamEditorState.clipboard.teams || {})?.map(clipboardTeam => (
-				Object.values(clipboardTeam.sets).map(set => renderSet(set))
-			))}
-			{TeamEditorState.clipboard.otherSets?.map(set => renderSet(set))}
-			<button class="button" onClick={this.cancelClipboard}>
-				<i class="fa fa-times" aria-hidden></i> Cancel
-			</button>
-		</div>;
-	}
 	override render() {
 		if (!this.editor) {
 			this.editor = new TeamEditorState(this.props.team);
@@ -918,7 +1025,7 @@ export class TeamEditor extends preact.Component<{
 					Import/Export
 				</button></li>
 			</ul>
-			{this.renderClipboard()}
+			{TeamEditorState.renderClipboard(this.cancelClipboard)}
 			{this.wizard ? (
 				<TeamWizard editor={editor} onChange={this.props.onChange} onUpdate={this.update} />
 			) : (
@@ -1107,6 +1214,7 @@ class TeamTextbox extends preact.Component<{
 					this.replace(paste.paste.replace(/\r\n/g, '\n'), valueIndex, valueIndex + value.length);
 				} else {
 					this.editor.import(pasteTxt);
+					this.props.onChange?.();
 				}
 				const notes = paste["notes"] as string;
 				if (notes.startsWith("Format: ")) {
@@ -1885,7 +1993,7 @@ class TeamWizard extends preact.Component<{
 			<div style="text-align:right">
 				<button class="option" onClick={this.copySet} value={i}>
 					<i class="fa fa-copy" aria-hidden></i> {
-						isCur ? "Remove from clipboard" :
+						isCur ? "Deselect" :
 						TeamEditorState.clipboard ? "Add to clipboard" :
 						editor.readonly ? "Copy" :
 						"Copy/Move"
@@ -2369,19 +2477,18 @@ class StatForm extends preact.Component<{
 	onChange: () => void,
 }> {
 	static renderStatGraph(set: Dex.PokemonSet, editor: TeamEditorState, evs?: boolean) {
-		// const supportsEVs = !team.format.includes('letsgo');
 		const defaultEV = (editor.gen > 2 ? 0 : 252);
 		const ivs = editor.getIVs(set);
 		return Dex.statNames.map(statID => {
 			if (statID === 'spd' && editor.gen === 1) return null;
 
 			const stat = editor.getStat(statID, set, ivs[statID]);
-			let ev: number | string = set.evs?.[statID] ?? defaultEV;
-			let width = stat * 75 / 504;
-			if (statID === 'hp') width = stat * 75 / 704;
-			if (width > 75) width = 75;
-			let hue = Math.floor(stat * 180 / 714);
-			if (hue > 360) hue = 360;
+			let ev: number | string = set.evs ? (set.evs[statID] || 0) : defaultEV;
+			const maxStat = statID === 'hp' ?
+				Math.floor(176 * editor.defaultLevel / 25) + 10 :
+				Math.floor(247 * editor.defaultLevel / 50) + 5;
+			const width = Math.min(stat * 75 / maxStat, 75);
+			const hue = Math.min(Math.floor(stat * 180 / maxStat), 360);
 			const statName = editor.gen === 1 && statID === 'spa' ? 'Spc' : BattleStatNames[statID];
 			if (evs && !ev && !set.evs && statID === 'hp') ev = 'EVs';
 			return <span class="statrow">
@@ -2545,6 +2652,7 @@ class StatForm extends preact.Component<{
 		set.evs = optimized.evs;
 		this.plus = optimized.plus || null;
 		this.minus = optimized.minus || null;
+		this.updateNatureFromPlusMinus();
 		this.props.onChange();
 	};
 	renderSpreadGuesser() {
@@ -2640,11 +2748,12 @@ class StatForm extends preact.Component<{
 	plus: Dex.StatNameExceptHP | null = null;
 	minus: Dex.StatNameExceptHP | null = null;
 	renderStatbar(stat: number, statID: StatName) {
-		let width = stat * 180 / 504;
-		if (statID === 'hp') width = Math.floor(stat * 180 / 704);
-		if (width > 179) width = 179;
-		let hue = Math.floor(stat * 180 / 714);
-		if (hue > 360) hue = 360;
+		const { editor } = this.props;
+		const maxStat = statID === 'hp' ?
+			Math.floor(176 * editor.defaultLevel / 25) + 10 :
+			Math.floor(247 * editor.defaultLevel / 50) + 5;
+		const width = Math.min(stat * 180 / maxStat, 180);
+		const hue = Math.min(Math.floor(stat * 180 / maxStat), 360);
 		return <span
 			style={`width:${Math.floor(width)}px;background:hsl(${hue},85%,45%);border-color:hsl(${hue},85%,35%)`}
 		></span>;
@@ -2658,7 +2767,11 @@ class StatForm extends preact.Component<{
 		if (isNaN(value)) {
 			if (set.evs) delete set.evs[statID];
 		} else {
-			set.evs ||= {};
+			if (this.maxEVs() < 6 * 252 || this.props.editor.isLetsGo) {
+				set.evs ||= {};
+			} else {
+				set.evs ||= { hp: 252, atk: 252, def: 252, spa: 252, spd: 252, spe: 252 };
+			}
 			set.evs[statID] = value;
 		}
 
@@ -2756,20 +2869,19 @@ class StatForm extends preact.Component<{
 		this.props.onChange();
 	};
 	maxEVs() {
-		const team = this.props.editor.team;
-		const useEVs = !team.format.includes('letsgo');
+		const editor = this.props.editor;
+		const useEVs = !editor.isLetsGo && editor.gen >= 3;
 		return useEVs ? 510 : Infinity;
 	}
 	override render() {
 		const { editor, set } = this.props;
-		const team = editor.team;
 		const species = editor.dex.species.get(set.species);
 
 		const baseStats = species.baseStats;
 
 		const nature = BattleNatures[set.nature || 'Serious'];
 
-		const useEVs = !team.format.includes('letsgo');
+		const useEVs = !editor.isLetsGo;
 		// const useAVs = !useEVs && team.format.endsWith('norestrictions');
 		const maxEV = useEVs ? 252 : 200;
 		const stepEV = useEVs ? 4 : 1;
@@ -2793,14 +2905,14 @@ class StatForm extends preact.Component<{
 		] as const);
 
 		let remaining = null;
-		const maxEv = this.maxEVs();
-		if (maxEv < 6 * 252) {
+		const maxEVs = this.maxEVs();
+		if (maxEVs < 6 * 252) {
 			let totalEv = 0;
 			for (const ev of Object.values(set.evs || {})) totalEv += ev;
-			if (totalEv <= maxEv) {
-				remaining = (totalEv > (maxEv - 2) ? 0 : (maxEv - 2) - totalEv);
+			if (totalEv <= maxEVs) {
+				remaining = (totalEv > (maxEVs - 2) ? 0 : (maxEVs - 2) - totalEv);
 			} else {
-				remaining = maxEv - totalEv;
+				remaining = maxEVs - totalEv;
 			}
 			remaining ||= null;
 		}
