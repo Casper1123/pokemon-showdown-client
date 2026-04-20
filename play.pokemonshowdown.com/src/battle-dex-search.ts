@@ -1139,10 +1139,10 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		let slices: { [k: string]: number } = table.formatSlices;
 		if (this.formatType === 'natdexcustom') {
 			if (this.isDoubles) {
-				tierSet = tierSet.slice(slices['MOD']);
-			} else {
-				tierSet = tierSet.slice(slices["MOD Uber"]);
-			}
+					tierSet = tierSet.slice(slices['DMOD Uber'] || slices.Uber);
+				} else {
+					tierSet = tierSet.slice(slices['MOD Uber'] || slices.Uber);
+				}
 		} else if (format === 'ubers' || format === 'uber' || format === 'ubersuu' || format === 'nationaldexdoubles') {
 			tierSet = tierSet.slice(slices.Uber);
 		} else if (isVGCOrBS || (isHackmons && dex.gen === 9 && !this.formatType)) {
@@ -1199,12 +1199,6 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 			tierSet = tierSet.slice(slices.Uber);
 		} else if (this.formatType === 'rs' || this.formatType === 'frlg') {
 			tierSet = tierSet.slice(slices.Regular);
-		} else if (this.formatType === 'natdexcustom') {
-			if (isDoublesOrBS) {
-				tierSet = tierSet.slice(slices['DMOD Uber'] || slices.Uber);
-			} else {
-				tierSet = tierSet.slice(slices['MOD Uber'] || slices.Uber);
-			}
 		} else if (!isDoublesOrBS) {
 			tierSet = [
 				...tierSet.slice(slices.OU, slices.UU),

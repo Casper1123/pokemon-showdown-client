@@ -25,7 +25,8 @@ import {
 } from "./battle-dex-data";
 import type * as DexData from "./battle-dex-data";
 import type { Teams } from "./battle-teams";
-import { Config } from "./client-main";
+import {Config, PS} from "./client-main";
+import {DexSearch, type SearchType} from "./battle-dex-search";
 
 export declare namespace Dex {
 	/* eslint-disable @typescript-eslint/no-shadow */
