@@ -284,7 +284,6 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		const tierTable = {};
 		const overrideTier = {};
 		const metagameBans = {};
-		const nonstandardMoves = [];
 		for (const id of pokemon) {
 			const species = Dex.mod(gen).species.get(id);
 			const baseSpecies = Dex.mod(gen).species.get(species.baseSpecies);
@@ -379,12 +378,6 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			}
 		}
 
-		nonstandardMoves.push(...Object.keys(Dex.data.Moves).filter(id => {
-			const move = Dex.mod(isSSDLC1 ? 'gen8dlc1' : isPreDLC ? 'gen9predlc' : 'gen9dlc1').moves.get(id);
-			const bMove = Dex.mod(isSSDLC1 ? 'gen8' : 'gen9').moves.get(id);
-			return bMove.isNonstandard !== move.isNonstandard;
-		}));
-
 		const tiers = [];
 		const items = [];
 		const formatSlices = {};
@@ -396,17 +389,12 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 			BattleTeambuilderTable['gen' + genNum + 'natdex'].items = items;
 			BattleTeambuilderTable['gen' + genNum + 'natdex'].metagameBans = metagameBans;
 			BattleTeambuilderTable['gen' + genNum + 'natdex'].formatSlices = formatSlices;
-			if (isNatDex && genNum === 9) {
-				BattleTeambuilderTable['gen' + genNum + 'natdex'].thirtyfivePokes = thirtyfivePokes;
-			}
 		} else if (isCustomNatdex && !isDoubles) {
 			BattleTeambuilderTable['gen' + genNum + 'natdexcustom'] = {};
 			BattleTeambuilderTable['gen' + genNum + 'natdexcustom'].learnsets = {};
 			BattleTeambuilderTable['gen' + genNum + 'natdexcustom'].tiers = tiers;
 			BattleTeambuilderTable['gen' + genNum + 'natdexcustom'].overrideTier = overrideTier;
 			BattleTeambuilderTable['gen' + genNum + 'natdexcustom'].items = items;
-			BattleTeambuilderTable['gen' + genNum + 'natdexcustom'].ndDoublesBans = ndDoublesBans;
-			BattleTeambuilderTable['gen' + genNum + 'natdexcustom'].monotypeBans = monotypeBans;
 			BattleTeambuilderTable['gen' + genNum + 'natdexcustom'].formatSlices = formatSlices;
 		} else if (isCustomNatdex && isDoubles) {
 			BattleTeambuilderTable['gen' + genNum + 'natdexcustomdoubles'] = {};
