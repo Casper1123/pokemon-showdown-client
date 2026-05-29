@@ -61,6 +61,5 @@ play.pokemonshowdown.com/config/config.js
 /teams.pokemonshowdown.com/index.html
 /teams.pokemonshowdown.com/ads.txt
 /.idea
-package-lock.json
 play.pokemonshowdown.com/js/lib/preact.min.js.map
 play.pokemonshowdown.com/js/lib/sockjs-1.4.0.min.js.map
