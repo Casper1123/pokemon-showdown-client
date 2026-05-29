@@ -192,73 +192,73 @@
 	Search.prototype.renderRow = function (id, type, matchStart, matchLength, errorMessage, attrs) {
 		// errorMessage = '<span class="col illegalcol"><em>' + errorMessage + '</em></span>';
 		switch (type) {
-		case 'html':
-			return '<li class="result">' + id + '</li>';
-		case 'header':
-			return '<li class="result"><h3>' + id + '</h3></li>';
-		case 'sortpokemon':
-			return this.renderPokemonSortRow();
-		case 'sortmove':
-			return this.renderMoveSortRow();
-		case 'pokemon':
-			var pokemon = this.engine.dex.species.get(id);
-			return this.renderPokemonRow(pokemon, matchStart, matchLength, errorMessage, attrs);
-		case 'move':
-			var move = this.engine.dex.moves.get(id);
-			return this.renderMoveRow(move, matchStart, matchLength, errorMessage, attrs);
-		case 'item':
-			var item = this.engine.dex.items.get(id);
-			return this.renderItemRow(item, matchStart, matchLength, errorMessage, attrs);
-		case 'ability':
-			var ability = this.engine.dex.abilities.get(id);
-			return this.renderAbilityRow(ability, matchStart, matchLength, errorMessage, attrs);
-		case 'type':
-			var type = { name: id[0].toUpperCase() + id.substr(1) };
-			return this.renderTypeRow(type, matchStart, matchLength, errorMessage);
-		case 'egggroup':
-			// very hardcode
-			var egName;
-			if (id === 'humanlike') egName = 'Human-Like';
-			else if (id === 'water1') egName = 'Water 1';
-			else if (id === 'water2') egName = 'Water 2';
-			else if (id === 'water3') egName = 'Water 3';
-			if (egName) {
-				if (matchLength > 5) matchLength++;
-			} else {
-				egName = id[0].toUpperCase() + id.substr(1);
-			}
-			var egggroup = { name: egName };
-			return this.renderEggGroupRow(egggroup, matchStart, matchLength, errorMessage);
-		case 'tier':
-			// very hardcode
-			var tierTable = {
-				uber: "Uber",
-				ou: "OU",
-				uu: "UU",
-				ru: "RU",
-				nu: "NU",
-				pu: "PU",
-				zu: "ZU",
-				nfe: "NFE",
-				lc: "LC",
-				cap: "CAP",
-				caplc: "CAP LC",
-				capnfe: "CAP NFE",
-				uubl: "UUBL",
-				rubl: "RUBL",
-				nubl: "NUBL",
-				publ: "PUBL",
-				zubl: "ZUBL"
-			};
-			var tier = { name: tierTable[id] };
-			return this.renderTierRow(tier, matchStart, matchLength, errorMessage);
-		case 'category':
-			var category = { name: id[0].toUpperCase() + id.substr(1), id: id };
-			return this.renderCategoryRow(category, matchStart, matchLength, errorMessage);
-		case 'article':
-			var articleTitle = (window.BattleArticleTitles && BattleArticleTitles[id]) || (id[0].toUpperCase() + id.substr(1));
-			var article = { name: articleTitle, id: id };
-			return this.renderArticleRow(article, matchStart, matchLength, errorMessage);
+			case 'html':
+				return '<li class="result">' + id + '</li>';
+			case 'header':
+				return '<li class="result"><h3>' + id + '</h3></li>';
+			case 'sortpokemon':
+				return this.renderPokemonSortRow();
+			case 'sortmove':
+				return this.renderMoveSortRow();
+			case 'pokemon':
+				var pokemon = this.engine.dex.species.get(id);
+				return this.renderPokemonRow(pokemon, matchStart, matchLength, errorMessage, attrs);
+			case 'move':
+				var move = this.engine.dex.moves.get(id);
+				return this.renderMoveRow(move, matchStart, matchLength, errorMessage, attrs);
+			case 'item':
+				var item = this.engine.dex.items.get(id);
+				return this.renderItemRow(item, matchStart, matchLength, errorMessage, attrs);
+			case 'ability':
+				var ability = this.engine.dex.abilities.get(id);
+				return this.renderAbilityRow(ability, matchStart, matchLength, errorMessage, attrs);
+			case 'type':
+				var type = { name: id[0].toUpperCase() + id.substr(1) };
+				return this.renderTypeRow(type, matchStart, matchLength, errorMessage);
+			case 'egggroup':
+				// very hardcode
+				var egName;
+				if (id === 'humanlike') egName = 'Human-Like';
+				else if (id === 'water1') egName = 'Water 1';
+				else if (id === 'water2') egName = 'Water 2';
+				else if (id === 'water3') egName = 'Water 3';
+				if (egName) {
+					if (matchLength > 5) matchLength++;
+				} else {
+					egName = id[0].toUpperCase() + id.substr(1);
+				}
+				var egggroup = { name: egName };
+				return this.renderEggGroupRow(egggroup, matchStart, matchLength, errorMessage);
+			case 'tier':
+				// very hardcode
+				var tierTable = {
+					uber: "Uber",
+					ou: "OU",
+					uu: "UU",
+					ru: "RU",
+					nu: "NU",
+					pu: "PU",
+					zu: "ZU",
+					nfe: "NFE",
+					lc: "LC",
+					cap: "CAP",
+					caplc: "CAP LC",
+					capnfe: "CAP NFE",
+					uubl: "UUBL",
+					rubl: "RUBL",
+					nubl: "NUBL",
+					publ: "PUBL",
+					zubl: "ZUBL"
+				};
+				var tier = { name: tierTable[id] };
+				return this.renderTierRow(tier, matchStart, matchLength, errorMessage);
+			case 'category':
+				var category = { name: id[0].toUpperCase() + id.substr(1), id: id };
+				return this.renderCategoryRow(category, matchStart, matchLength, errorMessage);
+			case 'article':
+				var articleTitle = (window.BattleArticleTitles && BattleArticleTitles[id]) || (id[0].toUpperCase() + id.substr(1));
+				var article = { name: articleTitle, id: id };
+				return this.renderArticleRow(article, matchStart, matchLength, errorMessage);
 		}
 		return 'Error: not found';
 	};
