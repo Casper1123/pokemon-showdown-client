@@ -583,7 +583,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 
 	protected formatType: 'natdexcustom' | 'doubles' | 'bdsp' | 'bdspdoubles' | 'rs' | 'frlg' | 'bw1' | 'letsgo' | 'metronome' | 'natdex' | 'nfe' |
 		'ssdlc1' | 'ssdlc1doubles' | 'predlc' | 'predlcdoubles' | 'predlcnatdex' | 'svdlc1' | 'svdlc1doubles' |
-		'svdlc1natdex' | 'stadium' | 'lc' | 'legendsza' | 'champions' |  null = null;
+		'svdlc1natdex' | 'stadium' | 'lc' | 'legendsza' | 'champions' | null = null;
 	isDoubles = false;
 
 	/**
@@ -697,8 +697,8 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.formatType = 'letsgo';
 			this.dex = Dex.mod('gen7letsgo' as ID);
 		}
-		if ((format.includes('nationaldex') || format.startsWith('nd') || format.includes('natdex'))
-			&& !(format.includes('nationaldexcustom') || format.startsWith('ndc') || format.includes('natdexcustom'))) {
+		if ((format.includes('nationaldex') || format.startsWith('nd') || format.includes('natdex')) &&
+			!(format.includes('nationaldexcustom') || format.startsWith('ndc') || format.includes('natdexcustom'))) {
 			format = (format.startsWith('nd') ? format.slice(2) :
 				format.includes('natdex') ? format.slice(6) : format.slice(11)) as ID;
 			this.formatType = 'natdex';
@@ -738,7 +738,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.formatType = 'natdexcustom';
 			if (!format) format = 'uber' as ID;
 			this.isDoubles = format.includes('doubles');
-			let dexmod = `gen${this.dex.gen}natdexcustom`
+			let dexmod = `gen${this.dex.gen}natdexcustom`;
 			if (this.isDoubles) dexmod += 'doubles';
 			this.dex = Dex.mod(dexmod as ID);
 			console.debug(`Constructor dex set to Dex.mod(${dexmod})`);
@@ -937,7 +937,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		const gen = this.dex.gen;
 		const tableKey = this.formatType === 'doubles' ? `gen${gen}doubles` :
 			(this.formatType === 'natdexcustom' && !this.isDoubles) ? `gen${gen}natdexcustom` :
-				(this.formatType === 'natdexcustom' && this.isDoubles) ? `gen${gen}natdexcustomdoubles` :
+			(this.formatType === 'natdexcustom' && this.isDoubles) ? `gen${gen}natdexcustomdoubles` :
 			this.formatType === 'letsgo' ? 'gen7letsgo' :
 			this.formatType === 'bdsp' ? 'gen8bdsp' :
 			this.formatType === 'bdspdoubles' ? 'gen8bdspdoubles' :
@@ -1137,10 +1137,10 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		let slices: { [k: string]: number } = table.formatSlices;
 		if (this.formatType === 'natdexcustom') {
 			if (this.isDoubles) {
-					tierSet = tierSet.slice(slices['DMOD Uber'] || slices.Uber);
-				} else {
-					tierSet = tierSet.slice(slices['MOD Uber'] || slices.Uber);
-				}
+				tierSet = tierSet.slice(slices['DMOD Uber'] || slices.Uber);
+			} else {
+				tierSet = tierSet.slice(slices['MOD Uber'] || slices.Uber);
+			}
 		} else if (format === 'ubers' || format === 'uber' || format === 'ubersuu' || format === 'nationaldexdoubles') {
 			tierSet = tierSet.slice(slices.Uber);
 		} else if (isVGCOrBS || (isHackmons && dex.gen === 9 && !this.formatType)) {
@@ -1594,7 +1594,7 @@ class BattleMoveSearch extends BattleTypedSearch<'move'> {
 
 		if (this.formatType === 'natdexcustom') {
 			const table = BattleTeambuilderTable[`gen${dex.gen}natdexcustom` + ((this.isDoubles) ? 'doubles' : '')];
-			if (table && table.overrideMoveData && table.overrideMoveData[id]) {
+			if (table?.overrideMoveData?.[id]) {
 				return true;
 			}
 		}
