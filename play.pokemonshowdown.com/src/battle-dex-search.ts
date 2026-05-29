@@ -581,7 +581,8 @@ abstract class BattleTypedSearch<T extends SearchType> {
 	 */
 	set: Dex.PokemonSet | null = null;
 
-	protected formatType: 'natdexcustom' | 'doubles' | 'bdsp' | 'bdspdoubles' | 'rs' | 'frlg' | 'bw1' | 'letsgo' | 'metronome' | 'natdex' | 'nfe' |
+	protected formatType: 'natdexcustom' | 'doubles' | 'bdsp' | 'bdspdoubles' | 'rs' | 'frlg' | 'bw1' | 'letsgo' |
+		'metronome' | 'natdex' | 'nfe' |
 		'ssdlc1' | 'ssdlc1doubles' | 'predlc' | 'predlcdoubles' | 'predlcnatdex' | 'svdlc1' | 'svdlc1doubles' |
 		'svdlc1natdex' | 'stadium' | 'lc' | 'legendsza' | 'champions' | null = null;
 	isDoubles = false;
@@ -838,7 +839,8 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		if (this.formatType === 'letsgo') table = table['gen7letsgo'];
 		if (this.formatType === 'bw1') table = table['gen5bw1'];
 		if (this.formatType === 'rs') table = table['gen3rs'];
-		if (this.formatType === 'natdexcustom') table = table[`gen${this.dex.gen}natdexcustom` + ((this.isDoubles) ? 'doubles' : '')];
+		if (this.formatType === 'natdexcustom') table =
+			table[`gen${this.dex.gen}natdexcustom` + ((this.isDoubles) ? 'doubles' : '')];
 		if (this.formatType === 'frlg') table = table['gen3frlg'];
 		if (this.formatType === 'legendsza') table = table['gen9legendsou'];
 		if (this.formatType === 'champions') table = table['champions'];
@@ -893,7 +895,8 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.format.startsWith('battlespot') ||
 			this.format.startsWith('battlestadium') ||
 			this.format.startsWith('battlefestival') ||
-			(this.dex.gen === 9 && this.formatType !== 'natdex' && this.formatType !== 'legendsza' && this.formatType !== 'natdexcustom')
+			(this.dex.gen === 9 && this.formatType !== 'natdex' &&
+				this.formatType !== 'legendsza' && this.formatType !== 'natdexcustom')
 		) {
 			if (gen === 9) {
 				genChar = 'a';
@@ -915,7 +918,8 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			if (this.formatType === 'frlg') table = table['gen3frlg'];
 			if (this.formatType === 'legendsza') table = table['gen9legendsou'];
 			if (this.formatType === 'champions') table = table['champions'];
-			if (this.formatType === 'natdexcustom') table = table[`gen${this.dex.gen}natdexcustom` + ((this.isDoubles) ? 'doubles' : '')];
+			if (this.formatType === 'natdexcustom') table =
+				table[`gen${this.dex.gen}natdexcustom` + ((this.isDoubles) ? 'doubles' : '')];
 			let learnset = table.learnsets[learnsetid];
 			const eggMovesOnly = this.eggMovesOnly(learnsetid, speciesid);
 			if (learnset && (moveid in learnset) && (!this.format.startsWith('tradebacks') ? learnset[moveid].includes(genChar) :
@@ -1242,7 +1246,8 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 					return true;
 				});
 			}
-			if ((format === 'doubles' || format === 'monotype') && (this.formatType === 'natdex' || this.formatType === 'natdexcustom') && table.metagameBans?.[format]) {
+			if ((format === 'doubles' || format === 'monotype') && (this.formatType === 'natdex' ||
+				this.formatType === 'natdexcustom') && table.metagameBans?.[format]) {
 				tierSet = tierSet.filter(([type, id]) => {
 					if (id in table.metagameBans[format]) return false;
 					if ('miraidon' in table.metagameBans[format] && 'calyrexshadow' in table.metagameBans[format] &&
@@ -1268,7 +1273,8 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		}
 
 		// Filter out Gmax Pokemon from standard tier selection
-		if (!(/^(battlestadium|vgc|doublesubers)/g.test(format) || (format === 'doubles' && (this.formatType === 'natdex' || this.formatType === 'natdexcustom')))) {
+		if (!(/^(battlestadium|vgc|doublesubers)/g.test(format) || (format === 'doubles' &&
+			(this.formatType === 'natdex' || this.formatType === 'natdexcustom')))) {
 			tierSet = tierSet.filter(([type, id]) => {
 				if (type === 'header' && id === 'DUber by technicality') return false;
 				if (type === 'header' && id === 'Uber by technicality') return false;

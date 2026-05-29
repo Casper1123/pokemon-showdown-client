@@ -29,14 +29,14 @@ if (!fs.existsSync(assetsCache)) {
 		});
 		console.log("DONE");
 	} catch (error) {
-	console.log("FAILED");
-	console.error("Failed to clone assets repository:");
-	console.error("This is likely due to:");
-	console.error("- SSH key not configured or not accessible");
-	console.error("- No access to the private repository");
-	console.error(`Error details: ${error.message}`);
-	console.error("You could consider removing this if you do not have an assets repository. This is handled in build-tools/build-minidex.js");
-	console.error("You could also replace the assets repo address.");
+		console.log("FAILED");
+		console.error("Failed to clone assets repository:");
+		console.error("This is likely due to:");
+		console.error("- SSH key not configured or not accessible");
+		console.error("- No access to the private repository");
+		console.error(`Error details: ${error.message}`);
+		console.error("You could consider removing this if you do not have an assets repository. This is handled in build-tools/build-minidex.js");
+		console.error("You could also replace the assets repo address.");
 	}
 } else {
 	process.stdout.write("Updating assets repository... ");
