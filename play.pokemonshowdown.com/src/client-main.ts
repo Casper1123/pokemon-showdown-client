@@ -512,6 +512,7 @@ class PSTeams extends PSStreamModel<'team' | 'format'> {
 		};
 	}
 	loadRemoteTeams() {
+		return; // Do not notify; this is on purpose.
 		return PS.alert('Error loading uploaded teams: This feature is currently not supported.');
 		PSLoginServer.query('getteams').then(data => {
 			if (!data) return;
