@@ -322,7 +322,7 @@ class PSPrefs extends PSStreamModel<string | null> {
 			for (let title of rooms.split(",")) {
 				const id = /[^a-z0-9-]/.test(title) ? toID(title) as any as RoomID : title as RoomID;
 				PS.addRoom({ id, title, connected: true, autofocus: false });
-			};
+			}
 			const cmd = `/autojoin ${rooms}`;
 			if (PS.connection?.queue.includes(cmd)) {
 				// don't jam up the queue with autojoin requests
@@ -2860,6 +2860,9 @@ export const PS = new class extends PSModel {
 /**********************************************************************
  * OfficialAuth
  *********************************************************************/
+
+/* eslint-disable no-restricted-syntax, no-restricted-globals */
+
 export class OfficialAuthError extends Error {
 	constructor(operation: string, statusCode: number | null = null) {
 		super(`Official auth error in operation '${operation}'.` + (statusCode !== null ? "" : `Status code: ${statusCode!.toString()}`));
@@ -3074,7 +3077,6 @@ export const OfficialAuth = new class {
 
 	hasItemsStored(): boolean {
 		const token = localStorage.getItem("ps-token");
-		const tokenExpiry = localStorage.getItem("ps-tokenExpiry");
 		const userid = localStorage.getItem("ps-token-userid");
 		return token !== null && userid !== "" && userid !== null;
 	}
@@ -3111,3 +3113,4 @@ export const OfficialAuth = new class {
 		return !reauth;
 	}
 };
+/* eslint-enable no-restricted-syntax, no-restricted-globals */

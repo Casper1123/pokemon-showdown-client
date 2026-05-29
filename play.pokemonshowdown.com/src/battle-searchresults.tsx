@@ -26,6 +26,7 @@ export class PSSearchResults extends preact.Component<{
 	moveIds: ID[] = [];
 	resultIndex = -1;
 
+	// eslint-disable-next-line no-restricted-globals
 	collapsedTiers = new Set<string>();
 	toggleTier = (tierName: string) => {
 		if (this.collapsedTiers.has(tierName)) {
