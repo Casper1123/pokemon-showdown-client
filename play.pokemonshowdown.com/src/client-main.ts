@@ -634,7 +634,7 @@ class PSTeams extends PSStreamModel<'team' | 'format'> {
  * User
  *********************************************************************/
 
-export type PSLoginState = { error?: string, success?: true, name?: string, needsPassword?: true, needsGoogle?: true };
+export type PSLoginState = { error?: string, success?: true, name?: string, needsPassword?: true };
 export class PSUser extends PSStreamModel<PSLoginState | null> {
 	name = "";
 	group = '';
@@ -749,12 +749,6 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 				this.handleAssertion(name, data.assertion);
 			} else {
 				// wrong password
-				if (special.needsGoogle) {
-					try {
-						// @ts-expect-error gapi included dynamically
-						gapi.auth2.getAuthInstance().signOut();
-					} catch {}
-				}
 				this.updateLogin({
 					name,
 					error: data?.error || 'Wrong password.',
@@ -789,7 +783,7 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 		if (assertion === ';') {
 			this.updateLogin({ name, needsPassword: true });
 		} else if (assertion === ';;@gmail') {
-			this.updateLogin({ name, needsGoogle: true });
+			this.updateLogin({ name });
 		} else if (assertion.startsWith(';;')) {
 			this.updateLogin({ error: assertion.slice(2) });
 		} else if (assertion.includes('\n') || !assertion) {
