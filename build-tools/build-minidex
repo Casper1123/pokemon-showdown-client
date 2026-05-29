@@ -14,7 +14,7 @@ if (!fs.existsSync(assetsCache)) {
 	try {
 		process.stdout.write("Cloning assets repository... ");
 		child_process.execSync('git clone git@github.com:Casper1123/pokemon-showdown-assets.git pokemon-showdown-assets', {
-			cwd: 'caches'
+			cwd: 'caches',
 		});
 		process.stdout.write("Creating asset symlinks... ");
 		const assetDirs = ['sprites', 'audio', 'fx'];
