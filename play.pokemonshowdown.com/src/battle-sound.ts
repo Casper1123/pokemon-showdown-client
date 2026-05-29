@@ -82,7 +82,6 @@ export class BattleBGM {
 			this.sound.currentTime -= (this.loopend - this.loopstart) / 1000;
 		}
 
-		// @ts-ignore
 		this.timer = setTimeout(() => {
 			this.updateTime();
 		}, Math.max(this.loopend - progress, 1));
@@ -118,7 +117,6 @@ export const BattleSound = new class {
 		try {
 			console.debug("Creating sound element with url", url);
 			const sound = document.createElement('audio');
-			//sound.src = `https://play.pokemonshowdown.com/${url}`;
 			sound.src = `https://${Config.routes.client}/${url}`;
 			sound.volume = this.effectVolume / 100;
 			this.soundCache[url] = sound;

@@ -678,6 +678,7 @@ export const BattlePokemonIconIndexes: { [id: string]: number } = {
 	ramnarok: 1560 + 78,
 	ramnarokradiant: 1560 + 79,
 	flox: 1560 + 80,
+	obliteryx: 1560 + 81,
 };
 
 export const BattlePokemonIconIndexesLeft: { [id: string]: number } = {
@@ -1156,8 +1157,7 @@ export class Item implements Effect {
 	readonly desc: string;
 	readonly shortDesc: string;
 
-	readonly megaStone: string;
-	readonly megaEvolves: string;
+	readonly megaStone: { [megaEvolves: string]: string };
 	readonly zMove: string | true | null;
 	readonly zMoveType: TypeName | '';
 	readonly zMoveFrom: string;
@@ -1183,8 +1183,7 @@ export class Item implements Effect {
 		this.desc = data.desc || data.shortDesc || '';
 		this.shortDesc = data.shortDesc || this.desc;
 
-		this.megaStone = data.megaStone || '';
-		this.megaEvolves = data.megaEvolves || '';
+		this.megaStone = data.megaStone || null;
 		this.zMove = data.zMove || null;
 		this.zMoveType = data.zMoveType || '';
 		this.zMoveFrom = data.zMoveFrom || '';
@@ -1279,7 +1278,7 @@ export class Move implements Effect {
 	readonly accuracy: number | true;
 	readonly pp: number;
 	readonly type: TypeName;
-	readonly category: 'Physical' | 'Special' | 'Status';
+	readonly category: CategoryName;
 	readonly priority: number;
 	readonly target: MoveTarget;
 	readonly pressureTarget: MoveTarget;

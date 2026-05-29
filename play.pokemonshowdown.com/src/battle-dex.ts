@@ -26,7 +26,6 @@ import {
 import type * as DexData from "./battle-dex-data";
 import type { Teams } from "./battle-teams";
 import {Config, PS} from "./client-main";
-import {DexSearch, type SearchType} from "./battle-dex-search";
 
 export declare namespace Dex {
 	/* eslint-disable @typescript-eslint/no-shadow */
@@ -733,18 +732,10 @@ export const Dex = new class implements ModdedDex {
 
 	mod(modid: ID): ModdedDex {
 		if (modid === 'gen9') return this;
-		if (!window.BattleTeambuilderTable) {
-			console.error(`Loading mod ${modid} isn't in the battleteambuildertable`);
-			return this;
-		}
+		if (!window.BattleTeambuilderTable) return this;
 		if (modid in this.moddedDexes) {
 			return this.moddedDexes[modid];
 		}
-
-		// if (!window.BattleTeambuilderTable[modid]) {
-		// 	this.loadModData(modid);
-		// }
-
 		this.moddedDexes[modid] = new ModdedDex(modid);
 		return this.moddedDexes[modid];
 	}
@@ -771,7 +762,6 @@ export const Dex = new class implements ModdedDex {
 		let dex = Dex.forGen(Dex.formatGen(format));
 
 		const formatid = toID(format).slice(4);
-
 		if (dex.gen === 7 && formatid.includes('letsgo')) {
 			dex = Dex.mod('gen7letsgo' as ID);
 		}
@@ -1334,7 +1324,7 @@ export const Dex = new class implements ModdedDex {
 		let left = (num % 12) * 40;
 		let fainted = ((pokemon as Pokemon | ServerPokemon)?.fainted ?
 			`;opacity:.3;filter:grayscale(100%) brightness(.5)` : ``);
-		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v21) no-repeat scroll -${left}px -${top}px${fainted}`;
+		return `background:transparent url(${Dex.resourcePrefix}sprites/pokemonicons-sheet.png?v22) no-repeat scroll -${left}px -${top}px${fainted}`;
 	}
 
 	getTeambuilderSpriteData(pokemon: any, dex: ModdedDex = Dex): TeambuilderSpriteData {
@@ -1370,10 +1360,11 @@ export const Dex = new class implements ModdedDex {
 		if (dex.modid === 'gen7letsgo') gen = 8;
 		if (Dex.prefs('nopastgens')) gen = 9;
 		if (Dex.prefs('bwgfx') && gen > 5) gen = 5;
+		// TODO: refactor after we get home sprites for Z-A Megas and Eternal Floette
 		let homeExists = (!species.isNonstandard || !['CAP', 'Custom'].includes(species.isNonstandard) ||
 			species.id === "xerneasneutral") && ![
 			"floetteeternal", "pichuspikyeared", "pikachubelle", "pikachucosplay", "pikachulibre", "pikachuphd", "pikachupopstar", "pikachurockstar",
-		].includes(species.id);
+		].includes(species.id) && !(species.isMega && species.gen === 9);
 		if (gen >= 8 && homeExists) {
 			spriteData.spriteDir = 'sprites/home-centered';
 			spriteData.x = 8;

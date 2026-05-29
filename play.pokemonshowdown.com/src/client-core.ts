@@ -164,9 +164,9 @@ export const PSBackground = new class extends PSStreamModel<string | null> {
 				bgid = 'shaymin';
 			} else {
 				const bgs = ['horizon', 'ocean', 'waterfall', 'shaymin', 'charizards'];
-				bgid = bgs[Math.floor(Math.random() * 5)];
+				bgid = bgs[Math.floor(Math.random() * bgs.length)];
 				// if someone clicked the random button, try to roll a different bg than before
-				if (bgid === this.curId) bgid = bgs[Math.floor(Math.random() * 5)];
+				if (bgid === this.curId) bgid = bgs[Math.floor(Math.random() * bgs.length)];
 			}
 		}
 		this.curId = bgid;

@@ -7,7 +7,7 @@
 
 import { PS, PSRoom, type RoomOptions, type Team } from "./client-main";
 import { PSPanelWrapper, PSRoomPanel } from "./panels";
-import { toID, type ID, Dex } from "./battle-dex";
+import { toID, type ID } from "./battle-dex";
 import { BattleLog } from "./battle-log";
 import { TeamEditor } from "./battle-team-editor";
 import { Net, PSLoginServer } from "./client-connection";
@@ -39,17 +39,6 @@ class TeamRoom extends PSRoom {
 	setFormat(format: string) {
 		const team = this.team;
 		team.format = toID(format);
-
-		if (window.FormatModMapping && window.FormatModMapping[format]) {
-			const modId = window.FormatModMapping[format];
-			// Ensure the proper mod is loaded.
-			if (window.FormatModMapping && window.FormatModMapping[modId]) {
-				const modid = window.FormatModMapping[modId];
-				if (!window.BattleTeambuilderTable[modid]) {
-					Dex.loadModData(modid);
-				}
-			}
-		}
 	}
 	load() {
 		PS.teams.loadTeam(this.team, true)?.then(() => {
@@ -230,7 +219,7 @@ class TeamPanel extends PSRoomPanel<TeamRoom> {
 		}
 
 		const unsaved = team.uploaded && team.uploadedPackedTeam ? team.uploadedPackedTeam !== team.packedTeam : false;
-		return <PSPanelWrapper room={room} scrollable><div class="pad">
+		return <PSPanelWrapper room={room}><div class="pad">
 			<a class="button" href="teambuilder" data-target="replace">
 				<i class="fa fa-chevron-left" aria-hidden></i> Teams
 			</a> {}
@@ -373,7 +362,7 @@ class ViewTeamPanel extends PSRoomPanel {
 			</PSPanelWrapper>;
 		}
 
-		return <PSPanelWrapper room={room} scrollable><div class="pad">
+		return <PSPanelWrapper room={room}><div class="pad">
 			<h1>{team.name || "Untitled team"}</h1>
 			<CopyableURLBox
 				url={`https://psim.us/t/${team.teamid!}${teamData.private ? '-' + teamData.private : ''}`}
@@ -391,7 +380,7 @@ type TeamStorage = 'account' | 'public' | 'disconnected' | 'local';
 class TeamStoragePanel extends PSRoomPanel {
 	static readonly id = "teamstorage";
 	static readonly routes = ["teamstorage-*"];
-	static readonly location = "semimodal-popup";
+	static readonly location = "modal-popup";
 	static readonly noURL = true;
 
 	chooseOption = (ev: MouseEvent) => {

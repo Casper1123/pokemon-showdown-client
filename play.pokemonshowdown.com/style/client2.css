@@ -896,11 +896,24 @@ p.or:after {
 
 .challenge {
 	margin: 0 5px 5px;
-	background: #fcd2b3;
 	border: 1px solid #f57b21;
-	border-radius: 5px;
+	background: #fcd2b3;
 	color: #682f05;
+	border-radius: 5px;
 	padding: 1px 5px;
+}
+.dark .challenge {
+	background: #682f05;
+	color: #fcd2b3;
+}
+.challenge.outgoing {
+	border: 1px solid #217bf5;
+	background: #b3d2fc;
+	color: #052f68;
+}
+.dark .challenge.outgoing {
+	background: #052f68;
+	color: #b3d2fc;
 }
 .challenge p {
 	margin: 4px 0;
@@ -1061,7 +1074,7 @@ form.menugroup {
 	font-size: 18pt;
 	font-weight: normal;
 }
- .roomcounters .usercount {
+.roomcounters .usercount {
 	display: block;
 	width: 49px;
 	height: 63px;
@@ -1633,6 +1646,9 @@ pre.textbox.textbox-empty[placeholder]:before {
 	border-right: 0;
 	border-top: 0;
 	border-bottom: 0;
+}
+.ps-room .battle-log .inner {
+	padding-top: 25px;
 }
 
 /* I like this one (bottom-aligns chat logs) but it's controversial */
@@ -2430,7 +2446,7 @@ pre.textbox.textbox-empty[placeholder]:before {
 	background: rgba(0,255,200,0.18);
 }
 .dark a.ilink {
-	color: #4488EE;
+	color: #81AAF2;
 }
 .dark .chat.mine {
 	background: rgba(255,255,255,0.05);

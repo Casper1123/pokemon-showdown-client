@@ -12,6 +12,7 @@ import { Dex, PSUtils, toID, type ID } from "./battle-dex";
 import { Teams } from "./battle-teams";
 import { BattleLog } from "./battle-log";
 import preact from "../js/lib/preact";
+import { TeamEditorState } from "./battle-team-editor";
 
 class PSTextarea extends preact.Component<{ initialValue?: string, name?: string }> {
 	updateSize = () => {
@@ -72,15 +73,41 @@ class TeambuilderRoom extends PSRoom {
 			} else {
 				PS.teams.unshift(this.createTeam(null, isBox));
 			}
+			PS.teams.save();
 			this.update(null);
 		},
 		'deleteteam'(target) {
 			const team = PS.teams.byKey[target];
-			if (team) PS.teams.delete(team);
+			if (!team) return this.errorReply(`Team not found: ${target}`);
+
+			PS.teams.delete(team);
+			PS.teams.save();
+			this.update(null);
+		},
+		'copyteam'(target) {
+			const team = PS.teams.byKey[target];
+			if (!team) return this.errorReply(`Team not found: ${target}`);
+
+			TeamEditorState.copyTeam(team);
+
+			PS.update();
+			this.update(null);
+		},
+		'pasteteamabove,moveteamabove'(target, cmd) {
+			const team = PS.teams.byKey[target];
+			if (target !== '-' && !team) return this.errorReply(`Team not found: ${target}`);
+
+			const index = team ? PS.teams.list.indexOf(team) : PS.teams.list.length;
+			const folder = this.curFolder?.endsWith('/') ? this.curFolder.slice(0, -1) : '';
+			TeamEditorState.pasteTeam(index, cmd === 'moveteamabove', folder);
+			PS.teams.save();
+
+			PS.update();
 			this.update(null);
 		},
 		'undeleteteam'() {
 			PS.teams.undelete();
+			PS.teams.save();
 			this.update(null);
 		},
 		'backup'() {
@@ -178,15 +205,6 @@ class TeambuilderRoom extends PSRoom {
 			};
 		} else {
 			const format = this.curFolder && !this.curFolder.endsWith('/') ? this.curFolder as ID : this.DEFAULT_FORMAT;
-
-			// Check if this format needs a custom mod
-			if (window.FormatModMapping && window.FormatModMapping[format]) {
-				const modid = window.FormatModMapping[format];
-				if (!window.BattleTeambuilderTable[modid]) {
-					Dex.loadModData(modid);
-				}
-			}
-
 			const folder = this.curFolder.endsWith('/') ? this.curFolder.slice(0, -1) : '';
 			return {
 				name: `${isBox ? "Box" : "Untitled"} ${PS.teams.list.length + 1}`,
@@ -240,7 +258,7 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 		e.preventDefault();
 		e.stopImmediatePropagation();
 		if (folder === '++') {
-			PS.prompt("Folder name?", { parentElem: elem!, okButton: "Create" }).then(name => {
+			PS.prompt("Folder name?", { parentElem: elem, okButton: "Create" }).then(name => {
 				name = (name || '').trim();
 				if (!name) return;
 
@@ -409,7 +427,12 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 		this.forceUpdate();
 	};
 	static handleDrop(ev: DragEvent) {
-		return !!this.addDraggedTeam(ev, (PS.rooms['teambuilder'] as TeambuilderRoom)?.curFolder);
+		let draggingTeam = false;
+		if (PS.dragging?.type === 'team' && typeof PS.dragging?.team === 'object') {
+			PS.teams.save();
+			draggingTeam = true;
+		}
+		return !!this.addDraggedTeam(ev, (PS.rooms['teambuilder'] as TeambuilderRoom)?.curFolder) || draggingTeam;
 	}
 	updateSearch = (ev: KeyboardEvent) => {
 		const target = ev.currentTarget as HTMLInputElement;
@@ -487,7 +510,7 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 
 		const room = this.props.room;
 		room.exportMode = false;
-		PS.teams.update('team');
+		PS.teams.save();
 		room.update(null);
 	};
 	renameFolder = (ev: MouseEvent) => {
@@ -625,6 +648,10 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 		const filteredTeams = teams.filter(team => !team || room.matchesSearch(team));
 		return filteredTeams;
 	}
+	cancelClipboard = () => {
+		TeamEditorState.clipboard = null;
+		this.forceUpdate();
+	};
 
 	renderTeamPane() {
 		const room = this.props.room;
@@ -673,7 +700,10 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 			</div>;
 		}
 
+		const clipboard = window.TeamEditorState ? TeamEditorState.clipboard : null;
+		const clipboardTeams = clipboard?.teams;
 		return <div class="teampane">
+			{window.TeamEditorState && TeamEditorState.renderClipboard(this.cancelClipboard)}
 			{filterFolder ? (
 				<h2>
 					<i class="fa fa-folder-open" aria-hidden></i> {filterFolder} {}
@@ -711,9 +741,29 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 				) : !filteredTeams.length ? (
 					<li><em>you have no teams in this folder</em></li>
 				) : filteredTeams.map(team => team ? (
-					<li key={team.key} onDragEnter={this.dragEnterTeam} data-teamkey={team.key}>
+					<li
+						key={team.key} onDragEnter={this.dragEnterTeam} data-teamkey={team.key}
+						class={clipboardTeams?.[team.key] ? 'cur' : ''}
+					>
+						{clipboardTeams && <div>
+							<button class="button notifying" data-cmd={`/pasteteamabove ${team.key}`}>
+								<i class="fa fa-clipboard" aria-hidden></i> Paste copy here
+							</button> {}
+							<button class="button notifying" data-cmd={`/moveteamabove ${team.key}`} disabled={clipboard.readonly}>
+								<i class="fa fa-arrow-right" aria-hidden></i> Move here
+							</button>
+						</div>}
 						<TeamBox team={team} onClick={this.clearSearch} /> {}
-						{!team.uploaded && <button data-cmd={`/deleteteam ${team.key}`} class="option">
+						{clipboardTeams && !clipboardTeams[team.key] && <button data-cmd={`/copyteam ${team.key}`} class="option">
+							<i class="fa fa-copy" aria-hidden></i> + Clipboard
+						</button>}
+						{clipboardTeams?.[team.key] && <button data-cmd={`/copyteam ${team.key}`} class="option">
+							<i class="fa fa-times" aria-hidden></i> Deselect
+						</button>}
+						{!clipboardTeams && <button data-cmd={`/copyteam ${team.key}`} class="option" aria-label="Copy/move" title="Copy/move">
+							<i class="fa fa-copy" aria-hidden></i>
+						</button>} {}
+						{!clipboardTeams && !team.uploaded && <button data-cmd={`/deleteteam ${team.key}`} class="option">
 							<i class="fa fa-trash" aria-hidden></i> Delete
 						</button>} {}
 						{team.uploaded?.private ? (
@@ -737,6 +787,14 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 						</button>
 					</li>
 				))}
+				{clipboardTeams && <div>
+					<button class="button notifying" data-cmd="/pasteteamabove -">
+						<i class="fa fa-clipboard" aria-hidden></i> Paste copy here
+					</button> {}
+					<button class="button notifying" data-cmd="/moveteamabove -" disabled={clipboard.readonly}>
+						<i class="fa fa-arrow-right" aria-hidden></i> Move here
+					</button>
+				</div>}
 			</ul>
 			<p>
 				<button data-cmd="/newteam bottom" class="button">
@@ -757,7 +815,7 @@ class TeambuilderPanel extends PSRoomPanel<TeambuilderRoom> {
 	override render() {
 		const room = this.props.room;
 
-		return <PSPanelWrapper room={room}>
+		return <PSPanelWrapper room={room} noScroll>
 			<div class="folderpane">
 				{this.renderFolderList()}
 			</div>

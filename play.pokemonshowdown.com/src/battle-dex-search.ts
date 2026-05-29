@@ -656,7 +656,7 @@ abstract class BattleTypedSearch<T extends SearchType> {
 			this.formatType = 'champions';
 			this.dex = Dex.mod('champions' as ID);
 			format = format.slice(9) as ID;
-			if (format !== 'ou') format = 'ubers' as ID;
+			if (format !== 'ou' && format.length > 2) format = 'ubers' as ID;
 		}
 		if (format.startsWith('vgc')) {
 			this.formatType = 'doubles';
@@ -964,7 +964,6 @@ abstract class BattleTypedSearch<T extends SearchType> {
 		}
 		if (!table) return pokemon.tier;
 
-
 		let id = pokemon.id;
 		if (id in table.overrideTier) {
 			return table.overrideTier[id];
@@ -1053,9 +1052,8 @@ class BattlePokemonSearch extends BattleTypedSearch<'pokemon'> {
 		const isHackmons = format.includes('hackmons') || format.endsWith('bh');
 		let isDoublesOrBS = isVGCOrBS || this.formatType?.includes('doubles');
 		const dex = this.dex;
+
 		let table = BattleTeambuilderTable;
-
-
 		if ((format.endsWith('cap') || format.endsWith('caplc')) && dex.gen < 9) {
 			table = table[`gen${dex.gen}`];
 		} else if (this.formatType === 'champions') {
@@ -1514,7 +1512,7 @@ class BattleItemSearch extends BattleTypedSearch<'item'> {
 	}
 }
 
-export class BattleMoveSearch extends BattleTypedSearch<'move'> {
+class BattleMoveSearch extends BattleTypedSearch<'move'> {
 	override sortRow: SearchRow = ['sortmove', ''];
 	getTable() {
 		return BattleMovedex;
@@ -1854,7 +1852,6 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 		if (this.formatType?.startsWith('ssdlc1')) lsetTable = lsetTable['gen8dlc1'];
 		if (this.formatType?.startsWith('predlc')) lsetTable = lsetTable['gen9predlc'];
 		if (this.formatType?.startsWith('svdlc1')) lsetTable = lsetTable['gen9dlc1'];
-
 		while (learnsetid) {
 			let learnset = lsetTable.learnsets[learnsetid];
 			if (learnset) {
@@ -2006,7 +2003,7 @@ export class BattleMoveSearch extends BattleTypedSearch<'move'> {
 				uselessMoves.push(['move', id as ID]);
 			}
 		}
-		return [...usableMoves, ...uselessMoves,];
+		return [...usableMoves, ...uselessMoves];
 	}
 	filter(row: SearchRow, filters: string[][]) {
 		if (!filters) return true;

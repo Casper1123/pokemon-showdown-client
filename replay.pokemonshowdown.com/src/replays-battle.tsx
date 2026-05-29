@@ -120,7 +120,6 @@ export class BattlePanel extends preact.Component<{ id: string }> {
 				$frame: $base.find('.battle'),
 				$logFrame: $base.find('.battle-log'),
 				log: replay.log.split('\n'),
-				formatId: this.result.format, // Todo: see if this is actually a format id or a format name.
 				isReplay: true,
 				paused: true,
 				autoresize: true,
@@ -242,6 +241,7 @@ export class BattlePanel extends preact.Component<{ id: string }> {
 	};
 	firstTurn = () => {
 		this.battle?.seekTurn(0);
+		this.forceUpdate();
 	};
 	lastTurn = () => {
 		this.battle?.seekTurn(Infinity);

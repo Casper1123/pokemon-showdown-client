@@ -68,18 +68,18 @@ export class PSHeader extends preact.Component {
 		let title = room.title;
 		switch (room.type) {
 		case 'battle':
-			let idChunks = room.id.slice(7).split('-');
+			const idChunks = room.id.split('-');
 			let formatName;
 			// TODO: relocate to room implementation
-			if (idChunks.length <= 1) {
-				if (idChunks[0] === 'uploadedreplay') formatName = 'Uploaded Replay';
+			if (idChunks.length <= 2) {
+				if (idChunks[1] === 'uploadedreplay') formatName = 'Uploaded Replay';
 			} else {
-				formatName = window.BattleLog ? BattleLog.formatName(idChunks[0]) : idChunks[0];
+				formatName = window.BattleLog ? BattleLog.formatName(idChunks[1]) : idChunks[1];
 			}
 			if (!title) {
-				let battle = (room as any).battle as Battle | undefined;
-				let p1 = battle?.p1?.name || '';
-				let p2 = battle?.p2?.name || '';
+				const battle = (room as any).battle as Battle | undefined;
+				const p1 = battle?.p1?.name || '';
+				const p2 = battle?.p2?.name || '';
 				if (p1 && p2) {
 					title = `${p1} v. ${p2}`;
 				} else if (p1 || p2) {
@@ -108,7 +108,7 @@ export class PSHeader extends preact.Component {
 		const room = PS.rooms[id];
 		if (!room) return null;
 		const closable = (id === '' || id === 'rooms' ? '' : ' closable');
-		const cur = PS.isVisible(room) ? ' cur' : '';
+		const cur = PS.isVisiblePanel(room) ? ' cur' : '';
 		let notifying = room.isSubtleNotifying ? ' subtle-notifying' : '';
 		let hoverTitle = '';
 		let notifications = room.notifications;
@@ -175,6 +175,7 @@ export class PSHeader extends preact.Component {
 		}
 		if (PSView.narrowMode) {
 			document.documentElement.classList?.remove('scroll-snap-enabled');
+			document.documentElement.style.width = 'auto';
 			PSView.narrowMode = false;
 		}
 
@@ -210,7 +211,7 @@ export class PSHeader extends preact.Component {
 		if (!PS.user.named) {
 			return <a class="button" href="login">Choose name</a>;
 		}
-		const userColor = window.BattleLog && `color:${BattleLog.usernameColor(PS.user.userid)}`;
+		const userColor = window.BattleLog && `color:${PS.user.away ? '#888' : BattleLog.usernameColor(PS.user.userid)}`;
 		return <span class="username" style={userColor}>
 			<span class="usernametext">{PS.user.name}</span>
 		</span>;
@@ -296,6 +297,7 @@ export class PSHeader extends preact.Component {
 }
 
 export class PSMiniHeader extends preact.Component {
+	menuOpen?: boolean;
 	override componentDidMount() {
 		window.addEventListener('scroll', this.handleScroll);
 	}
@@ -303,9 +305,11 @@ export class PSMiniHeader extends preact.Component {
 		window.removeEventListener('scroll', this.handleScroll);
 	}
 	handleScroll = () => {
-		this.forceUpdate();
+		if (this.menuOpen !== !window.scrollX) this.forceUpdate();
 	};
 	override render() {
+		this.menuOpen = !window.scrollX;
+
 		if (PS.leftPanelWidth !== null) return null;
 
 		let notificationsCount = 0;
@@ -315,14 +319,14 @@ export class PSMiniHeader extends preact.Component {
 			if (miniNotifications?.length) notificationsCount++;
 		}
 		const { icon, title } = PSHeader.roomInfo(PS.panel);
-		const userColor = window.BattleLog && `color:${BattleLog.usernameColor(PS.user.userid)}`;
+		const userColor = window.BattleLog && `color:${PS.user.away ? '#888' : BattleLog.usernameColor(PS.user.userid)}`;
 		const showMenuButton = PSView.narrowMode;
 		const notifying = (
-			!showMenuButton && !window.scrollX && Object.values(PS.rooms).some(room => room!.notifications.length)
+			!showMenuButton && this.menuOpen && Object.values(PS.rooms).some(room => room!.notifications.length)
 		) ? ' notifying' : '';
 		const menuButton = !showMenuButton ? (
 			null
-		) : window.scrollX ? (
+		) : !this.menuOpen ? (
 			<button onClick={PSView.scrollToHeader} class={`mini-header-left ${notifying}`} aria-label="Menu">
 				{!!notificationsCount && <div class="notification-badge">{notificationsCount}</div>}
 				<i class="fa fa-bars" aria-hidden></i>

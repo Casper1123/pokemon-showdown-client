@@ -9,12 +9,12 @@ if (preg_match('/^([a-z0-9-_\.]*?)\.psim\.us$/', $host, $m)) {
 	if ($config['host'] === 'logs') die; // not authorised
 	if ($config['host'] === 'sim') die; // not authorised
 } else if ($host === $psconfig['routes']['client']) {
-	$config['host'] = 'showdown'
+	$config['host'] = 'showdown';
 } else {
 	die; // not authorised
 }
 
-$protocol = @$_REQUEST['protocol'] ?? 'http:';
+$protocol = @$_REQUEST['protocol'] === 'https:' ? 'https:' : 'http:';
 $portType = ($protocol === 'http:' ? 'port' : 'httpsport');
 
 if ($config['host'] !== 'showdown') {
@@ -148,17 +148,17 @@ function messageHandler(e) {
 		break;
 	case 'R':
 	case 'S':
-   		var rq = JSON.parse(data.substr(1));
-			$.ajax({
-				type: (data.charAt(0) === 'R' ? 'GET' : 'POST'),
-				url: rq[0],
-				data: rq[1],
-				success: function(ajaxdata) {
-					postReply('r' + JSON.stringify([rq[2], ajaxdata]));
-				},
-				dataType: rq[3]
-			});
-			break;
+		var rq = JSON.parse(data.substr(1));
+		$.ajax({
+			type: (data.charAt(0) === 'R' ? 'GET' : 'POST'),
+			url: rq[0],
+			data: rq[1],
+			success: function(ajaxdata) {
+				postReply('r' + JSON.stringify([rq[2], ajaxdata]));
+			},
+			dataType: rq[3]
+		});
+		break;
 	}
 }
 

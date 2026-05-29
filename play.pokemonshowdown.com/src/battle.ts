@@ -97,6 +97,7 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 	prevItemEffect = '';
 	terastallized = '';
 	teraType = '';
+	moddedType: Dex.TypeName[] = [];
 
 	boosts: { [stat: string]: number } = {};
 	status: Dex.StatusName | 'tox' | '' | '???' = '';
@@ -510,6 +511,8 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 			types = [this.terastallized as Dex.TypeName];
 		} else if (this.volatiles.typechange) {
 			types = this.volatiles.typechange[1].split('/');
+		} else if (this.moddedType.length) {
+			types = this.moddedType;
 		} else {
 			types = this.getSpecies(serverPokemon).types;
 		}
@@ -605,11 +608,8 @@ export class Pokemon implements PokemonDetails, PokemonHealth {
 			let ratio = (range[0] + range[1]) / 2;
 			return Math.round(maxWidth * ratio) || 1;
 		}
-		let percentage = Math.ceil(100 * this.hp / this.maxhp);
-		if ((percentage === 100) && (this.hp < this.maxhp)) {
-			percentage = 99;
-		}
-		return percentage * maxWidth / 100;
+		const width = Math.round(this.hp / this.maxhp * maxWidth) || 1;
+		return this.hp < this.maxhp && width === maxWidth ? maxWidth - 1 : width;
 	}
 	getHPText(precision = 1) {
 		return Pokemon.getHPText(this, this.side.battle.reportExactHP, precision);
@@ -1034,6 +1034,7 @@ export interface ServerPokemon extends PokemonDetails, PokemonHealth {
 	condition: string;
 	active: boolean;
 	reviving: boolean;
+	commanding: boolean;
 	/** unboosted stats */
 	stats: {
 		atk: number,
@@ -2645,6 +2646,10 @@ export class Battle {
 					poke.copyTypesFrom(ofpoke);
 				} else {
 					const types = Dex.sanitizeName(args[3] || '???');
+					// Kind of a hack/hardcode protocol for now due to time constraints, should be expanded upon later
+					if (fromeffect.id.startsWith('format')) {
+						poke.moddedType = types.split('/') as Dex.TypeName[];
+					}
 					poke.removeVolatile('typeadd' as ID);
 					poke.addVolatile('typechange' as ID, types);
 					if (!kwArgs.silent) {
@@ -3179,7 +3184,6 @@ export class Battle {
 			this.activateAbility(poke, fromeffect);
 			let minTimeLeft = 5;
 			let maxTimeLeft = 0;
-
 			if (effect.id.endsWith('terrain')) {
 				for (let i = this.pseudoWeather.length - 1; i >= 0; i--) {
 					let pwID = toID(this.pseudoWeather[i][0]);
@@ -3242,10 +3246,6 @@ export class Battle {
 			this.scene.afterMove(poke);
 			break;
 		}
-		case '-hint':case '-candynamax': {
-			this.log(args, kwArgs);
-			break;
-		}
 		case '-message':{
 			// Find turn remainder for Spacial Distortion
 			if (this.formatId.includes('natdexcustom') && args[1]) {
@@ -3276,6 +3276,10 @@ export class Battle {
 					}
 				}
 			}
+			this.log(args, kwArgs);
+			break;
+		}
+		case '-hint':case '-candynamax': {
 			this.log(args, kwArgs);
 			break;
 		}
@@ -3861,18 +3865,8 @@ export class Battle {
 			break;
 		}
 		case 'gen': {
-			// This stupid case keeps overwriting the client-side mod. Thanks.
-			// Setting the dex to the one we need instead of running forGen to avoid getting a non-modded mod.
 			this.gen = parseInt(args[1], 10);
-			if (this.formatId) {
-				console.debug('setting Battle dex for format', this.formatId);
-				this.dex = Dex.forFormat(this.formatId);
-				console.debug('set Battle dex to', this.dex.modid);
-			} else {
-				console.debug('set Battle dex to default gen', this.gen);
-				this.dex = Dex.forGen(this.gen);
-			}
-
+			this.dex = Dex.forGen(this.gen);
 			this.scene.updateGen();
 			this.log(args);
 			break;

@@ -69,6 +69,7 @@ export class PSConnection {
 				case 'connected':
 					console.log('\u2705 (CONNECTED via worker)');
 					this.connected = true;
+					if (PS.prefs.avatar) worker.postMessage({ type: 'send', data: `/avatar ${PS.prefs.avatar},1` });
 					this.queue.forEach(msg => worker.postMessage({ type: 'send', data: msg }));
 					this.queue = [];
 					PS.update();
@@ -122,6 +123,7 @@ export class PSConnection {
 			console.log('\u2705 (CONNECTED)');
 			this.connected = true;
 			this.reconnectDelay = 1000;
+			if (PS.prefs.avatar) socket.send(`/avatar ${PS.prefs.avatar},1`);
 			this.queue.forEach(msg => socket.send(msg));
 			this.queue = [];
 			PS.update();
@@ -243,12 +245,13 @@ export class PSStorage {
 			PS.alert("Sorry, psim connections are unsupported by your browser.");
 			return;
 		}
+
 		window.addEventListener('message', this.onMessage);
-		// Force check for official server being the host.
+
 		if (document.location.hostname !== Config.routes.client) {
 			const iframe = document.createElement('iframe');
 			iframe.src = 'https://' + Config.routes.client + '/crossdomain.php?host=' +
-				encodeURIComponent(document.location.hostname.replace(".", "-").replace(".", "-")) +
+				encodeURIComponent(document.location.hostname) +
 				'&path=' + encodeURIComponent(document.location.pathname.substr(1)) +
 				'&protocol=' + encodeURIComponent(document.location.protocol);
 			iframe.style.display = 'none';
@@ -256,7 +259,7 @@ export class PSStorage {
 		} else {
 			Config.server ||= Config.defaultserver;
 			$(
-				`<iframe src="https://${Config.routes.client}/crossprotocol.html" style="display: none;"></iframe>`
+				`<iframe src="https://${Config.routes.client}/crossprotocol.html?v1.2" style="display: none;"></iframe>`
 			).appendTo('body');
 			setTimeout(() => {
 				// HTTPS may be blocked
@@ -284,6 +287,10 @@ export class PSStorage {
 				link.rel = 'stylesheet';
 				link.href = `//${Config.routes.client}/customcss.php?server=${encodeURIComponent(Config.server.id)}`;
 				document.head.appendChild(link);
+			}
+			if ((Config.server as any).https === false) {
+				Config.server.protocol = 'http';
+				Config.server.httpport = Config.server.port;
 			}
 			Object.assign(PS.server, Config.server);
 			break;
@@ -375,22 +382,13 @@ export class PSStorage {
 	}
 	static postCrossOriginMessage = function (data: string) {
 		try {
-			let targetOrigin = PSStorage.origin;
-
-			if (data.startsWith('S') || data.startsWith('R')) {
-				const requestData = JSON.parse(data.substr(1));
-				const url = requestData[0];
-				if (url && url.includes('/action.php') && url.includes('play.pokemonshowdown.com')) {
-					targetOrigin = 'https://play.pokemonshowdown.com';
-				}
-			}
-
-			return PSStorage.frame!.postMessage(data, targetOrigin);
+			// I really hope this is a Chrome bug that this can fail
+			return PSStorage.frame!.postMessage(data, PSStorage.origin);
 		} catch {
 		}
 		return false;
 	};
-}
+};
 
 PSConnection.connect();
 
@@ -401,8 +399,10 @@ export const PSLoginServer = new class {
 		// 	alert("Sorry, login server queries don't work in the testclient. To log in, see README.md to set up testclient-key.js");
 		// 	return Promise.resolve(null);
 		// }
-		let url = 'https://play.pokemonshowdown.com/api/' + act;
+		data.act = act;
+		let url = '/~~' + PS.server.id + '/action.php';
 		if (location.pathname.endsWith('.html')) {
+			url = 'https://' + Config.routes.client + url;
 			if (typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY === 'string') {
 				data.sid = POKEMON_SHOWDOWN_TESTCLIENT_KEY.replace(/%2C/g, ',');
 			}

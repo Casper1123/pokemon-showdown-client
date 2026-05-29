@@ -18,7 +18,6 @@ import { Dex, toID, type ID } from './battle-dex';
 import { BattleTextParser, type Args } from './battle-text-parser';
 import type { BattleRoom } from './panel-battle';
 import { Teams } from './battle-teams';
-import {BattleLog} from "./battle-log";
 import type preact from '../js/lib/preact';
 
 declare const BattleTextAFD: any;
@@ -98,14 +97,11 @@ class PSPrefs extends PSStreamModel<string | null> {
 	nopastgens: boolean | null = null;
 
 	/* Chat Preferences */
-	blockPMs: boolean | null = null;
-	blockChallenges: boolean | null = null;
 	inchatpm: boolean | null = null;
 	noselfhighlight: boolean | null = null;
 	temporarynotifications: boolean | null = null;
 	leavePopupRoom: boolean | null = null;
 	refreshprompt: boolean | null = null;
-	language = 'english';
 	chatformatting: Record<string, boolean> = {
 		hidegreentext: false,
 		hideme: false,
@@ -121,6 +117,7 @@ class PSPrefs extends PSStreamModel<string | null> {
 	ignoreopp: boolean | null = null;
 	autotimer: boolean | null = null;
 	autohardcore: boolean | null = null;
+	spectatefromstart: boolean | null = null;
 	rightpanelbattles: boolean | null = null;
 	disallowspectators: boolean | null = null;
 	starredformats: { [formatid: string]: true | undefined } | null = null;
@@ -163,6 +160,13 @@ class PSPrefs extends PSStreamModel<string | null> {
 
 	highlights: Record<string, string[]> | null = null;
 	logtimes: { [serverid: ID]: { [roomid: RoomID]: number } } | null = null;
+
+	avatar: string | null = null;
+	serversettings: {
+		blockPMs?: boolean | string,
+		blockChallenges?: boolean,
+		language?: string,
+	} = {};
 
 	// PREFS END HERE
 
@@ -209,7 +213,10 @@ class PSPrefs extends PSStreamModel<string | null> {
 		for (const key in PSPrefsDefaults) {
 			if (key in newPrefs) (this as any)[key] = (newPrefs as any)[key];
 		}
+
 		this.setAFD();
+		this.setShowDebug();
+
 		this.update(null);
 		if (!noSave) this.save();
 	}
@@ -232,6 +239,11 @@ class PSPrefs extends PSStreamModel<string | null> {
 			showjoins[Config.server.id] = serverShowjoins;
 			newPrefs['showjoins'] = showjoins;
 		}
+
+		// incorrect storage of serversettings
+		delete newPrefs['blockPMs'];
+		delete newPrefs['blockChallenges'];
+		delete newPrefs['language'];
 
 		const isChrome64 = navigator.userAgent.includes(' Chrome/64.');
 		if (newPrefs['nogif'] !== undefined) {
@@ -288,6 +300,18 @@ class PSPrefs extends PSStreamModel<string | null> {
 			}
 		}
 	}
+	setShowDebug(mode = this.showdebug) {
+		const css = mode ? `.debug {display: block;}` : `.debug {display: none;}`;
+		let style = document.querySelector('style[id=debugstyle]');
+		if (style) {
+			style.innerHTML = css;
+		} else {
+			style = document.createElement('style');
+			style.id = "debugstyle";
+			style.innerHTML = css;
+			document.querySelector('head')?.append(style);
+		}
+	}
 	doAutojoin() {
 		let autojoin = PS.prefs.autojoin;
 		if (autojoin) {
@@ -296,7 +320,8 @@ class PSPrefs extends PSStreamModel<string | null> {
 			}
 			let rooms = autojoin[PS.server.id] || '';
 			for (let title of rooms.split(",")) {
-				PS.addRoom({ id: toID(title) as string as RoomID, title, connected: true, autofocus: false });
+				const id = /[^a-z0-9-]/.test(title) ? toID(title) as any as RoomID : title as RoomID;
+				PS.addRoom({ id, title, connected: true, autofocus: false });
 			};
 			const cmd = `/autojoin ${rooms}`;
 			if (PS.connection?.queue.includes(cmd)) {
@@ -487,8 +512,7 @@ class PSTeams extends PSStreamModel<'team' | 'format'> {
 		};
 	}
 	loadRemoteTeams() {
-		return; // Redundant.
-		// @ts-ignore
+		return PS.alert('Error loading uploaded teams: This feature is currently not supported.');
 		PSLoginServer.query('getteams').then(data => {
 			if (!data) return;
 			if (data.actionerror) {
@@ -508,7 +532,7 @@ class PSTeams extends PSStreamModel<'team' | 'format'> {
 					}
 					localTeam.uploaded = {
 						teamid: team.teamid,
-						notLoaded: false,
+						notLoaded: this.unloadedPackedTeam(team.team) === localTeam.packedTeam,
 						private: team.private,
 					};
 					delete teams[localTeam.teamid];
@@ -531,22 +555,22 @@ class PSTeams extends PSStreamModel<'team' | 'format'> {
 						localTeam.teamid = team.teamid;
 						localTeam.uploaded = {
 							teamid: team.teamid,
-							notLoaded: false,
+							notLoaded: this.unloadedPackedTeam(team.team) === localTeam.packedTeam,
 							private: team.private,
 						};
 						break;
 					}
 				}
 				if (!matched) {
-					const mons = team.team.split(',').map((m: string) => ({ species: m, moves: [] }));
 					const newTeam: Team = {
 						name: team.name,
 						format: team.format,
 						folder: '',
-						packedTeam: Teams.pack(mons),
+						packedTeam: this.unloadedPackedTeam(team.team),
 						iconCache: null,
 						isBox: false,
 						key: this.getKey(team.name),
+						teamid: team.teamid,
 						uploaded: {
 							teamid: team.teamid,
 							notLoaded: true,
@@ -557,6 +581,10 @@ class PSTeams extends PSStreamModel<'team' | 'format'> {
 				}
 			}
 		});
+	}
+	unloadedPackedTeam(uploadedTeam: string) {
+		const mons = uploadedTeam.split(',').map((m: string) => ({ species: m, moves: [] }));
+		return Teams.pack(mons);
 	}
 	loadTeam(team: Team | undefined | null, ifNeeded: true): void | Promise<void>;
 	loadTeam(team: Team | undefined | null): Promise<void>;
@@ -612,6 +640,7 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 	group = '';
 	userid = "" as ID;
 	named = false;
+	away = false;
 	registered: { name: string, userid: ID } | null = null;
 	avatar = "lucas";
 	challstr = '';
@@ -627,6 +656,7 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 		this.userid = toID(name);
 		this.named = named;
 		this.avatar = avatar;
+		this.away = fullName.endsWith('@!');
 		this.update(null);
 		if (loggingIn) {
 			for (const roomid in PS.rooms) {
@@ -682,15 +712,56 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 				OfficialAuth.authorize(this);
 			} else {
 				this.handleAssertion(name, res);
-			}
+			}}).catch((reason) => {
+				console.error('Could not get assertion; ' + reason);
+				OfficialAuth.authorize(this)
+		});
+		return
+		PSLoginServer.rawQuery(
+			'getassertion', { userid, challstr: this.challstr }
+		).then(res => {
+			this.handleAssertion(name, res);
 			this.updateRegExp();
-		}).catch(() => OfficialAuth.authorize(this));
+		});
 	}
 	changeNameWithPassword(name: string, password: string, special: PSLoginState = { needsPassword: true }) {
 		if (!PS.rooms['login']) {
 			PS.join('login' as RoomID);
-			return;
+		} // Todo: double check the functionality on this.
+		return;
+		this.loggingIn = name;
+		if (!password && !special) {
+			this.updateLogin({
+				name,
+				error: "Password can't be empty.",
+				...special as any,
+			});
 		}
+		this.update(null);
+		PSLoginServer.query(
+			'login', { name, pass: password, challstr: this.challstr }
+		).then(data => {
+			this.loggingIn = null;
+			if (data?.curuser?.loggedin) {
+				// success!
+				const username = data.curuser.loggedin.username;
+				this.registered = { name: username, userid: toID(username) };
+				this.handleAssertion(name, data.assertion);
+			} else {
+				// wrong password
+				if (special.needsGoogle) {
+					try {
+						// @ts-expect-error gapi included dynamically
+						gapi.auth2.getAuthInstance().signOut();
+					} catch {}
+				}
+				this.updateLogin({
+					name,
+					error: data?.error || 'Wrong password.',
+					...special as any,
+				});
+			}
+		});
 	}
 	updateLogin(update: PSLoginState) {
 		this.update(update);
@@ -731,13 +802,19 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 	logOut() {
 		OfficialAuth.clearTokenStorage();
 		window.open("https://play.pokemonshowdown.com/api/oauth/authorized", undefined);
+
+		// Todo: figure out if this handles it correctly
+		// PSLoginServer.query('logout', { userid: this.userid });
+		PS.send(`/logout`);
+		PS.connection?.disconnect();
+
+		PS.alert("You have been logged out and disconnected.\n\nIf you wanted to change your name while staying connected, use the 'Change Name' button or the '/nick' command.");
 		this.name = "";
 		this.group = '';
 		this.userid = "" as ID;
 		this.named = false;
 		this.registered = null;
 		this.update(null);
-		PS.alert("You have been logged out.\n\nIf you wanted to change your name while staying connected, use the 'Change Name' button or the '/nick' command.");
 	}
 
 	updateRegExp() {
@@ -853,7 +930,7 @@ class PSServer {
  * Rooms
  *********************************************************************/
 
-type PSRoomLocation = 'left' | 'right' | 'popup' | 'mini-window' | 'modal-popup' | 'semimodal-popup';
+type PSRoomLocation = 'left' | 'right' | 'popup' | 'mini-window' | 'modal-popup';
 
 export interface RoomOptions {
 	id: RoomID;
@@ -930,6 +1007,11 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 	isPlaceholder = false;
 	readonly classType: string = '';
 	location: PSRoomLocation = 'left';
+	/**
+	 * Whether a modal popup is closable by clicking on the
+	 * background or pressing Esc. It is, of course, still closable
+	 * through other methods.
+	 */
 	closable = true;
 	/**
 	 * Whether the room is connected to the server. This is _eager_,
@@ -941,7 +1023,7 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 	 * the room isn't connected to the game server but to something
 	 * else.
 	 *
-	 * `true` for DMs for historical reasons (TODO: fix)
+	 * 'client-only' for DMs
 	 */
 	connected: 'autoreconnect' | 'client-only' | 'expired' | boolean = false;
 	/**
@@ -985,7 +1067,7 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 		if (options.location) this.location = options.location;
 		if (options.parentElem) this.parentElem = options.parentElem;
 		if (options.parentRoomid) this.parentRoomid = options.parentRoomid;
-		if (this.location !== 'popup' && this.location !== 'semimodal-popup') this.parentElem = null;
+		if (this.location !== 'popup' && this.location !== 'modal-popup') this.parentElem = null;
 		if (options.rightPopup) this.rightPopup = true;
 		if (options.connected) this.connected = options.connected;
 		if (options.backlog) this.backlog = options.backlog;
@@ -998,7 +1080,7 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 	}
 	notify(options: { title: string, body?: string, noAutoDismiss?: boolean, id?: string }) {
 		let desktopNotification: Notification | null = null;
-		const roomIsFocused = document.hasFocus?.() && PS.isVisible(this);
+		const roomIsFocused = document.hasFocus?.() && PS.isVisiblePanel(this);
 		if (roomIsFocused && !options.noAutoDismiss) return;
 		if (!roomIsFocused) {
 			PS.playNotificationSound();
@@ -1031,12 +1113,11 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 		PS.update();
 	}
 	subtleNotify() {
-		if (PS.isVisible(this)) return;
+		if (PS.isVisiblePanel(this)) return;
 		const room = PS.rooms[this.id] as ChatRoom;
 		const lastSeenTimestamp = PS.prefs.logtimes?.[PS.server.id]?.[this.id] || 0;
 		const lastMessageTime = +(room.lastMessage?.[1] || 0);
-		if ((lastMessageTime - room.timeOffset) <= lastSeenTimestamp) return;
-		this.isSubtleNotifying = true;
+		this.isSubtleNotifying = !((lastMessageTime + room.timeOffset) <= lastSeenTimestamp);
 		PS.update();
 	}
 	dismissNotificationAt(i: number) {
@@ -1159,6 +1240,9 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 				PS.join("confirmleaveroom" as RoomID, { parentElem: elem });
 				return;
 			}
+			if (room?.type === "chat" && room.challenging) {
+				room.cancelChallenge();
+			}
 
 			PS.leave(roomid);
 		},
@@ -1182,7 +1266,7 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 			const roomid = /[^a-z0-9-]/.test(target) ? toID(target) as any as RoomID : target as RoomID;
 			const targetRoom = roomid ? PS.rooms[roomid] : this;
 			if (!targetRoom) return this.errorReply(`Room '${roomid}' not found.`);
-			if (PS.isNormalRoom(targetRoom)) {
+			if (PS.isPanel(targetRoom)) {
 				this.errorReply(`'${roomid}' is already maximized.`);
 			} else if (!PS.isPopup(targetRoom)) {
 				PS.moveRoom(targetRoom, 'left', false, 0);
@@ -1280,6 +1364,7 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 			if (/[^a-z0-9-]/.test(target)) target = toID(target);
 			const avatar = window.BattleAvatarNumbers?.[target] || target;
 			PS.user.avatar = avatar;
+			PS.prefs.set('avatar', avatar || null);
 			if (this.type !== 'chat' && this.type !== 'battle') {
 				PS.send(`/avatar ${avatar}`);
 			} else {
@@ -1380,30 +1465,12 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 		'showdebug'() {
 			PS.prefs.set('showdebug', true);
 			this.add('||Debug battle messages: ON');
-			let onCSS = '.debug {display: block;}';
-			let style = document.querySelector('style[id=debugstyle]');
-			if (style) {
-				style.innerHTML = onCSS;
-			} else {
-				style = document.createElement('style');
-				style.id = "debugstyle";
-				style.innerHTML = onCSS;
-				document.querySelector('head')?.append(style);
-			}
+			PS.prefs.setShowDebug(true);
 		},
 		'hidedebug'() {
-			PS.prefs.set('showdebug', true);
+			PS.prefs.set('showdebug', false);
 			this.add('||Debug battle messages: OFF');
-			let onCSS = '.debug {display: none;}';
-			let style = document.querySelector('style[id=debugstyle]');
-			if (style) {
-				style.innerHTML = onCSS;
-			} else {
-				style = document.createElement('style');
-				style.id = "debugstyle";
-				style.innerHTML = onCSS;
-				document.querySelector('head')?.append(style);
-			}
+			PS.prefs.setShowDebug(false);
 		},
 		'showbattles'() {
 			PS.prefs.set('showbattles', true);
@@ -1568,6 +1635,7 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 				this.add('||/challenge [user], [format] - Challenge the user [user] to a battle in the specified [format].');
 				this.add('||/challenge [user], [format] @@@ [rules] - Challenge the user [user] to a battle with custom rules.');
 				this.add('||[rules] can be a comma-separated list of: [added rule], ![removed rule], -[banned thing], *[restricted thing], +[unbanned/unrestricted thing]');
+				this.add('||If used in the DMs of a user, no [user] parameter can be used and it will challenge that user.');
 				this.add('||/battlerules - Detailed information on what can go in [rules].');
 				return;
 			case 'accept':
@@ -1606,13 +1674,22 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 				return;
 			case 'showjoins':
 			case 'hidejoins':
-				this.add('||/showjoins [room] - Receive users\' join/leave messages. Optionally for only specified room.');
-				this.add('||/hidejoins [room] - Ignore users\' join/leave messages. Optionally for only specified room.');
+				this.add('||/showjoins [room] - Receive users\' join/leave messages.');
+				this.add('||/hidejoins [room] - Ignore users\' join/leave messages.');
+				this.add('||If no [room] is provided, changes the global setting.');
 				return;
 			case 'showbattles':
 			case 'hidebattles':
 				this.add('||/showbattles - Receive links to new battles in Lobby.');
 				this.add('||/hidebattles - Ignore links to new battles in Lobby.');
+				return;
+			case 'ffto':
+			case 'fastforwardto':
+				this.add('||/ffto [turn] - Skip to turn [turn] in the current battle.');
+				this.add('||/ffto +[turn] - Skip forward [turn] turns.');
+				this.add('||/ffto -[turn] - Skip backward [turn] turns.');
+				this.add('||/ffto 0 - Skip to the start of the battle.');
+				this.add('||/ffto end - Skip to the end of the battle.');
 				return;
 			case 'unpackhidden':
 			case 'packhidden':
@@ -1643,8 +1720,9 @@ export class PSRoom extends PSStreamModel<Args | null> implements RoomOptions {
 			case 'ranking':
 			case 'rating':
 			case 'ladder':
-				this.add('||/rating - Get your own rating.');
-				this.add('||/rating [username] - Get user [username]\'s rating.');
+				this.add('||/rank [user] - Shows all ladder ranks for the given [user].');
+				this.add('||/rank [user], [format] - Shows the rank of [user] in the given [format].');
+				this.add('||If no user is given, it defaults to the user of the command.');
 				return;
 			case 'afd':
 				this.add('||/afd full - Enable all April Fools\' Day jokes.');
@@ -1779,18 +1857,40 @@ export const PS = new class extends PSModel {
 		"user-*": "*popup",
 		"viewuser-*": "*popup",
 		"volume": "*popup",
-		"options": "*popup",
+		"options": "*modal-popup",
 		"*": "*right",
 		"battle-*": "*",
 		"battles": "*right",
-		"teamdropdown": "*semimodal-popup",
-		"formatdropdown": "*semimodal-popup",
+		"teamdropdown": "*modal-popup",
+		"formatdropdown": "*modal-popup",
 		"team-*": "*",
 		"ladder": "*",
 		"ladder-*": "*",
 		"view-*": "*",
-		"login": "*semimodal-popup",
-		"help-*": "chat",
+		"login": "*modal-popup",
+		"help-*": "*right",
+		"tourpopout": "*modal-popup",
+		"groupchat-*": "*right",
+		"users": "*popup",
+		"useroptions-*": "*popup",
+		"userlist": "*modal-popup",
+		"avatars": "*modal-popup",
+		"changepassword": "*modal-popup",
+		"register": "*modal-popup",
+		"forfeitbattle": "*modal-popup",
+		"replaceplayer": "*modal-popup",
+		"changebackground": "*modal-popup",
+		"confirmleaveroom": "*modal-popup",
+		"chatformatting": "*modal-popup",
+		"popup-*": "*modal-popup",
+		"roomtablist": "*modal-popup",
+		"battleoptions": "*modal-popup",
+		"battletimer": "*modal-popup",
+		"rules-*": "*modal-popup",
+		"resources": "*",
+		"game-*": "*",
+		"teamstorage-*": "*modal-popup",
+		"viewteam-*": "*",
 	});
 	/** List of rooms on the left side of the top tabbar */
 	leftRoomList: RoomID[] = [];
@@ -1904,7 +2004,8 @@ export const PS = new class extends PSModel {
 			}
 			let rooms = autojoin[this.server.id] || '';
 			for (let title of rooms.split(",")) {
-				this.addRoom({ id: toID(title) as unknown as RoomID, title, connected: true, autofocus: false });
+				const id = /[^a-z0-9-]/.test(title) ? toID(title) as any as RoomID : title as RoomID;
+				this.addRoom({ id, title, connected: true, autofocus: false });
 			}
 		}
 
@@ -2036,71 +2137,7 @@ export const PS = new class extends PSModel {
 		this.updateLayout();
 		super.update();
 	}
-
-	handleCustomGroupsMessage(data: string): boolean {
-		if (!data.startsWith('|customgroups|')) return false;
-		console.debug("pre parsing:", data);
-		try {
-			const nlIndex = data.indexOf('\n');
-			if (nlIndex > 0) {
-				// Process any additional messages after the customgroups data
-				this.receive(data.substr(nlIndex + 1));
-			}
-
-			const groupsData = data.slice(14, nlIndex > 0 ? nlIndex : undefined);
-			this.parseGroups(groupsData);
-			return true;
-		} catch (e) { return false; }
-
-	}
-
-	parseGroups(groupsList: string): void {
-		let data: any[] | null = null;
-		try {
-			data = JSON.parse(groupsList);
-		} catch (e) {
-			return;
-		}
-		if (!data) return;
-		console.debug("post-parsing:", data);
-		console.debug(this.server.groups);
-
-		const groups: { [symbol: string]: PSGroup } = {};
-
-		for (let i = 0; i < data.length; i++) {
-			const entry = data[i];
-			console.debug("entry: ", entry);
-			if (!entry) continue;
-
-			const symbol = entry.symbol || ' ';
-			const groupName = entry.name;
-			const groupType = entry.type || 'normal';
-
-			// Handle default positioning for undeclared groups
-			if (groupType === 'normal' && !this.server.defaultGroup.order) {
-				this.server.defaultGroup.order = i + 0.5;
-			}
-			if (!groupName) {
-				this.server.defaultGroup = { order: i + 1 };
-			}
-
-			groups[symbol] = {
-				name: groupName ? BattleLog.escapeHTML(groupName + ' (' + symbol + ')') : undefined,
-				type: groupType as 'leadership' | 'staff' | 'punishment',
-				order: i + 1
-			};
-		}
-
-		this.server.groups = groups;
-		console.debug("Done!", this.server.groups);
-	}
-
 	receive(msg: string) {
-		// Handling the change of rooms here. The message pisses me off. Unhappy with how this is done but it is what it is.
-		if (this.handleCustomGroupsMessage(msg)) {
-			return;
-		}
-
 		msg = msg.endsWith('\n') ? msg.slice(0, -1) : msg;
 		let roomid = '' as RoomID;
 		if (msg.startsWith('>')) {
@@ -2129,6 +2166,9 @@ export const PS = new class extends PSModel {
 						// (the server sometimes sends a popup error message and a new room at the same time)
 						autoclosePopups: false,
 					});
+					if (room && type === 'battle') {
+						(room as BattleRoom).rejoining = msg.includes('\n|start\n');
+					}
 				} else {
 					room.type = type;
 					this.updateRoomTypes();
@@ -2161,7 +2201,7 @@ export const PS = new class extends PSModel {
 						if (!PS.user.initializing) {
 							room.receiveLine(['error', args[2]]);
 						}
-					} else if (args[1] === 'nonexistent') {
+					} else if (args[1] === 'nonexistent' || args[1] === 'joinfailed') {
 						// sometimes we assume a room is a chatroom when it's not
 						// when that happens, just ignore this error
 						if (room.type === 'chat' || room.type === 'battle') room.receiveLine(args);
@@ -2176,6 +2216,17 @@ export const PS = new class extends PSModel {
 			} case 'nametaken': {
 				PS.join('login' as RoomID, { args: { error: `Someone is already using the name ${args[1]}.` } });
 				break;
+			} case 'chat': case 'c': {
+				if (args[1] === '~' && (args[2] + ' ').startsWith('/warn ')) {
+					PS.join(`rules-warn` as RoomID, {
+						args: {
+							type: 'warn',
+							message: args[2].slice(6).trim() || undefined,
+						},
+						parentElem: null,
+					});
+					continue;
+				}
 			}
 
 			}
@@ -2192,7 +2243,17 @@ export const PS = new class extends PSModel {
 		}
 		this.connection.send(`${roomid || ''}|${msg}`);
 	}
-	isVisible(room: PSRoom) {
+	isVisible(room: PSRoom): boolean {
+		if (PS.isPanel(room)) {
+			return !this.leftPanelWidth ? room === this.panel : room === this.leftPanel || room === this.rightPanel;
+		}
+		if (room.location === 'mini-window') {
+			return !this.leftPanelWidth ? this.mainmenu === this.panel : this.mainmenu === this.leftPanel;
+		}
+		// some kind of popup
+		return true;
+	}
+	isVisiblePanel(room: PSRoom) {
 		if (!this.leftPanelWidth) {
 			// one panel visible
 			return room === this.panel || room === this.room;
@@ -2327,10 +2388,10 @@ export const PS = new class extends PSModel {
 			return true;
 		}
 		this.closePopupsAbove(room, true);
-		if (!this.isVisible(room)) {
+		if (!this.isVisiblePanel(room)) {
 			room.focusNextUpdate = true;
 		}
-		if (PS.isNormalRoom(room)) {
+		if (PS.isPanel(room)) {
 			if (room.location === 'right') {
 				this.rightPanel = room;
 			} else {
@@ -2426,7 +2487,7 @@ export const PS = new class extends PSModel {
 
 		return this.focusRoom(target);
 	}
-	alert(message: string, opts: { okButton?: string, parentElem?: HTMLElement, width?: number } = {}) {
+	alert(message: string, opts: { okButton?: string, parentElem?: HTMLElement | null, width?: number } = {}) {
 		this.join(`popup-${this.popups.length}` as RoomID, {
 			args: { message, ...opts, parentElem: null },
 			parentElem: opts.parentElem,
@@ -2445,8 +2506,8 @@ export const PS = new class extends PSModel {
 		});
 	}
 	prompt(message: string, opts: {
-		defaultValue?: string, okButton?: string, cancelButton?: string, type?: 'text' | 'password' | 'number',
-		otherButtons?: preact.ComponentChildren, parentElem?: HTMLElement,
+		defaultValue?: string, okButton?: string, cancelButton?: string, type?: 'text' | 'password' | 'number' | 'numeric',
+		otherButtons?: preact.ComponentChildren, parentElem?: HTMLElement | null,
 	} = {}): Promise<string | null> {
 		opts.cancelButton ??= 'Cancel';
 		return new Promise(resolve => {
@@ -2481,7 +2542,7 @@ export const PS = new class extends PSModel {
 		if (options.id.startsWith('challenge-')) {
 			this.requestNotifications();
 			options.id = `dm-${options.id.slice(10)}` as RoomID;
-			options.args = { challengeMenuOpen: true };
+			options.args = { challengeMenuOpen: true, ...options.args };
 		}
 		if (options.id.startsWith('dm-')) {
 			this.requestNotifications();
@@ -2491,6 +2552,10 @@ export const PS = new class extends PSModel {
 			}
 		}
 		if (options.id.startsWith('battle-') && PS.prefs.rightpanelbattles) options.location = 'right';
+		if (options.id.startsWith('help-')) {
+			options.location = 'right';
+			options.type = 'chat';
+		}
 		options.parentRoomid ??= this.getRoom(options.parentElem)?.id;
 		const parentRoom = options.parentRoomid ? this.rooms[options.parentRoomid] : null;
 		let preexistingRoom = this.rooms[options.id];
@@ -2501,6 +2566,12 @@ export const PS = new class extends PSModel {
 			preexistingRoom = this.rooms[options.id];
 		}
 		if (preexistingRoom) {
+			if (options.args?.format) {
+				preexistingRoom.args = options.args;
+				if ((preexistingRoom as ChatRoom).challengeMenuOpen) {
+					options.args.format = `!!${options.args.format as string}`;
+				}
+			}
 			if (options.autofocus) {
 				if (options.args?.challengeMenuOpen) {
 					(preexistingRoom as ChatRoom).openChallenge();
@@ -2543,16 +2614,6 @@ export const PS = new class extends PSModel {
 			PS.focusRoom(PS.leftPanel.id);
 		}
 	}
-	roomVisible(room: PSRoom): boolean {
-		if (PS.isNormalRoom(room)) {
-			return !this.leftPanelWidth ? room === this.panel : room === this.leftPanel || room === this.rightPanel;
-		}
-		if (room.location === 'mini-window') {
-			return !this.leftPanelWidth ? this.mainmenu === this.panel : this.mainmenu === this.leftPanel;
-		}
-		// some kind of popup
-		return true;
-	}
 	renameRoom(room: PSRoom, id: RoomID) {
 		// should never happen
 		if (this.rooms[id]) this.removeRoom(this.rooms[id]);
@@ -2575,9 +2636,10 @@ export const PS = new class extends PSModel {
 	}
 	isPopup(room: PSRoom | undefined | null) {
 		if (!room) return false;
-		return room.location === 'popup' || room.location === 'semimodal-popup' || room.location === 'modal-popup';
+		return room.location === 'popup' || room.location === 'modal-popup';
 	}
-	isNormalRoom(room: PSRoom | undefined | null) {
+	/** this isn't just !isPopup. you forgot about mini windows again. */
+	isPanel(room: PSRoom | undefined | null) {
 		if (!room) return false;
 		return room.location === 'left' || room.location === 'right';
 	}
@@ -2596,13 +2658,12 @@ export const PS = new class extends PSModel {
 			}
 			return;
 		}
-		const POPUPS = ['popup', 'semimodal-popup', 'modal-popup'];
-		if (this.isPopup(room) && POPUPS.includes(location)) {
+		if (this.isPopup(room) && (location === 'popup' || location === 'modal-popup')) {
 			room.location = location;
 			return;
 		}
 
-		background ??= !this.roomVisible(room);
+		background ??= !this.isVisible(room);
 
 		if (room.location === 'mini-window') {
 			const miniRoomIndex = this.miniRoomList.indexOf(room.id);
@@ -2610,7 +2671,7 @@ export const PS = new class extends PSModel {
 				this.miniRoomList.splice(miniRoomIndex, 1);
 			}
 			if (this.room === room) this.room = this.panel;
-		} else if (POPUPS.includes(room.location)) {
+		} else if (room.location === 'popup' || room.location === 'modal-popup') {
 			const popupIndex = this.popups.indexOf(room.id);
 			if (popupIndex >= 0) {
 				this.popups.splice(popupIndex, 1);
@@ -2646,7 +2707,6 @@ export const PS = new class extends PSModel {
 			this.miniRoomList.splice(index ?? 0, 0, room.id);
 			break;
 		case 'popup':
-		case 'semimodal-popup':
 		case 'modal-popup':
 			// moving a room to a popup must move it to the topmost popup
 			this.popups.push(room.id);
@@ -2751,6 +2811,7 @@ export const PS = new class extends PSModel {
 		const room = PS.rooms[roomid];
 		if (room) {
 			this.removeRoom(room);
+			if (room.type === 'chat') this.updateAutojoin();
 			this.update();
 		}
 	}

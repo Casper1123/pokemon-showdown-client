@@ -16,8 +16,7 @@ import type { RoomsRoom } from "./panel-rooms";
 import { TeamBox, type SelectType } from "./panel-teamdropdown";
 import { Dex, toID, type ID } from "./battle-dex";
 import type { Args } from "./battle-text-parser";
-import { BattleLog } from "./battle-log";
-
+import { BattleLog } from "./battle-log"; // optional
 
 export type RoomInfo = {
 	title: string, desc?: string, userCount?: number, section?: string, privacy?: 'hidden',
@@ -137,12 +136,33 @@ export class MainMenuRoom extends PSRoom {
 					console.debug("Assertion obtained, handling.");
 					PS.user.handleAssertion(userid, ass);
 				}
+			}).catch((reason) => {
+				console.error('Could not get assertion; ' + reason);
+				OfficialAuth.authorize(PS.user)
+			});
+			return;
+			PSLoginServer.query(
+				'upkeep', { challstr }
+			).then(res => {
+				if (!res?.username) {
+					PS.user.initializing = false;
+					return;
+				}
+				// | , ; are not valid characters in names
+				res.username = res.username.replace(/[|,;]+/g, '');
+				if (res.loggedin) {
+					PS.user.registered = { name: res.username, userid: toID(res.username) };
+				}
+				PS.user.handleAssertion(res.username, res.assertion);
 			});
 			return;
 		} case 'updateuser': {
-			const [, fullName, namedCode, avatar] = args;
+			const [, fullName, namedCode, avatar, settingsJSON] = args;
 			const named = namedCode === '1';
 			if (named) PS.user.initializing = false;
+			if (settingsJSON) {
+				PS.prefs.set('serversettings', { ...PS.prefs.serversettings, ...JSON.parse(settingsJSON) });
+			}
 			PS.user.setName(fullName, named, avatar);
 			PS.teams.loadRemoteTeams();
 			return;
@@ -168,7 +188,7 @@ export class MainMenuRoom extends PSRoom {
 			this.parseFormats(args);
 			return;
 		} case 'popup': {
-			const [, message] = args;
+			let [, message] = args;
 			for (const roomid in PS.rooms) {
 				const room = PS.rooms[roomid] as ChatRoom | MainMenuRoom;
 				if (room.teamSent) {
@@ -177,7 +197,12 @@ export class MainMenuRoom extends PSRoom {
 				}
 				if (room.type === 'team') (room as any).cancelUpload();
 			}
-			PS.alert(message.replace(/\|\|/g, '\n'));
+			let width: number | undefined;
+			if (message.startsWith('|wide|')) {
+				message = message.slice(6);
+				width = 960;
+			}
+			PS.alert(message.replace(/\|\|/g, '\n'), { width });
 			return;
 		}
 		}
@@ -249,6 +274,7 @@ export class MainMenuRoom extends PSRoom {
 				let partner = false;
 				let bestOfDefault = false;
 				let teraPreviewDefault = false;
+				let itemClauseDefault = false;
 				let team: 'preset' | null = null;
 				let teambuilderLevel: number | null = null;
 				let lastCommaIndex = name.lastIndexOf(',');
@@ -263,6 +289,7 @@ export class MainMenuRoom extends PSRoom {
 					if (code & 32) partner = true;
 					if (code & 64) bestOfDefault = true;
 					if (code & 128) teraPreviewDefault = true;
+					if (code & 256) itemClauseDefault = true;
 				} else {
 					// Backwards compatibility: late 0.9.0 -> 0.10.0
 					if (name.substr(name.length - 2) === ',#') { // preset teams
@@ -326,6 +353,7 @@ export class MainMenuRoom extends PSRoom {
 					tournamentShow,
 					bestOfDefault,
 					teraPreviewDefault,
+					itemClauseDefault,
 					rated: searchShow && id.substr(4, 7) !== 'unrated',
 					teambuilderLevel,
 					partner,
@@ -333,18 +361,8 @@ export class MainMenuRoom extends PSRoom {
 					isTeambuilderFormat,
 					effectType: 'Format',
 				};
-
-				// Ensure mod is loaded for format.
-				if (window.FormatModMapping && window.FormatModMapping[id]) {
-					const modid = window.FormatModMapping[id];
-					if (!window.BattleTeambuilderTable[modid]) {
-						Dex.loadModData(modid);
-					}
-				}
 			}
 		}
-
-
 
 		// Match base formats to their variants, if they are unavailable in the server.
 		let multivariantFormats: { [id: string]: 1 } = {};
@@ -390,9 +408,9 @@ export class MainMenuRoom extends PSRoom {
 	 * Most queries are still handled hardcoded, so this is only for certain
 	 * special queries that need a Promise.
 	 */
-	makeQuery(id: string, param?: string) {
+	makeQuery(id: string, param?: string, excludeParamFromListener?: boolean) {
 		let fullid = id;
-		if (param) fullid += ` ${toID(param)}`;
+		if (param && !excludeParamFromListener) fullid += ` ${toID(param)}`;
 		return new Promise<any>(resolve => {
 			if (!this.listeners[fullid]) {
 				this.listeners[fullid] = [];
@@ -411,6 +429,7 @@ export class MainMenuRoom extends PSRoom {
 			if (!userdetails) {
 				this.userdetailsCache[userid] = response;
 			} else {
+				response.status ||= '';
 				Object.assign(userdetails, response);
 			}
 			PS.rooms[`user-${userid}`]?.update(null);
@@ -455,6 +474,7 @@ export class MainMenuRoom extends PSRoom {
 		case 'teamupload':
 			if (PS.teams.uploading) {
 				const team = PS.teams.uploading;
+				team.teamid = response.teamid;
 				team.uploaded = {
 					teamid: response.teamid,
 					notLoaded: false,
@@ -494,7 +514,7 @@ class NewsPanel extends PSRoomPanel {
 	change = (ev: Event) => {
 		const target = ev.currentTarget as HTMLInputElement;
 		if (target.value === '1') {
-			document.cookie = "preactalpha=1; expires=Thu, 1 Jun 2026 12:00:00 UTC; path=/";
+			document.cookie = "preactalpha=1; expires=Thu, 1 Jul 2026 12:00:00 UTC; path=/";
 		} else {
 			document.cookie = "preactalpha=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 		}
@@ -504,7 +524,7 @@ class NewsPanel extends PSRoomPanel {
 	};
 	override render() {
 		const cookieSet = document.cookie.includes('preactalpha=1');
-		return <PSPanelWrapper room={this.props.room} fullSize scrollable>
+		return <PSPanelWrapper room={this.props.room} fullSize>
 			<div class="construction">
 				TO USE THE WEBSITE, YOU NEED TO ALLOW POPUPS. OTHERWISE YOU CANNOT LOG IN.
 			</div>
@@ -680,7 +700,7 @@ class MainMenuPanel extends PSRoomPanel<MainMenuRoom> {
 	override render() {
 		const onlineButton = ' button' + (PS.isOffline ? ' disabled' : '');
 		const tinyLayout = this.props.room.width < 620 ? ' tiny-layout' : '';
-		return <PSPanelWrapper room={this.props.room} scrollable onDragEnter={this.handleDragEnter}>
+		return <PSPanelWrapper room={this.props.room} onDragEnter={this.handleDragEnter}>
 			<div class={`mainmenu-mini-windows${tinyLayout}`}>
 				{this.renderMiniRooms()}
 			</div>
@@ -802,6 +822,7 @@ class TeamDropdown extends preact.Component<{ format: string }> {
 		return <button
 			name="team" value={this.teamKey}
 			class="select teamselect" data-href="/teamdropdown" data-format={teamFormat} onChange={this.change}
+			disabled={!!PS.mainmenu.searchingFormat()}
 		>
 			{PS.roomTypes['teamdropdown'] && <TeamBox team={team} noLink />}
 		</button>;
@@ -818,6 +839,7 @@ export class TeamForm extends preact.Component<{
 	format = '';
 	teraPreview = false;
 	bestOf = false;
+	itemClause = false;
 	changeFormat = (ev: Event) => {
 		this.format = (ev.target as HTMLButtonElement).value;
 	};
@@ -844,6 +866,10 @@ export class TeamForm extends preact.Component<{
 			const value = this.base?.querySelector<HTMLInputElement>('input[name=bestofvalue]')?.value;
 			format = `${format}${hasCustomRules ? `, Best of = ${value!}` : `@@@ Best of = ${value!}`}`;
 		}
+		if (this.itemClause) {
+			const hasCustomRules = format.includes('@@@');
+			format = `${format}${hasCustomRules ? ', Item Clause = 1' : '@@@ Item Clause = 1'}`;
+		}
 		PS.teams.loadTeam(team).then(() => {
 			(validate === 'validate' ? this.props.onValidate : this.props.onSubmit)?.(ev, format, team);
 		});
@@ -853,6 +879,7 @@ export class TeamForm extends preact.Component<{
 		const rule = (ev.target as HTMLInputElement)?.name;
 		if (rule === 'terapreview') this.teraPreview = checked;
 		if (rule === 'bestof') this.bestOf = checked;
+		if (rule === 'itemclause=1') this.itemClause = checked;
 	};
 	handleClick = (ev: Event) => {
 		let target = ev.target as HTMLButtonElement | null;
@@ -920,6 +947,11 @@ export class TeamForm extends preact.Component<{
 							name="bestofvalue" type="number" min="3" max="9" step="2" value="3" style="width: 28px; vertical-align: initial;"
 						/>
 					</abbr></label></p>}
+			{this.props.selectType === 'challenge' &&
+				window.BattleFormats[formatId]?.itemClauseDefault && <p>
+				<label class="checkbox">
+					<input type="checkbox" name="itemclause" onChange={this.toggleCustomRule} />
+					<abbr title="Start a battle with Item Clause">Item Clause</abbr></label></p>}
 			<p>{this.props.children}</p>
 		</form>;
 	}
