@@ -3006,7 +3006,7 @@ export const OfficialAuth = new class {
 				} else {
 					setTimeout(checkIfUpdated, 500);
 				}
-			} catch {
+			} catch (DOMException) {
 				setTimeout(checkIfUpdated, 500);
 			}
 		};
@@ -3101,7 +3101,7 @@ export const OfficialAuth = new class {
 				if (tokenExpiry <= Date.now()) {
 					refresh = true;
 				}
-			} catch { reauth = true; } // If it fails, well be damned we should probably just try from scratch.
+			} catch (e) { reauth = true; } // If it fails, well be damned we should probably just try from scratch.
 		}
 
 		if (refresh && !reauth) { // Skip if reauth because it's already been determined to not be a good idea.
