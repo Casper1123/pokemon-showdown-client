@@ -9,6 +9,9 @@
  * @author Guangcong Luo <guangcongluo@gmail.com>
  */
 
+// Shut the FUCK up
+/* eslint-disable no-unused-expressions */
+
 (function (exports, $) {
 	'use strict';
 
