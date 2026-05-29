@@ -366,7 +366,7 @@ class BattlePanel extends PSRoomPanel<BattleRoom> {
 			$frame: $elem.find('.battle'),
 			$logFrame: $elem.find('.battle-log'),
 			log: room.backlog?.map(args => '|' + args.join('|')),
-			formatId: formatId
+			formatId,
 		}));
 		const scene = battle.scene as BattleScene;
 		room.backlog = null;

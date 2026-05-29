@@ -1159,7 +1159,7 @@ export class Battle {
 	id = '';
 	/** used to forward some information to the room in the old client */
 	roomid = '';
-	formatId: string = '';  // Used to maintain information about modded rooms.
+	formatId = ''; // Used to maintain information about modded rooms.
 	hardcoreMode = false;
 	ignoreNicks = !!Dex.prefs('ignorenicks');
 	ignoreOpponent = !!Dex.prefs('ignoreopp');
@@ -3250,9 +3250,9 @@ export class Battle {
 			// Find turn remainder for Spacial Distortion
 			if (this.formatId.includes('natdexcustom') && args[1]) {
 				const message = args[1];
-				let countdownMatch = message.match(/Space is winning its fight against the distortion \.\.\. \((\d+) turns?\)/);
+				let countdownMatch = /Space is winning its fight against the distortion \.\.\. \((\d+) turns?\)/.exec(message);
 				if (!countdownMatch) {
-					countdownMatch = message.match(/Space turns the tides against the distortion \.\.\. \((\d+) turns?\)/);
+					countdownMatch = /Space turns the tides against the distortion \.\.\. \((\d+) turns?\)/.exec(message);
 				}
 				if (countdownMatch) {
 					const turnsLeft = parseInt(countdownMatch[1]);
@@ -3562,7 +3562,7 @@ export class Battle {
 				this.dex = Dex.mod('gen9ssb' as ID);
 			}
 			if (toID(this.tier).includes('nationaldexcustom') || toID(this.tier).includes('natdexcustom')) {
-				this.dex = Dex.mod(`gen${this.gen}natdexcustom` as ID)
+				this.dex = Dex.mod(`gen${this.gen}natdexcustom` as ID);
 			}
 			if (this.tier.includes(`Champions`)) {
 				this.dex = Dex.mod('champions' as ID);

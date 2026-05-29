@@ -26,7 +26,7 @@ export class PSSearchResults extends preact.Component<{
 	moveIds: ID[] = [];
 	resultIndex = -1;
 
-	collapsedTiers: Set<string> = new Set();
+	collapsedTiers = new Set<string>();
 	toggleTier = (tierName: string) => {
 		if (this.collapsedTiers.has(tierName)) {
 			this.collapsedTiers.delete(tierName);
@@ -526,7 +526,6 @@ export class PSSearchResults extends preact.Component<{
 
 		let results = search.results;
 
-		const isFilterActive = search.filters && search.filters.length > 0;
 		if (results) {
 			let currentTier: string | null = null;
 			results = results.filter(row => {

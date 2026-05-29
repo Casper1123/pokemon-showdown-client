@@ -712,17 +712,12 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 				OfficialAuth.authorize(this);
 			} else {
 				this.handleAssertion(name, res);
-			}}).catch((reason) => {
-				console.error('Could not get assertion; ' + reason);
-				OfficialAuth.authorize(this)
+			}
+		}).catch(reason => {
+			console.error('Could not get assertion; ' + reason);
+			OfficialAuth.authorize(this);
 		});
-		return
-		PSLoginServer.rawQuery(
-			'getassertion', { userid, challstr: this.challstr }
-		).then(res => {
-			this.handleAssertion(name, res);
-			this.updateRegExp();
-		});
+
 	}
 	changeNameWithPassword(name: string, password: string, special: PSLoginState = { needsPassword: true }) {
 		if (!PS.rooms['login']) {
@@ -2914,7 +2909,8 @@ export const OfficialAuth = new class {
 		const now = Date.now();
 		if (tokenExpiry <= now) {
 			console.debug("Token has expired and cannot be refreshed.");
-			return false; // Equal because it takes a tiny bit of time to send and process the request. Might not even be large enough a buffer.
+			return false; // Equal because it takes a tiny bit of time to send and process the request.
+			// Might not even be large enough a buffer.
 		}
 		if (now < tokenExpiry - 1123200000) {
 			console.debug("Token is not old enough to be refreshed.");
@@ -2929,8 +2925,8 @@ export const OfficialAuth = new class {
 			body: new URLSearchParams({
 				client_id: encodeURIComponent(this.clientId),
 				token: encodeURIComponent(token),
-			})
-		})
+			}),
+		});
 
 		const responseText = await response.text();
 		// Remove the ']' CSRF protection prefix
@@ -2978,7 +2974,7 @@ export const OfficialAuth = new class {
 					if (!token || token === "null") {
 						console.error('Received no token');
 					} else {
-						localStorage.setItem('ps-token', decodeURIComponent(token as string));
+						localStorage.setItem('ps-token', decodeURIComponent(token));
 					}
 
 					let tokenExpiry = url.searchParams.get('expires');
@@ -2986,10 +2982,8 @@ export const OfficialAuth = new class {
 					if (!tokenExpiry) {
 						localStorage.setItem('ps-token-expiry', String(Date.now() + 1209600000)); // Now + 13 days (shaves off a bit yes, but that's fine imo)
 					} else {
-						// @ts-ignore if an expiry timestamp has been received, it's safe to assume it's a number. If not, make an issue here: https://github.com/smogon/pokemon-showdown-loginserver
-						localStorage.setItem('ps-token-expiry', decodeURIComponent(tokenExpiry  as string));
+						localStorage.setItem('ps-token-expiry', decodeURIComponent(tokenExpiry));
 					}
-
 
 					const assertion = url.searchParams.get('assertion');
 					console.debug('assertion', assertion);
@@ -3001,11 +2995,11 @@ export const OfficialAuth = new class {
 					if (!userid || userid === "undefined") { // Note: If userid undefined logs in it's impossible lmao.
 						console.error('Received no userid');
 					}
-					userid = decodeURIComponent(userid as string);
+					userid = decodeURIComponent(userid!);
 					localStorage.setItem('ps-token-userid', userid);
 
 					PS.leave('login' as RoomID); // Close login popup if it's open.
-					user.handleAssertion(userid, decodeURIComponent(assertion as string));
+					user.handleAssertion(userid, decodeURIComponent(assertion!));
 				} else {
 					setTimeout(checkIfUpdated, 500);
 				}
@@ -3036,9 +3030,9 @@ export const OfficialAuth = new class {
 			body: new URLSearchParams({
 				client_id: encodeURIComponent(this.clientId),
 				challenge: encodeURIComponent(user.challstr),
-				token: encodeURIComponent(token as string), // Casting because token === null is excluded by Authorized.
-			})
-		})
+				token: encodeURIComponent(token!), // Casting because token === null is excluded by Authorized.
+			}),
+		});
 		const responseText = await response.text();
 		// if it starts with ] or { then it's not good. Then crash out.
 		if (responseText.startsWith(']') || responseText.startsWith('{')) {
@@ -3058,9 +3052,9 @@ export const OfficialAuth = new class {
 				'Content-Type': 'application/x-www-form-urlencoded',
 			},
 			body: new URLSearchParams({
-				uri: encodeURIComponent(Config.routes.client)
-			})
-		})
+				uri: encodeURIComponent(Config.routes.client),
+			}),
+		});
 
 		const responseText = await response.text();
 		// Remove the ']' CSRF protection prefix
@@ -3116,4 +3110,4 @@ export const OfficialAuth = new class {
 		}
 		return !reauth;
 	}
-}
+};

@@ -125,10 +125,10 @@ export class MainMenuRoom extends PSRoom {
 		case 'challstr': {
 			const [, challstr] = args;
 			PS.user.challstr = challstr;
-			console.debug("Upkeep")
+			console.debug("Upkeep");
 			OfficialAuth.getAssertion(PS.user).then(ass => {
 				const userid = localStorage.getItem('ps-token-userid');
-				console.debug("Userid", userid)
+				console.debug("Userid", userid);
 				if (ass === null || userid === null) {
 					console.debug(ass === null, userid === null, "assertion, userid, null. Authorize request.");
 					OfficialAuth.authorize(PS.user);
@@ -136,24 +136,9 @@ export class MainMenuRoom extends PSRoom {
 					console.debug("Assertion obtained, handling.");
 					PS.user.handleAssertion(userid, ass);
 				}
-			}).catch((reason) => {
+			}).catch(reason => {
 				console.error('Could not get assertion; ' + reason);
-				OfficialAuth.authorize(PS.user)
-			});
-			return;
-			PSLoginServer.query(
-				'upkeep', { challstr }
-			).then(res => {
-				if (!res?.username) {
-					PS.user.initializing = false;
-					return;
-				}
-				// | , ; are not valid characters in names
-				res.username = res.username.replace(/[|,;]+/g, '');
-				if (res.loggedin) {
-					PS.user.registered = { name: res.username, userid: toID(res.username) };
-				}
-				PS.user.handleAssertion(res.username, res.assertion);
+				OfficialAuth.authorize(PS.user);
 			});
 			return;
 		} case 'updateuser': {
@@ -523,7 +508,6 @@ class NewsPanel extends PSRoomPanel {
 		}
 	};
 	override render() {
-		const cookieSet = document.cookie.includes('preactalpha=1');
 		return <PSPanelWrapper room={this.props.room} fullSize>
 			<div class="construction">
 				TO USE THE WEBSITE, YOU NEED TO ALLOW POPUPS. OTHERWISE YOU CANNOT LOG IN.
