@@ -820,33 +820,6 @@ class OptionsPanel extends PSRoomPanel {
 	}
 }
 
-class GooglePasswordBox extends preact.Component<{ name: string }> {
-	override componentDidMount() {
-		window.gapiCallback = (response: any) => {
-			PS.user.changeNameWithPassword(this.props.name, response.credential, { needsGoogle: true });
-		};
-
-		PS.user.gapiLoaded = true;
-		const script = document.createElement('script');
-		script.async = true;
-		script.src = 'https://accounts.google.com/gsi/client';
-		document.getElementsByTagName('head')[0].appendChild(script);
-	}
-	override render() {
-		return <div class="google-password-box">
-			<div
-				id="g_id_onload" data-client_id="912270888098-jjnre816lsuhc5clj3vbcn4o2q7p4qvk.apps.googleusercontent.com"
-				data-context="signin" data-ux_mode="popup" data-callback="gapiCallback" data-auto_prompt="false"
-			></div>
-			<div
-				class="g_id_signin" data-type="standard" data-shape="pill" data-theme="filled_blue" data-text="continue_with"
-				data-size="large" data-logo_alignment="left" data-auto_select="true" data-itp_support="true"
-				style="width:fit-content;margin:0 auto"
-			>[loading Google log-in button]</div>
-		</div>;
-	}
-}
-
 class LoginPanel extends PSRoomPanel {
 	static readonly id = 'login';
 	static readonly routes = ['login'];
