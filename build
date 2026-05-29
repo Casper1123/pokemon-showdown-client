@@ -79,4 +79,4 @@ if (full) {
 }
 
 // Also move copy of config file for clients to load.
-// fs.copyFileSync("config/config.js", "play.pokemonshowdown.com/config/config.js")
+fs.copyFileSync("config/config.js", "play.pokemonshowdown.com/config/config.js")
