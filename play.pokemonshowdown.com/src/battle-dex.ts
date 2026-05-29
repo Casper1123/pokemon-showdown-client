@@ -272,15 +272,6 @@ export const Dex = new class implements ModdedDex {
 		return parseInt(formatid.charAt(3)) || Dex.gen;
 	}
 	forFormat(format: string) {
-		// Note: old modloader content. Keeping here as a sample location for editing &
-		// 	reminders on how you can make things work too.
-		// Inject custom format. I really hope this works ;-;
-		// const formatId = toID(format).slice(4);
-		// if (window.FormatModMapping && window.FormatModMapping[formatId]) {
-		// 	const modId = window.FormatModMapping[formatId];
-		// 	return Dex.mod(modId);
-		// }
-
 		let dex = Dex.forGen(Dex.formatGen(format));
 
 		const formatid = toID(format).slice(4);
