@@ -1,12 +1,10 @@
-import preact from "../js/lib/preact";
+import type preact from "../js/lib/preact";
 import { toID, toRoomid, toUserid, Dex, PSUtils } from "./battle-dex";
 import type { ID } from "./battle-dex-data";
 import { BattleLog } from "./battle-log";
 import { PSLoginServer } from "./client-connection";
 import { PSBackground } from "./client-core";
-import {
-	PS, PSRoom, Config, type RoomOptions, type PSLoginState, type RoomID, type TimestampOptions, OfficialAuth
-} from "./client-main";
+import {	PS, PSRoom, Config, type RoomOptions, type RoomID, type TimestampOptions, OfficialAuth } from "./client-main";
 import { type BattleRoom } from "./panel-battle";
 import { ChatUserList, type ChatRoom } from "./panel-chat";
 import { PSRoomPanel, PSPanelWrapper, PSView } from "./panels";
@@ -888,68 +886,6 @@ class LoginPanel extends PSRoomPanel {
 				<button type="button" name="closeRoom" class="button">Close</button>
 			</p>
 			<h3>Log in</h3>
-		</div></PSPanelWrapper>;
-		<PSPanelWrapper room={room} width={280}><div class="pad">
-			<form onSubmit={this.handleSubmit}>
-				{loginState?.error && <p class="error">{loginState.error}</p>}
-				<p><label class="label">
-					Username: <small class="preview" style={`color:${BattleLog.usernameColor(toID(this.getUsername()))}`}>(color)</small>
-					<input
-						class="textbox" type="text" name="username"
-						onInput={this.update} onChange={this.update} autocomplete="username"
-						value={this.getUsername()} disabled={!!PS.user.loggingIn || !!loginState?.name}
-					/>
-				</label></p>
-				{PS.user.named && !loginState && <p>
-					<small>(Others will be able to see your name change. To change name privately, use "Log out")</small>
-				</p>}
-				{loginState?.needsPassword && <p>
-					<i class="fa fa-level-up fa-rotate-90" aria-hidden></i> <strong>if you registered this name:</strong>
-					<label class="label">
-						Password: {}
-						<input
-							class="textbox" type={this.state.passwordShown ? 'text' : 'password'} name="password"
-							autocomplete="current-password" style="width:173px"
-						/>
-						<button
-							type="button" onClick={this.handleShowPassword} aria-label="Show password"
-							class="button" style="float:right;margin:-21px 0 10px;padding: 2px 6px"
-						><i class="fa fa-eye" aria-hidden></i></button>
-					</label>
-				</p>}
-				{loginState?.needsGoogle && <>
-					<p><i class="fa fa-level-up fa-rotate-90" aria-hidden></i> <strong>if you registered this name:</strong></p>
-					<p><GooglePasswordBox name={this.getUsername()} /></p>
-				</>}
-				<p class="buttonbar">
-					{PS.user.loggingIn ? (
-						<button disabled class="cur">Logging in...</button>
-					) : loginState?.needsPassword ? (
-						<>
-							<button type="submit" class="button"><strong>Log in</strong></button> {}
-							<button type="button" onClick={this.reset} class="button">Cancel</button>
-						</>
-					) : loginState?.needsGoogle ? (
-						<button type="button" onClick={this.reset} class="button">Cancel</button>
-					) : (
-						<>
-							<button type="submit" class="button"><strong>Choose name</strong></button> {}
-							<button type="button" name="closeRoom" class="button">Cancel</button>
-						</>
-					)} {}
-				</p>
-				{loginState?.name && <div>
-					<p>
-						<i class="fa fa-level-up fa-rotate-90" aria-hidden></i> <strong>if not:</strong>
-					</p>
-					<p style={{ maxWidth: '210px', margin: '0 auto' }}>
-						This is someone else's account. Sorry.
-					</p>
-					<p class="buttonbar">
-						<button class="button" onClick={this.reset}>Try another name</button>
-					</p>
-				</div>}
-			</form>
 		</div></PSPanelWrapper>;
 	}
 }
