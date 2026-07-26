@@ -2957,6 +2957,7 @@ export const OfficialAuth = new class {
 	 * @param user The user to authorize.
 	 */
 	authorize(user: PSUser): void {
+		if (window.oauthPopupOpen) return;
 		if (window.location.pathname?.startsWith("/auth/")) { return; } // Prevent recursively opening if already at this page.
 
 		const authorizeUrl = this.requestUrl("authorize");
@@ -2965,8 +2966,11 @@ export const OfficialAuth = new class {
 		authorizeUrl.searchParams.append('challenge', encodeURIComponent(user.challstr));
 
 		const popup = window.open(authorizeUrl, undefined, 'popup=1');
+		window.popupIsOpen = true;
 		const checkIfUpdated = () => {
 			try {
+				if (!popup) { window.popupIsOpen = false; return; }
+
 				if (popup?.location?.href?.startsWith(this.redirectURI)) {
 					console.debug("Processing.");
 					popup.close();
