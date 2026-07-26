@@ -2974,6 +2974,7 @@ export const OfficialAuth = new class {
 				if (popup?.location?.href?.startsWith(this.redirectURI)) {
 					console.debug("Processing.");
 					popup.close();
+					window.popupIsOpen = false;
 
 					const url = new URL(popup.location.href);
 					console.debug("url:", url);
@@ -3005,6 +3006,7 @@ export const OfficialAuth = new class {
 					}
 					userid = decodeURIComponent(userid!);
 					localStorage.setItem('ps-token-userid', userid);
+
 
 					PS.leave('login' as RoomID); // Close login popup if it's open.
 					user.handleAssertion(userid, decodeURIComponent(assertion!));
