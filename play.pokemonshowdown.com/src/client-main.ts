@@ -2958,7 +2958,7 @@ export const OfficialAuth = new class {
 	 */
 	authorize(user: PSUser): void {
 		if (window.oauthPopupOpen) return;
-		if (window.location.pathname?.startsWith("/auth/")) { return; } // Prevent recursively opening if already at this page.
+		if (window.location.pathname?.startsWith("/auth")) { return; } // Prevent recursively opening if already at this page.
 
 		const authorizeUrl = this.requestUrl("authorize");
 		authorizeUrl.searchParams.append('redirect_uri', `${this.redirectURI}/auth/`);
