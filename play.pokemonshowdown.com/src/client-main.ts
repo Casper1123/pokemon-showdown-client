@@ -2960,9 +2960,9 @@ export const OfficialAuth = new class {
 	authorize(user: PSUser): void {
 		console.debug('Checking for user authorization');
 		if (window.oauthPopupOpen) { console.debug('\tWindow open, backing out.'); return; }
-		if (window.location.pathname?.startsWith("/auth")) { console.debug('\tAuth window already on auth page, backing out.'); return; } // Prevent recursively opening if already at this page.
+		if (window.location.pathname?.startsWith("/auth/")) { console.debug('\tAuth window already on auth page, backing out.'); return; } // Prevent recursively opening if already at this page.
 		const authorizeUrl = this.requestUrl("authorize");
-		authorizeUrl.searchParams.append('redirect_uri', `${this.redirectURI}/auth`);
+		authorizeUrl.searchParams.append('redirect_uri', `${this.redirectURI}/auth/`);
 		authorizeUrl.searchParams.append('client_id', encodeURIComponent(this.clientId));
 		authorizeUrl.searchParams.append('challenge', encodeURIComponent(user.challstr));
 
@@ -3026,6 +3026,7 @@ export const OfficialAuth = new class {
 				setTimeout(checkIfUpdated, 500);
 			}
 		};
+
 		checkIfUpdated();
 	}
 
