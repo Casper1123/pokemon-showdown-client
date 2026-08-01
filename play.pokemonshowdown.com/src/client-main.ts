@@ -761,7 +761,6 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 	}
 	handleAssertion(name: string, assertion?: string | null) {
 		if (!assertion) {
-			console.error('No assertion given.');
 			PS.alert("Error logging in.");
 			return;
 		}
@@ -2958,26 +2957,19 @@ export const OfficialAuth = new class {
 	 * @param user The user to authorize.
 	 */
 	authorize(user: PSUser): void {
-		console.debug('Checking for user authorization');
-		if (window.oauthPopupOpen) { console.debug('\tWindow open, backing out.'); return; }
-		if (window.location.pathname?.startsWith("/auth")) { console.debug('\tAuth window already on auth page, backing out.'); return; } // Prevent recursively opening if already at this page.
+		if (window.oauthPopupOpen) return;
+		if (window.location.pathname?.startsWith("/auth")) { return; } // Prevent recursively opening if already at this page.
+
 		const authorizeUrl = this.requestUrl("authorize");
 		authorizeUrl.searchParams.append('redirect_uri', `${this.redirectURI}/auth`);
 		authorizeUrl.searchParams.append('client_id', encodeURIComponent(this.clientId));
 		authorizeUrl.searchParams.append('challenge', encodeURIComponent(user.challstr));
 
-		console.debug('\tOpening popup');
 		const popup = window.open(authorizeUrl, undefined, 'popup=1');
 		window.popupIsOpen = true;
-		console.debug('\tPopup opened.');
 		const checkIfUpdated = () => {
-			console.debug('\t\tChecking popup.');
 			try {
-				if (!popup) {
-					console.debug('\t\tNo popup. Stopping.');
-					window.popupIsOpen = false;
-					return;
-				}
+				if (!popup) { window.popupIsOpen = false; return; }
 
 				if (popup?.location?.href?.startsWith(this.redirectURI)) {
 					console.debug("Processing.");
@@ -3014,15 +3006,14 @@ export const OfficialAuth = new class {
 					}
 					userid = decodeURIComponent(userid!);
 					localStorage.setItem('ps-token-userid', userid);
-					console.debug('logging in user');
+
+
 					PS.leave('login' as RoomID); // Close login popup if it's open.
 					user.handleAssertion(userid, decodeURIComponent(assertion!));
 				} else {
-					console.debug(`\t\tPopup at ${popup?.location?.href} and not at ${this.redirectURI}, checking again.`);
 					setTimeout(checkIfUpdated, 500);
 				}
 			} catch {
-				console.debug('\t\tCaught an exception, retrying.');
 				setTimeout(checkIfUpdated, 500);
 			}
 		};
