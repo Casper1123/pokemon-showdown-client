@@ -447,36 +447,6 @@ export class PSStorage {
 
 PSConnection.connect();
 
-export const PSLoginServer = new class {
-	rawQuery(act: string, data: PostData): Promise<string | null> {
-		// commenting out because for some reason this is working in Chrome????
-		// if (location.protocol === 'file:') {
-		// 	alert("Sorry, login server queries don't work in the testclient. To log in, see README.md to set up testclient-key.js");
-		// 	return Promise.resolve(null);
-		// }
-		data.act = act;
-		let url = '/~~' + PS.server.id + '/action.php';
-		if (location.pathname.endsWith('.html')) {
-			url = 'https://' + Config.routes.client + url;
-			if (typeof POKEMON_SHOWDOWN_TESTCLIENT_KEY === 'string') {
-				data.sid = POKEMON_SHOWDOWN_TESTCLIENT_KEY.replace(/%2C/g, ',');
-			}
-		}
-		return PSStorage.request('POST', url, data) || Net(url).get({ method: 'POST', body: data }).then(
-			res => res ?? null
-		).catch(
-			() => null
-		);
-	}
-	query(act: string, data: PostData = {}): Promise<{ [k: string]: any } | null> {
-		return this.rawQuery(act, data).then(
-			res => res ? JSON.parse(res.slice(1)) : null
-		).catch(
-			() => null
-		);
-	}
-};
-
 interface PostData {
 	[key: string]: string | number | boolean | null | undefined;
 }
