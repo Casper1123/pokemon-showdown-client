@@ -1,4 +1,4 @@
-import type preact from "../js/lib/preact";
+import preact from "../js/lib/preact";
 import { toID, toRoomid, toUserid, Dex, PSUtils, TL } from "./battle-dex";
 import type { ID } from "./battle-dex-data";
 import { BattleLog } from "./battle-log";
@@ -1073,28 +1073,7 @@ class ChangePasswordPanel extends PSRoomPanel {
 	declare state: { errorMsg: string };
 
 	handleChangePassword = (ev: Event) => {
-		ev.preventDefault();
-		let oldpassword = this.base?.querySelector<HTMLInputElement>('input[name=oldpassword]')?.value;
-		let password = this.base?.querySelector<HTMLInputElement>('input[name=password]')?.value;
-		let cpassword = this.base?.querySelector<HTMLInputElement>('input[name=cpassword]')?.value;
-		if (!oldpassword?.length ||
-			!password?.length ||
-			!cpassword?.length) return this.setState({ errorMsg: TL`All fields are required` });
-		if (password !== cpassword) return this.setState({ errorMsg: TL`Passwords do not match` });
-		PSLoginServer.query("changepassword", {
-			oldpassword,
-			password,
-			cpassword,
-		}).then(data => {
-			if (data?.actionerror) return this.setState({ errorMsg: data?.actionerror });
-			PS.alert(TL`Your password was successfully changed!`);
-
-		}).catch(err => {
-			console.error(err);
-			this.setState({ errorMsg: err.message });
-		});
-
-		this.setState({ errorMsg: '' });
+		this.setState({ errorMsg: 'This feature is disabled.' });
 	};
 
 	override render() {
@@ -1564,10 +1543,6 @@ class BattleOptionsPanel extends PSRoomPanel {
 			PS.prefs.set('spectatefromstart', value);
 			break;
 		}
-		case 'spectatefromstart': {
-			PS.prefs.set('spectatefromstart', value);
-			break;
-		}
 		case 'ignoreopp': {
 			PS.prefs.set('ignoreopp', value);
 			this.handleIgnoreOpponent(value);
@@ -1743,14 +1718,6 @@ class BattleOptionsPanel extends PSRoomPanel {
 						name="spectatefromstart" checked={!!PS.prefs.spectatefromstart}
 						type="checkbox" onChange={this.handleAllSettings}
 					/> {TL`Start at turn 0 when spectating battles`}
-				</label>
-			</p>
-			<p>
-				<label class="checkbox">
-					<input
-						name="spectatefromstart" checked={!!PS.prefs.spectatefromstart}
-						type="checkbox" onChange={this.handleAllSettings}
-					/> Start at turn 0 when spectating battles
 				</label>
 			</p>
 			{!PS.prefs.onepanel && window.innerWidth >= 800 && <p>

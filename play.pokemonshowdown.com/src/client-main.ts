@@ -325,18 +325,6 @@ class PSPrefs extends PSStreamModel<string | null> {
 			document.querySelector('head')?.append(style);
 		}
 	}
-	setShowDebug(mode = this.showdebug) {
-		const css = mode ? `.debug {display: block;}` : `.debug {display: none;}`;
-		let style = document.querySelector('style[id=debugstyle]');
-		if (style) {
-			style.innerHTML = css;
-		} else {
-			style = document.createElement('style');
-			style.id = "debugstyle";
-			style.innerHTML = css;
-			document.querySelector('head')?.append(style);
-		}
-	}
 	doAutojoin() {
 		let autojoin = PS.prefs.autojoin;
 		if (autojoin) {
@@ -762,7 +750,6 @@ export class PSUser extends PSStreamModel<PSLoginState | null> {
 			console.error('Could not get assertion; ' + reason);
 			OfficialAuth.authorize(this);
 		});
-
 	}
 	changeNameWithPassword(name: string, password: string, special: PSLoginState = { needsPassword: true }) {
 		if (!PS.rooms['login']) {

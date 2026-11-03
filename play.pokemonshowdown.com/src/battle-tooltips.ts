@@ -1720,9 +1720,6 @@ export class BattleTooltips {
 			ev0 = tr(tr(tr((2 * baseSpe + 31) * level / 100 + 5)) * tr((70 / 255 / 10 + 1) * 100) / 100);
 			ev84 = tr(tr(tr((2 * baseSpe + 31) * level / 100 + 5)) * tr((70 / 255 / 10 + 1) * 100) / 100);
 			ev252 = tr(tr(tr((2 * baseSpe + 31 + 63) * level / 100 + 5)) * tr((70 / 255 / 10 + 1) * 100) / 100);
-			ev0 = tr(tr(tr((2 * baseSpe + 31) * level / 100 + 5)) * tr((70 / 255 / 10 + 1) * 100) / 100);
-			ev84 = tr(tr(tr((2 * baseSpe + 31) * level / 100 + 5)) * tr((70 / 255 / 10 + 1) * 100) / 100);
-			ev252 = tr(tr(tr((2 * baseSpe + 31 + 63) * level / 100 + 5)) * tr((70 / 255 / 10 + 1) * 100) / 100);
 			max = tr(tr(tr((2 * baseSpe + 31) * level / 100 + 5) * maxNatureMult) * tr((70 / 255 / 10 + 1) * 100) / 100);
 			if (tier.includes('No Restrictions')) max += 200;
 			else if (tier.includes('Random')) max += 20;

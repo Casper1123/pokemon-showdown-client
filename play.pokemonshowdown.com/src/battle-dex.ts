@@ -538,6 +538,9 @@ export const Dex = new class implements ModdedDex {
 		return this.formats.get(format).gen;
 	}
 	forFormat(format: string) {
+		if (format.includes('natdexcustomdoubles')) {
+			format = format.replace('doubles', ''); // hoping this works.
+		}
 		return this.mod(this.formats.get(format).mod);
 	}
 

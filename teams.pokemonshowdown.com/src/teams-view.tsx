@@ -383,6 +383,7 @@ export class TeamViewer extends preact.Component<PageProps> {
 						</>}
 					</div>
 				</div>
+
 			</div>
 			<hr />
 			<div
@@ -490,7 +491,6 @@ export class TeamViewer extends preact.Component<PageProps> {
 		if (!this.state.team) return;
 		const team = unpackTeam(this.state.team.team);
 		navigator.clipboard.writeText(team.map(exportSet).join('\n\n'));
-		clearTimeout(this.state.copyButtonUsed);
 		clearTimeout(this.state.copyButtonUsed);
 		this.setState({
 			copyButtonUsed: setTimeout(() => this.setState({ copyButtonUsed: undefined }), 3000),
