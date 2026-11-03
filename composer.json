@@ -1,6 +1,5 @@
 {
     "require": {
-        "google/apiclient": "^2.2",
         "sentry/sentry": "^1.10"
     }
 }
