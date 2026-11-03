@@ -271,7 +271,7 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	const OTHER = [9.33];
 
 	// process.stdout.write("\n  ");
-	for (const genIdent of [...CUSTOMNATDEX, ...GENS, ...DOUBLES, ...VGC, ...OTHER, ...NATDEX]) {
+	for (const genIdent of [...CUSTOMNATDEX, ...GENS, ...DOUBLES, ...VGC, ...OTHER, ...NATDEX, ...CHAMPIONS]) {
 		const isCustomNatdex = ('' + genIdent).endsWith('.8');
 		const isNatDex = ('' + genIdent).endsWith('.1') && genIdent > 8;
 		const isDoubles = (genIdent < 0);
@@ -282,7 +282,6 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 		const gen = (() => {
 			let genStr = 'gen' + genNum;
 			if (isCustomNatdex) genStr += 'natdexcustom';
-			if (isLegendsZA) genStr += 'legendsou';
 			if (isChampions || isNDChampions) genStr = 'champions';
 			return genStr;
 		})();
