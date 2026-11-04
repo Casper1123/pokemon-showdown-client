@@ -963,7 +963,9 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	//
 
 	for (const mod of CLIENT_MODS) {
-		const modDex = Dex.mod(mod.replace('doubles', ''));
+		const modName = mod.replace('doubles', '')
+		console.log("building mod " + mod + " using mod name " + modName)
+		const modDex = Dex.mod();
 		const modData = modDex.data;
 		const parentDex = Dex.forGen(modDex.gen);
 
