@@ -93,11 +93,13 @@ _this2.setState(Object.assign({},result,{loading:false}));
 
 render=function render(){var _this3=this;
 if(this.state.loading){
-return preact.h("div",{"class":"section",style:{wordWrap:'break-word'}},"Loading...");
+return preact.h(Page,{wrap:true},"Loading...");
 }
-return preact.h("div",{"class":"section",style:{wordWrap:'break-word',textAlign:'center'}},
-preact.h("small",null,preact.h("a",{href:'//'+Config.routes.teams},preact.h("i",{style:{"float":'left'},"class":"fa fa-arrow-left"}))),
-preact.h("h1",null,"Search Teams"),
+return preact.h(Page,{wrap:true,center:true},
+preact.h("div",{style:{display:'flex',alignItems:'center',gap:'20px'}},
+preact.h("a",{href:'//'+Config.routes.teams,"class":"button"},preact.h("i",{"class":"fa fa-caret-left"})," Back"),
+preact.h("h1",null,"Search Teams")
+),
 preact.h("br",null),
 preact.h("div",{name:"searchsection"},
 preact.h("label",null,"Format: "),

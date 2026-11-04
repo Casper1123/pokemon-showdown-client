@@ -31,6 +31,7 @@ ExamplePanel=function(_PSRoomPanel){function ExamplePanel(){return _PSRoomPanel.
 
 
 
+
 render=function render(){
 var room=this.props.room;
 return preact.h(PSPanelWrapper,{room:room},
@@ -47,12 +48,13 @@ ExampleViewPanel=function(_PSRoomPanel2){function ExampleViewPanel(){return _PSR
 
 
 
+
 render=function render(){
 var room=this.props.room;
 return preact.h(PSPanelWrapper,{room:room},
 preact.h("div",{"class":"mainmessage"},preact.h("p",null,"Hello World!"))
 );
-};return ExampleViewPanel;}(PSRoomPanel);ExampleViewPanel.id='examplevie2';ExampleViewPanel.routes=['exampleview2'];ExampleViewPanel.title='Example View';
+};return ExampleViewPanel;}(PSRoomPanel);ExampleViewPanel.id='exampleview2';ExampleViewPanel.routes=['exampleview2'];ExampleViewPanel.title='Example View';
 
 
 PS.addRoomType(ExampleViewPanel);

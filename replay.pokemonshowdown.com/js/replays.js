@@ -5,6 +5,7 @@
 
 
 
+
 var PSRouter=new(function(_PSModel){
 
 
@@ -12,7 +13,7 @@ var PSRouter=new(function(_PSModel){
 
 
 function _class(){var _this;
-_this=_PSModel.call(this)||this;_this.baseLoc=void 0;_this.leftLoc=null;_this.rightLoc=null;_this.forceSinglePanel=false;_this.stickyRight=true;
+_this=_PSModel.call(this)||this;_this.baseLoc=void 0;_this.leftLoc=null;_this.rightLoc=null;_this.forceSinglePanel=false;_this.shortViewport=false;
 var baseLocSlashIndex=document.location.href.lastIndexOf('/');
 _this.baseLoc=document.location.href.slice(0,baseLocSlashIndex+1);
 if(Net.defaultRoute){
@@ -39,15 +40,16 @@ return""+(Net.defaultRoute?'#':route!=null&&route.startsWith('?')?'./':'')+(rout
 };_proto.
 setSinglePanel=function setSinglePanel(init){
 var singlePanel=window.innerWidth<1300;
-var stickyRight=window.innerHeight>614;
-if(this.forceSinglePanel!==singlePanel||this.stickyRight!==stickyRight){
+var shortViewport=window.innerHeight<=660;
+if(this.forceSinglePanel!==singlePanel||this.shortViewport!==shortViewport){
 this.forceSinglePanel=singlePanel;
-this.stickyRight=stickyRight;
+this.shortViewport=shortViewport;
 if(!init)this.update();
 }
 };_proto.
 push=function push(href){
 if(!href.startsWith(this.baseLoc))return false;
+if(href.includes('.json')||href.includes('.log')||href.includes('.inputlog'))return false;
 
 if(this.go(href)){var _window$history;
 (_window$history=window.history)==null||_window$history.pushState([this.leftLoc,this.rightLoc],'',href);
@@ -93,8 +95,9 @@ this.update();
 };return _class;}(PSModel))(
 );var
 
-PSReplays=function(_preact$Component){function PSReplays(){return _preact$Component.apply(this,arguments)||this;}_inheritsLoose(PSReplays,_preact$Component);PSReplays.
+PSReplays=function(_preact$Component){function PSReplays(){var _this2;for(var _len=arguments.length,args=new Array(_len),_key=0;_key<_len;_key++){args[_key]=arguments[_key];}_this2=_preact$Component.call.apply(_preact$Component,[this].concat(args))||this;_this2.
 
+user=null;return _this2;}_inheritsLoose(PSReplays,_preact$Component);PSReplays.
 updateDarkMode=function updateDarkMode(){
 var dark=this.darkMode==='dark'?'dark':'';
 if(this.darkMode==='auto'){
@@ -102,8 +105,8 @@ dark=window.matchMedia!=null&&window.matchMedia('(prefers-color-scheme: dark)').
 }
 document.documentElement.className=dark;
 };var _proto2=PSReplays.prototype;_proto2.
-componentDidMount=function componentDidMount(){var _this2=this;
-PSRouter.subscribe(function(){return _this2.forceUpdate();});
+componentDidMount=function componentDidMount(){var _this3=this;
+PSRouter.subscribe(function(){return _this3.forceUpdate();});
 if(window.history){
 this.base.addEventListener('click',function(e){
 var el=e.target;
@@ -111,7 +114,7 @@ for(;el;el=el.parentNode){
 if(el.tagName==='A'&&PSRouter.push(el.href)){
 e.preventDefault();
 e.stopImmediatePropagation();
-_this2.forceUpdate();
+_this3.forceUpdate();
 return;
 }
 }
@@ -122,15 +125,21 @@ Net("https://"+Config.routes.client+"/config/colors.json").get().then(function(r
 var data=JSON.parse(response);
 Object.assign(Config.customcolors,data);
 });
+if(!Net.defaultRoute)Net("/api/replays/check-login").get().then(function(result){
+if(!result.startsWith(']'))return;
+var _result$slice$split=result.slice(1).split(','),userid=_result$slice$split[0],isLeader=_result$slice$split[1];
+_this3.user={id:userid,isLeader:!!isLeader};
+_this3.forceUpdate();
+});
 };_proto2.
 render=function render(){
-var position=PSRouter.showingLeft()&&PSRouter.showingRight()&&!PSRouter.stickyRight?
-{display:'flex',flexDirection:'column',justifyContent:'flex-end'}:{};
-return preact.h("div",{
-"class":'bar-wrapper'+(PSRouter.showingLeft()&&PSRouter.showingRight()?' has-sidebar':''),style:position},
+var twoColumn=PSRouter.showingLeft()&&PSRouter.showingRight();
+var className="bar-wrapper"+(twoColumn?' has-sidebar':'')+(
+twoColumn&&PSRouter.shortViewport?' short-viewport':'');
 
-PSRouter.showingLeft()&&preact.h(SearchPanel,{id:PSRouter.leftLoc}),
-PSRouter.showingRight()&&preact.h(BattlePanel,{id:PSRouter.rightLoc}),
+return preact.h("div",{"class":className},
+PSRouter.showingLeft()&&preact.h(SearchPanel,{id:PSRouter.leftLoc,user:this.user}),
+PSRouter.showingRight()&&preact.h(BattlePanel,{id:PSRouter.rightLoc,user:this.user}),
 preact.h("div",{style:{clear:'both'}})
 );
 };return PSReplays;}(preact.Component);PSReplays.darkMode='auto';

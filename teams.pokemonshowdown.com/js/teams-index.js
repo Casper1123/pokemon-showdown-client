@@ -46,7 +46,7 @@ return false;
 };_proto.
 render=function render(){var _this3=this;
 if(this.state.loading){
-return preact.h("div",{"class":"section",style:{wordWrap:'break-word'}},"Loading...");
+return preact.h(Page,{wrap:true},"Loading...");
 }
 var teamsByFormat={};
 var i=0;for(var _i2=0,_this$state$teams2=
@@ -58,7 +58,7 @@ if(!teamsByFormat[team.format])teamsByFormat[team.format]=[];
 teamsByFormat[team.format].push(team);
 i++;
 }
-return preact.h("div",{"class":"section",style:{wordWrap:'break-word'}},
+return preact.h(Page,{wrap:true},
 preact.h("h2",null,"Hi, ",this.state.loggedIn||"guest","!"),
 preact.h("label",null,"Upload a new team: "),
 preact.h("a",{"class":"button",href:"//"+Config.routes.client+"/view-teams-upload"},"Go"),preact.h("br",null),preact.h("br",null),

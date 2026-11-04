@@ -264,9 +264,9 @@ return preact.h("span",null);
 function unpackTeam(buf){
 if(!buf)return[];
 
-var team=[];for(var _i0=0,_buf$split2=
+var team=[];for(var _i10=0,_buf$split2=
 
-buf.split("]");_i0<_buf$split2.length;_i0++){var setBuf=_buf$split2[_i0];
+buf.split("]");_i10<_buf$split2.length;_i10++){var setBuf=_buf$split2[_i10];
 var parts=setBuf.split("|");
 if(parts.length<11)continue;
 var set={species:'',moves:[]};
@@ -366,7 +366,6 @@ preact.h("strong",null,
 team.name||team.title||"Untitled "+team.teamid,
 team["private"]?preact.h(preact.Fragment,null," ",preact.h("i",{"class":"fa fa-lock"})):preact.h(preact.Fragment,null)
 ),
-preact.h("br",null),
 preact.h("small",null,
 (this.props.fullTeam?
 unpackTeam(team.team).map(function(x){return x.species;}):
@@ -379,8 +378,8 @@ map(function(x){return preact.h(PSIcon,{pokemon:x});})||preact.h("em",null,"(Emp
 
 
 function getShowdownUsername(){
-var vals=document.cookie.split(';');for(var _i10=0;_i10<
-vals.length;_i10++){var cookie=vals[_i10];
+var vals=document.cookie.split(';');for(var _i12=0;_i12<
+vals.length;_i12++){var cookie=vals[_i12];
 var _cookie$split=cookie.split('='),part=_cookie$split[0],rest=_cookie$split.slice(1);
 var data=decodeURIComponent(rest.join('='));
 if(toID(part)==='showdownusername'||toID(part)==='sid'){
@@ -401,5 +400,18 @@ result={actionerror:"Malformed response received. Try again later."};
 }
 return result;
 });
-}
+}var
+
+Page=function(_preact$Component3){function Page(){return _preact$Component3.apply(this,arguments)||this;}_inheritsLoose(Page,_preact$Component3);var _proto7=Page.prototype;_proto7.
+render=function render(){
+return preact.h("div",{style:{display:'flex',justifyContent:'center',alignItems:'center'}},
+preact.h("div",{style:{
+width:'90%',
+height:'85%',
+wordWrap:this.props.wrap?'break-word':undefined,
+textAlign:this.props.center?'center':undefined
+}},
+this.props.children)
+);
+};return Page;}(preact.Component);
 //# sourceMappingURL=utils.js.map
