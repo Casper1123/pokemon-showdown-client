@@ -961,10 +961,10 @@ process.stdout.write("Building `data/teambuilder-tables.js`... ");
 	//
 	// Mods
 	//
-
+	console.log("\n"); // Make the output look a little prettier.
 	for (const mod of CLIENT_MODS) {
 		const modName = mod.replace('doubles', '')
-		console.log("building mod " + mod + " using mod name " + modName)
+		console.log("Integrating mod " + mod + " using mod id " + modName)
 		const modDex = Dex.mod();
 		const modData = modDex.data;
 		const parentDex = Dex.forGen(modDex.gen);
