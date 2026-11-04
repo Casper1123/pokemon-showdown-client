@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 'use strict';
 
-const path = require("path");
-const child_process = require("child_process");
+import child_process from "node:child_process";
+import path from 'path'
 import fs from 'node:fs';
 import imageSize from 'image-size';
 
-const rootDir = path.resolve(__dirname, '..');
-process.chdir(rootDir);
+process.chdir(import.meta.dirname + '/..');
 
 const assetsCache = 'caches/pokemon-showdown-assets';
 if (!fs.existsSync(assetsCache)) {
@@ -43,8 +42,6 @@ if (!fs.existsSync(assetsCache)) {
 	child_process.execSync('git pull', { cwd: assetsCache });
 	console.log("DONE");
 }
-
-process.chdir(path.resolve(__dirname, '../play.pokemonshowdown.com'));
 
 process.chdir(import.meta.dirname + '/..');
 
