@@ -36,8 +36,12 @@ function getLanguages() {
 }
 
 function addModText(Dex, text) {
-	for (const mod of CLIENT_MODS) {
-		const modData = Dex.mod(mod).data;
+	for (const modRaw of CLIENT_MODS) {
+		const mod = modRaw.replace("doubles", "");
+		console.log("\tSetting mod text for mod " + modRaw);
+		const modDex = Dex.mod(mod);
+		console.log(`\t\tObtained dex with id ${modDex.id}`);
+		const modData = modDex.data;
 		for (const table of ['Moves', 'Abilities', 'Items']) {
 			for (const id in modData[table]) {
 				const { desc, shortDesc } = modData[table][id];
