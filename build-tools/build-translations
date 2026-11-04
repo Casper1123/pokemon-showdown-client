@@ -48,7 +48,7 @@ function addModText(Dex, text) {
 				if (!desc && !shortDesc) continue;
 				text[table][id] = {
 					...text[table][id],
-					[mod]: { desc: desc || shortDesc, shortDesc: shortDesc || desc },
+					[modRaw]: { desc: desc || shortDesc, shortDesc: shortDesc || desc },
 				};
 			}
 		}
