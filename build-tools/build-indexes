@@ -1062,14 +1062,11 @@ console.log("DONE");
 process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.js`...");
 
 {
-	console.log("\n\tObtaining moves from cache")
 	const Moves = requireNoCache('../caches/pokemon-showdown/dist/data/moves.js').Moves;
 	for (const id in Moves) {
-		console.log(`\tWorking on move with id ${id} and name ${Moves[id].name}`);
 		const move = Dex.moves.get(Moves[id].name);
 		if (move.basePowerCallback) Moves[id].basePowerCallback = true;
 	}
-	console.log("Exporting moves");
 	const buf = 'exports.BattleMovedex = ' + es3stringify(Moves) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/moves.js', buf);
 	fs.writeFileSync('play.pokemonshowdown.com/data/moves.json', JSON.stringify(Moves));
@@ -1080,9 +1077,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
  *********************************************************/
 
 {
-	console.log("\n\tObtaining items from cache")
 	const Items = requireNoCache('../caches/pokemon-showdown/dist/data/items.js').Items;
-	console.log("\tExporting items")
 	const buf = 'exports.BattleItems = ' + es3stringify(Items) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/items.js', buf);
 }
@@ -1092,9 +1087,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
  *********************************************************/
 
 {
-	console.log("\n\tObtaining abilities from cache")
 	const Abilities = requireNoCache('../caches/pokemon-showdown/dist/data/abilities.js').Abilities;
-	console.log("\tExporting abilities");
 	const buf = 'exports.BattleAbilities = ' + es3stringify(Abilities) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/abilities.js', buf);
 }
@@ -1104,9 +1097,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
  *********************************************************/
 
 {
-	console.log("\n\tObtaining typechart from cache")
 	const TypeChart = requireNoCache('../caches/pokemon-showdown/dist/data/typechart.js').TypeChart;
-	console.log("\n\tObtaining moves")
 	const buf = 'exports.BattleTypeChart = ' + es3stringify(TypeChart) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/typechart.js', buf);
 }
@@ -1116,9 +1107,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
  *********************************************************/
 
 {
-	console.log("\n\tObtaining aliases from cache")
 	const Aliases = requireNoCache('../caches/pokemon-showdown/dist/data/aliases.js').Aliases;
-	console.log("\tExporting aliases");
 	const buf = 'exports.BattleAliases = ' + es3stringify(Aliases) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/aliases.js', buf);
 }
@@ -1128,9 +1117,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
  *********************************************************/
 
 {
-	console.log("\n\tObtaining formatsdata from cache")
 	const FormatsData = requireNoCache('../caches/pokemon-showdown/dist/data/formats-data.js').FormatsData;
-	console.log("\n\tObtaining moves from cache")
 	const buf = 'exports.BattleFormatsData = ' + es3stringify(FormatsData) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/formats-data.js', buf);
 }
@@ -1140,9 +1127,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
  *********************************************************/
 
 {
-	console.log("\n\tObtaining formats from cache")
 	const Formats = requireNoCache('../caches/pokemon-showdown/dist/config/formats.js').Formats;
-	console.log("\n\tObtaining moves from cache")
 	const buf = 'exports.Formats = ' + es3stringify(Formats) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/formats.js', buf);
 }
@@ -1152,9 +1137,7 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
  *********************************************************/
 
 {
-	console.log("\n\tObtaining learnsets from cache")
 	const Learnsets = requireNoCache('../caches/pokemon-showdown/dist/data/learnsets.js').Learnsets;
-	console.log("\tExporting learnsets");
 	const buf = 'exports.BattleLearnsets = ' + es3stringify(Learnsets) + ';';
 	fs.writeFileSync('play.pokemonshowdown.com/data/learnsets.js', buf);
 	fs.writeFileSync('play.pokemonshowdown.com/data/learnsets.json', JSON.stringify(Learnsets));
@@ -1165,7 +1148,6 @@ process.stdout.write("Building `data/moves,items,abilities,typechart,learnsets.j
  *********************************************************/
 
 {
-	console.log("\n\tBuilding translations for dex text.")
 	require('./build-translations').buildTextFiles(Dex);
 }
 
