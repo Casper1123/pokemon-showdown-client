@@ -3,7 +3,6 @@ const {describe, it} = require('node:test');
 const path = require('path');
 
 const englishTextPath = path.resolve(__dirname, '../../play.pokemonshowdown.com/data/text/en.js');
-const afdTextPath = path.resolve(__dirname, '../../play.pokemonshowdown.com/data/text/en-afd.js');
 global.window = global;
 global.BattleText = {en: {
 	Default: {
@@ -23,8 +22,6 @@ global.BattleText = {en: {
 	TypeNames: {Fire: 'Fire', Water: 'English Water'},
 	NatureNames: {Adamant: 'Adamant', Modest: 'English Modest'},
 	StatNames: {atk: 'Attack', stats: 'stats'},
-}, 'en-afd': {
-	Default: {default: {hitCount: 'April hits: {NUMBER}'}},
 }};
 
 require('../../play.pokemonshowdown.com/js/battle-dex-data.js');
@@ -33,17 +30,8 @@ require('../../play.pokemonshowdown.com/js/battle-text-parser.js');
 const BattleTextParser = global.BattleTextParser;
 
 describe('BattleTextParser', () => {
-	it('loads the generated English and April Fools text tables', () => {
+	it('loads the generated English text table', () => {
 		assert.ok(require(englishTextPath).BattleText.en.Default.default);
-		assert.ok(require(afdTextPath).BattleText['en-afd'].Default);
-	});
-
-	it('uses en-afd as a sparse English overlay', () => {
-		global.Dex.afdMode = true;
-		const parser = new BattleTextParser();
-		assert.equal(parser.extractMessage('|-hitcount|p1a: Mew|3'), 'April hits: 3\n');
-		assert.equal(parser.extractMessage('|-damage|p1a: Mew|58/100'), 'Mew took damage.\n');
-		global.Dex.afdMode = false;
 	});
 
 	it('handles a missing English text preload', async () => {

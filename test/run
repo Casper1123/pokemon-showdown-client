@@ -37,7 +37,6 @@ const required = [
 	'play.pokemonshowdown.com/data/pokedex.js',
 	'play.pokemonshowdown.com/data/moves.js',
 	'play.pokemonshowdown.com/data/text/en.js',
-	'play.pokemonshowdown.com/data/text/en-afd.js',
 ];
 const missing = required.filter(file => !fs.existsSync(path.resolve(root, file)));
 const canFull = !missing.length;
