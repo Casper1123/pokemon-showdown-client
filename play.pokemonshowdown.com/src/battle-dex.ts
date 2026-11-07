@@ -90,18 +90,6 @@ export function toUserid(text: any) {
 
 const TEXT_LANGUAGES = [
 	{ code: "en", legacyId: "english", name: "English", fullName: "English" },
-	{ code: "de", legacyId: "german", name: "Deutsch", fullName: "Deutsch (German)" },
-	{ code: "es", legacyId: "spanish", name: "Español", fullName: "Español (Spanish)" },
-	{ code: "fr", legacyId: "french", name: "Français", fullName: "Français (French)" },
-	{ code: "it", legacyId: "italian", name: "Italiano", fullName: "Italiano (Italian)" },
-	{ code: "nl", legacyId: "dutch", name: "Nederlands", fullName: "Nederlands (Dutch)" },
-	{ code: "pt", legacyId: "portuguese", name: "Português", fullName: "Português (Portuguese)" },
-	{ code: "tr", legacyId: "turkish", name: "Türkçe", fullName: "Türkçe (Turkish)" },
-	{ code: "hi", legacyId: "hindi", name: "हिंदी", fullName: "हिंदी (Hindi)" },
-	{ code: "ja", legacyId: "japanese", name: "日本語", fullName: "日本語 (Japanese)" },
-	{ code: "zh-cn", legacyId: "simplifiedchinese", name: "简体中文", fullName: "简体中文 (Simplified Chinese)" },
-	{ code: "zh-tw", legacyId: "traditionalchinese", name: "繁體中文", fullName: "繁體中文 (Traditional Chinese)" },
-	{ code: "ko", legacyId: "korean", name: "한국어", fullName: "한국어 (Korean)" },
 ];
 type Language = typeof TEXT_LANGUAGES[number];
 const TEXT_LANGUAGE_TABLE: Record<string, Language> = {};
@@ -112,9 +100,6 @@ for (const lang of TEXT_LANGUAGES) {
 	TEXT_LANGUAGE_TABLE[lang.name] = lang;
 	TEXT_LANGUAGE_TABLE[lang.name.toLowerCase()] = lang;
 }
-TEXT_LANGUAGE_TABLE['en-afd'] = {
-	code: "en-afd", legacyId: "english", name: "English (AFD)", fullName: "English (AFD)",
-};
 
 type TranslatableEffect = Species | Item | Ability | Move | NatureEffect | Type;
 
