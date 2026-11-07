@@ -83,7 +83,9 @@ if (full) {
 	}
 }
 
-execSync(`node ./build-tools/update` + full, options);
-
 // Also move copy of config file for clients to load.
 fs.copyFileSync("config/config.js", "play.pokemonshowdown.com/config/config.js")
+
+execSync(`node ./build-tools/update` + full, options);
+
+
