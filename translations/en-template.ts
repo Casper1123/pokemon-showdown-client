@@ -224,29 +224,29 @@ export const translations: TranslationCatalog = {
 
 	// TRANSLATORS: login
 	"[Choose name]": null,
-	"Logging in...": null,
+	"Logging in...": null, // NOT USED
 	"[Log in]": null,
-	"[Try another name]": null,
+	"[Try another name]": null, // NOT USED
 	"[Password...]": null,
 	"[Change password]": null,
-	"[Show password]": null,
-	"Loading Google log-in button...": null,
-	"(color)": null,
-	"(Others will be able to see your name change. To change name privately, use \"Log out\")": null,
-	"if you registered this name:": null,
-	"if not:": null,
-	"This is someone else's account. Sorry.": null,
+	"[Show password]": null, // NOT USED
+	"Loading Google log-in button...": null, // NOT USED
+	"(color)": null, // NOT USED
+	"(Others will be able to see your name change. To change name privately, use \"Log out\")": null, // NOT USED
+	"if you registered this name:": null, // NOT USED
+	"if not:": null, // NOT USED
+	"This is someone else's account. Sorry.": null, // NOT USED
 	"Password": null,
 
 	// TRANSLATORS: register / change password
-	"All fields are required": null,
-	"Passwords do not match": null,
-	"Your password was successfully changed!": null,
+	"All fields are required": null, // NOT USED
+	"Passwords do not match": null, // NOT USED
+	"Your password was successfully changed!": null, // NOT USED
 	"Change your password:": null,
 	"Old password": null,
 	"New password": null,
 	"New password (confirm)": null,
-	"You have been successfully registered.": null,
+	"You have been successfully registered.": null, // NOT USED
 	"Register your account:": null,
 	"Password (confirm)": null,
 	"An Electric-type mouse that is the mascot of the Pokémon franchise.": null,
@@ -301,8 +301,8 @@ export const translations: TranslationCatalog = {
 	"active battles": null,
 	"Find an online user": null,
 	"Watch an active battle": null,
-	"Meloetta is PS's mascot! The Aria forme is about using its voice, and represents our chatrooms.": null,
-	"Meloetta is PS's mascot! The Pirouette forme is Fighting-type, and represents our battles.": null,
+	"Meloetta is PS's mascot! The Aria forme is about using its voice, and represents our chatrooms.": null, // NOT USED
+	"Meloetta is PS's mascot! The Pirouette forme is Fighting-type, and represents our battles.": null, // NOT USED
 
 	"Official chat rooms": null,
 	"Hidden rooms": null,
